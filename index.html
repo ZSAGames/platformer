@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fioletowy Kwadrat: Rage Edition (Cat Mario Style)</title>
+    <title>Fioletowy Kwadrat: Rage Edition (Retro-Modern)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
-            --glow-left: #38bdf8;
-            --glow-right: #22c55e;
-            --glow-top: #a855f7;
-            --glow-flash: rgba(168, 85, 247, 0);
-            --bg-deep: #070913;
+            --glow-left: #0284c7;
+            --glow-right: #16a34a;
+            --glow-top: #7c3aed;
+            --bg-deep: #060811;
         }
         * {
             box-sizing: border-box;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
         body {
             margin: 0;
@@ -26,118 +26,62 @@
             color: #f8fafc;
             font-family: 'Fredoka', sans-serif;
             overflow: hidden;
-            height: 100vh;
+            height: 100dvh;
             width: 100vw;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             position: relative;
         }
         .mono-font {
             font-family: 'JetBrains Mono', monospace;
         }
+        .retro-font {
+            font-family: 'Press Start 2P', monospace;
+        }
 
         /* ==========================================================================
-           AMBIENT BACKGROUND SYNCED WITH GAME SIDE GLOW (AMBILIGHT ENGINE)
+           PURE AMBIENT COLOR BACKDROP (NO SIDE LINES OR GRID CLUTTER)
            ========================================================================== */
         #ambient-backdrop {
             position: fixed;
             inset: 0;
             pointer-events: none;
             z-index: 0;
-            overflow: hidden;
             background:
-                radial-gradient(circle at 14% 52%, color-mix(in srgb, var(--glow-left) 38%, transparent) 0%, transparent 55%),
-                radial-gradient(circle at 86% 52%, color-mix(in srgb, var(--glow-right) 38%, transparent) 0%, transparent 55%),
-                radial-gradient(circle at 50% 18%, color-mix(in srgb, var(--glow-top) 28%, transparent) 0%, transparent 60%),
-                radial-gradient(circle at 50% 50%, #111827 0%, #05070f 100%);
-            transition: background 0.35s ease;
-        }
-        #ambient-grid {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            background-image:
-                linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-            background-size: 44px 44px;
-            mask-image: radial-gradient(circle at center, rgba(0,0,0,0.85) 20%, transparent 90%);
-        }
-        #ambient-flash {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 1;
-            background: radial-gradient(circle at center, var(--glow-flash) 0%, transparent 72%);
-            transition: background 0.08s ease-out;
+                radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--glow-left) 36%, transparent) 0%, transparent 60%),
+                radial-gradient(circle at 82% 50%, color-mix(in srgb, var(--glow-right) 36%, transparent) 0%, transparent 60%),
+                radial-gradient(circle at 50% 15%, color-mix(in srgb, var(--glow-top) 25%, transparent) 0%, transparent 60%),
+                radial-gradient(circle at 50% 50%, #0f172a 0%, #05070e 100%);
+            transition: background 0.6s ease;
         }
 
         /* ==========================================================================
-           4:3 GAME STAGE FITTED TO VIEWPORT WITH DUAL SIDE-GLOW HALOS
+           4:3 GAME STAGE FITTED TO PAGE (DESKTOP & MOBILE LANDSCAPE SAFE)
            ========================================================================== */
         #stage-container {
             position: relative;
             z-index: 10;
-            flex: 1 1 auto;
-            width: 100%;
+            width: 100vw;
+            height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 0;
-            padding: 4px 12px;
+            padding: 4px;
         }
         #game-wrapper {
             position: relative;
             aspect-ratio: 4 / 3;
-            height: 100%;
-            max-height: calc(100vh - 134px);
-            max-width: calc((100vh - 134px) * (4 / 3));
-            width: auto;
-            border-radius: 18px;
+            width: min(98vw, calc(97dvh * (4 / 3)));
+            height: min(97dvh, calc(98vw * 0.75));
+            border-radius: 14px;
             background: #090d16;
+            border: 3px solid rgba(255, 255, 255, 0.16);
             box-shadow:
-                -45px 0 95px -15px color-mix(in srgb, var(--glow-left) 62%, transparent),
-                45px 0 95px -15px color-mix(in srgb, var(--glow-right) 62%, transparent),
-                0 -25px 75px -15px color-mix(in srgb, var(--glow-top) 48%, transparent),
-                0 25px 60px rgba(0, 0, 0, 0.85),
-                0 0 0 2px rgba(255, 255, 255, 0.14),
-                0 0 28px 2px color-mix(in srgb, var(--glow-top) 45%, transparent);
-            transition: box-shadow 0.25s ease;
+                -35px 0 80px -15px color-mix(in srgb, var(--glow-left) 50%, transparent),
+                35px 0 80px -15px color-mix(in srgb, var(--glow-right) 50%, transparent),
+                0 20px 55px rgba(0, 0, 0, 0.85);
             overflow: hidden;
-        }
-        @media (max-aspect-ratio: 4/3) {
-            #game-wrapper {
-                width: 96vw;
-                height: auto;
-                max-width: 96vw;
-                max-height: calc(96vw * 0.75);
-            }
-        }
-
-        /* Side-glow LED lightbars mounted to left & right edges of the 4:3 frame */
-        .side-glow-bar {
-            position: absolute;
-            top: 8%;
-            bottom: 8%;
-            width: 5px;
-            border-radius: 999px;
-            pointer-events: none;
-            z-index: 25;
-            opacity: 0.85;
-            filter: blur(1px);
-            transition: background 0.25s ease, box-shadow 0.25s ease;
-        }
-        .side-glow-left {
-            left: 3px;
-            background: var(--glow-left);
-            box-shadow: 0 0 18px 4px var(--glow-left);
-        }
-        .side-glow-right {
-            right: 3px;
-            background: var(--glow-right);
-            box-shadow: 0 0 18px 4px var(--glow-right);
         }
 
         canvas {
@@ -145,388 +89,532 @@
             height: 100%;
             display: block;
         }
-        .boss-cursor {
-            cursor: crosshair !important;
-        }
 
         /* ==========================================================================
-           SLEEK ARCADE HUD & BUTTON STYLING
+           RETRO-MODERN BUTTONS & PANELS
            ========================================================================== */
-        .hud-glass {
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(9, 13, 24, 0.92) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow:
-                0 10px 30px rgba(0, 0, 0, 0.55),
-                0 0 24px -4px color-mix(in srgb, var(--glow-top) 35%, transparent),
-                inset 0 1px 0 rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(14px);
+        .retro-panel {
+            background: rgba(15, 23, 42, 0.95);
+            border: 3px solid #a855f7;
+            box-shadow: 0 8px 0 #3b0764, 0 20px 50px rgba(0, 0, 0, 0.85);
         }
-        .btn-arcade {
+        .btn-retro {
             background: linear-gradient(180deg, #9333ea 0%, #6b21a8 100%);
-            border: 1px solid #d8b4fe;
-            box-shadow: 0 3px 0 #3b0764, 0 4px 12px rgba(147, 51, 234, 0.4);
-            transition: all 0.12s ease;
+            border: 2px solid #e9d5ff;
+            box-shadow: 0 4px 0 #3b0764;
+            transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.1s ease;
+            cursor: pointer;
         }
-        .btn-arcade:hover {
-            filter: brightness(1.14);
+        .btn-retro:hover {
+            filter: brightness(1.12);
             transform: translateY(-1px);
+            box-shadow: 0 5px 0 #3b0764;
         }
-        .btn-arcade:active {
-            transform: translateY(2px);
+        .btn-retro:active {
+            transform: translateY(3px);
             box-shadow: 0 1px 0 #3b0764;
         }
-        .btn-utility {
-            background: rgba(30, 41, 59, 0.85);
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            box-shadow: 0 3px 0 rgba(2, 6, 23, 0.9);
-            transition: all 0.12s ease;
+        .btn-retro-secondary {
+            background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+            border: 2px solid #94a3b8;
+            box-shadow: 0 4px 0 #0f172a;
+            transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.1s ease;
+            cursor: pointer;
         }
-        .btn-utility:hover {
-            background: rgba(51, 65, 85, 0.95);
-            border-color: rgba(192, 132, 252, 0.5);
+        .btn-retro-secondary:hover {
+            filter: brightness(1.12);
+            border-color: #cbd5e1;
             transform: translateY(-1px);
         }
-        .btn-utility:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 rgba(2, 6, 23, 0.9);
+        .btn-retro-secondary:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #0f172a;
         }
+
+        /* Touch Controls inside 4:3 wrapper - always visible on mobile/touch or landscape */
         .touch-btn {
-            background: rgba(15, 23, 42, 0.78);
-            border: 2px solid rgba(192, 132, 252, 0.65);
-            backdrop-filter: blur(6px);
+            background: rgba(15, 23, 42, 0.72);
+            border: 2px solid rgba(216, 180, 254, 0.78);
+            box-shadow: 0 4px 0 rgba(2, 6, 23, 0.95);
+            backdrop-filter: blur(4px);
+            touch-action: manipulation;
+            user-select: none;
         }
-        .touch-btn:active {
-            background: rgba(147, 51, 234, 0.85);
-            transform: scale(0.94);
+        .touch-btn:active, .touch-btn.active-press {
+            background: rgba(147, 51, 234, 0.9);
+            border-color: #ffffff;
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 rgba(2, 6, 23, 0.95);
         }
+
+        /* Show touch controls automatically on touch devices or mobile landscape */
+        #touch-controls {
+            display: none;
+        }
+        @media (pointer: coarse), (max-width: 900px), (max-height: 580px) {
+            #touch-controls.touch-auto {
+                display: flex;
+            }
+        }
+        #touch-controls.touch-force-on {
+            display: flex !important;
+        }
+        #touch-controls.touch-force-off {
+            display: none !important;
+        }
+
+        /* Compact HUD scaling for mobile landscape */
+        @media (max-height: 520px) {
+            #in-game-hud {
+                padding: 3px 8px;
+                top: 4px;
+            }
+        }
+
         @keyframes pulseDanger {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.04); }
+            50% { transform: scale(1.03); }
         }
         .rage-banner {
             animation: pulseDanger 0.65s infinite ease-in-out;
         }
-        @keyframes deathBump {
-            0% { transform: scale(1); }
-            40% { transform: scale(1.28); }
-            100% { transform: scale(1); }
-        }
-        .bump-anim {
-            animation: deathBump 0.3s ease-out;
-        }
     </style>
 </head>
-<body class="py-1.5 px-2 sm:py-2 sm:px-4">
+<body>
 
-    <!-- Dynamic Ambilight Background Layers -->
+    <!-- Pure Ambient Color Sync Background -->
     <div id="ambient-backdrop"></div>
-    <div id="ambient-grid"></div>
-    <div id="ambient-flash"></div>
 
-    <!-- Top Upgraded Arcade HUD -->
-    <header class="relative z-20 w-full max-w-[1040px] hud-glass rounded-2xl px-3 py-2 flex flex-wrap items-center justify-between gap-2">
-        <!-- Left: Animated Mini Avatar + Level Info -->
-        <div class="flex items-center gap-3 min-w-0">
-            <div class="relative w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-800 border-2 border-purple-300 shadow-lg flex items-center justify-center shrink-0 overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/25"></div>
-                <div class="flex gap-1.5 mt-0.5" id="hud-avatar-eyes">
-                    <div class="w-2.5 h-3 bg-white rounded-sm flex items-center justify-end pr-0.5">
-                        <div class="w-1.5 h-1.5 bg-slate-950 rounded-xs"></div>
-                    </div>
-                    <div class="w-2.5 h-3 bg-white rounded-sm flex items-center justify-end pr-0.5">
-                        <div class="w-1.5 h-1.5 bg-slate-950 rounded-xs"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                    <span id="hud-level-badge" class="bg-gradient-to-r from-purple-600 to-indigo-600 border border-purple-400/50 text-[11px] font-extrabold px-2 py-0.5 rounded-md text-white mono-font tracking-wider shadow-sm">
-                        POZIOM 1/20
-                    </span>
-                    <h1 id="hud-level-name" class="text-sm sm:text-base font-bold text-white tracking-wide truncate">
-                        1. Sielankowe Wzgórza
-                    </h1>
-                </div>
-                <p id="hud-level-hint" class="text-[11px] sm:text-xs text-purple-200/80 truncate max-w-[260px] sm:max-w-[420px]">
-                    Skacz przez przepaście... ale uważaj na niewidzialny blok!
-                </p>
-            </div>
-        </div>
-
-        <!-- Right: Meters, Live Hz/FPS Badge & Controls -->
-        <div class="flex items-center gap-2 flex-wrap justify-end">
-            <!-- Segmented Dash Energy Pill -->
-            <div class="flex items-center gap-2 bg-slate-950/85 border border-cyan-500/35 px-2.5 py-1 rounded-xl shadow-inner">
-                <div class="flex flex-col">
-                    <div class="flex items-center justify-between gap-1.5">
-                        <span class="text-[10px] font-extrabold text-cyan-300 tracking-wider mono-font">⚡ DASH</span>
-                        <span id="dash-status-text" class="text-[9px] font-extrabold text-emerald-400 mono-font">GOTOWY</span>
-                    </div>
-                    <div class="w-20 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-700/80 p-[1px] mt-0.5">
-                        <div id="dash-bar" class="h-full bg-gradient-to-r from-cyan-400 via-sky-400 to-purple-400 rounded-full w-full transition-all duration-75 shadow-[0_0_8px_#22d3ee]"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Death Counter Pill -->
-            <div id="death-pill" class="flex items-center gap-1.5 bg-red-950/75 border border-red-500/45 px-2.5 py-1 rounded-xl shadow-inner">
-                <span class="text-sm">💀</span>
-                <div class="flex flex-col leading-none">
-                    <span class="text-[9px] text-red-300/90 font-bold tracking-wider mono-font">ŚMIERCI</span>
-                    <span id="death-count" class="text-xs sm:text-sm font-extrabold text-red-400 mono-font">0</span>
-                </div>
-            </div>
-
-            <!-- Live High-Refresh-Rate FPS / 60Hz Physics Lock Badge -->
-            <div class="hidden md:flex items-center gap-1.5 bg-slate-950/80 border border-emerald-500/35 px-2.5 py-1 rounded-xl" title="Gra działa ze stałą prędkością fizyki 60Hz niezależnie od odświeżania monitora (60Hz / 144Hz / 240Hz)">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <div class="flex flex-col leading-none">
-                    <span id="fps-counter" class="text-[11px] font-extrabold text-emerald-300 mono-font">60 FPS</span>
-                    <span class="text-[9px] text-slate-400 font-bold mono-font">60Hz LOCK</span>
-                </div>
-            </div>
-
-            <!-- Level Select Dropdown -->
-            <select id="level-select" aria-label="Wybierz poziom" class="bg-slate-900/95 text-purple-200 text-xs font-bold border border-purple-500/45 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer hover:border-purple-400 transition">
-                <!-- Populated dynamically with all 20 levels -->
-            </select>
-
-            <!-- Action Buttons -->
-            <button id="btn-restart" title="Restart Poziomu (Klawisz R)" class="btn-arcade text-xs font-bold px-2.5 py-1.5 rounded-xl text-white flex items-center gap-1">
-                <span>↻</span> <span class="hidden sm:inline">Reset</span>
-            </button>
-            <button id="btn-hints" title="Pokaż zarysy ukrytych pułapek" class="btn-utility text-amber-300 text-xs font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1">
-                <span>👁️</span> <span id="hint-mode-text" class="hidden lg:inline">Podpowiedzi: WYŁ</span>
-            </button>
-            <button id="btn-sound" title="Włącz/Wyłącz Dźwięk" class="btn-utility text-slate-200 text-xs font-bold px-2.5 py-1.5 rounded-xl">
-                🔊
-            </button>
-        </div>
-    </header>
-
-    <!-- Center 4:3 Game Stage with Synced Side Glow -->
+    <!-- Centered 4:3 Game Container Fitted to Page -->
     <div id="stage-container">
         <main id="game-wrapper">
-            <!-- Left & Right Ambilight Side-Glow Strips -->
-            <div class="side-glow-bar side-glow-left"></div>
-            <div class="side-glow-bar side-glow-right"></div>
-
             <!-- True 4:3 Internal Resolution (800 x 600) -->
             <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-            <!-- Boss Health Overlay (Only visible on Level 20) -->
-            <div id="boss-hud" class="hidden absolute top-3 left-1/2 -translate-x-1/2 w-[88%] max-w-[620px] bg-slate-950/90 border-2 border-red-500/90 rounded-2xl p-2.5 shadow-[0_0_30px_rgba(239,68,68,0.5)] backdrop-blur-md pointer-events-none z-20">
+            <!-- ==============================================================
+                 COMPACT IN-FRAME TOP HUD (Visible during Gameplay)
+                 ============================================================== -->
+            <header id="in-game-hud" class="hidden absolute top-2 inset-x-2.5 z-20 flex items-center justify-between gap-2 bg-slate-950/80 border border-purple-400/35 rounded-xl px-3 py-1.5 backdrop-blur-md shadow-lg pointer-events-auto">
+                <!-- Left: Mini Square Icon + Level Title -->
+                <div class="flex items-center gap-2 min-w-0">
+                    <div class="w-6 h-6 rounded-md bg-purple-600 border-2 border-purple-200 flex items-center justify-center shrink-0">
+                        <div class="flex gap-1">
+                            <div class="w-1.5 h-2 bg-white flex items-center justify-end"><div class="w-1 h-1 bg-slate-950"></div></div>
+                            <div class="w-1.5 h-2 bg-white flex items-center justify-end"><div class="w-1 h-1 bg-slate-950"></div></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span id="hud-level-badge" class="bg-purple-700 text-[10px] font-extrabold px-1.5 py-0.5 rounded text-purple-100 mono-font shrink-0">
+                            1/20
+                        </span>
+                        <h1 id="hud-level-name" class="text-xs sm:text-sm font-bold text-white truncate">
+                            1. Sielankowe Wzgórza
+                        </h1>
+                    </div>
+                </div>
+
+                <!-- Right: Compact Dash Bar, Deaths, Restart & Pause [P] Button -->
+                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                    <!-- Dash Pill -->
+                    <div class="flex items-center gap-1.5 bg-slate-900/90 border border-cyan-500/40 px-2 py-1 rounded-lg">
+                        <span class="text-[10px] font-extrabold text-cyan-300 mono-font">DASH</span>
+                        <div class="w-12 sm:w-16 h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-700">
+                            <div id="dash-bar" class="h-full bg-cyan-400 w-full transition-all duration-75"></div>
+                        </div>
+                    </div>
+
+                    <!-- Death Pill -->
+                    <div class="flex items-center gap-1 bg-red-950/80 border border-red-500/45 px-2 py-1 rounded-lg">
+                        <span class="text-xs">💀</span>
+                        <span id="death-count" class="text-xs font-extrabold text-red-400 mono-font">0</span>
+                    </div>
+
+                    <!-- Quick Restart Button -->
+                    <button id="btn-hud-restart" title="Restart Poziomu (R)" class="btn-retro-secondary text-xs font-bold px-2 py-1 rounded-lg text-white">
+                        ↻
+                    </button>
+
+                    <!-- Pause Button [P] -->
+                    <button id="btn-hud-pause" title="Pauza (P)" class="btn-retro text-xs font-bold px-2.5 py-1 rounded-lg text-white mono-font">
+                        ❚❚ P
+                    </button>
+                </div>
+            </header>
+
+            <!-- ==============================================================
+                 BOSS HEALTH OVERLAY (Level 20)
+                 ============================================================== -->
+            <div id="boss-hud" class="hidden absolute top-14 left-1/2 -translate-x-1/2 w-[88%] max-w-[520px] bg-slate-950/90 border-2 border-red-500 rounded-xl p-2 shadow-2xl pointer-events-none z-20">
                 <div class="flex justify-between items-center mb-1 px-1">
-                    <span class="text-xs sm:text-sm font-extrabold text-red-400 tracking-wider flex items-center gap-2">
-                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
-                        MEGA-ROBO KWADRAT MK-XX (KLIKAJ LPM W BOSSA!)
+                    <span class="text-[11px] sm:text-xs font-extrabold text-red-400 tracking-wider flex items-center gap-1.5">
+                        <span class="inline-block w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                        MEGA-ROBO KWADRAT MK-XX
                     </span>
                     <span id="boss-hp-text" class="text-xs font-extrabold text-amber-300 mono-font">500 / 500 HP</span>
                 </div>
-                <div class="w-full h-3.5 bg-slate-900 rounded-full overflow-hidden border border-red-900 p-0.5">
-                    <div id="boss-hp-bar" class="h-full bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400 rounded-full transition-all duration-100 shadow-[0_0_12px_#f97316]" style="width: 100%;"></div>
+                <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-red-900 p-0.5">
+                    <div id="boss-hp-bar" class="h-full bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400 rounded-full transition-all duration-150" style="width: 100%;"></div>
                 </div>
             </div>
 
-            <!-- Death / Troll Overlay Banner -->
-            <div id="death-overlay" class="hidden absolute inset-0 bg-slate-950/65 backdrop-blur-[3px] flex flex-col items-center justify-center pointer-events-none z-20">
-                <div class="rage-banner bg-gradient-to-b from-red-950/95 to-slate-950/95 border-2 border-red-500 px-6 py-5 rounded-2xl shadow-[0_0_50px_rgba(239,68,68,0.65)] text-center max-w-md mx-4">
-                    <div class="text-3xl sm:text-4xl font-extrabold text-red-400 tracking-wider mb-1 drop-shadow">ZGINĄŁEŚ! 💀</div>
-                    <p id="troll-message" class="text-sm sm:text-base text-amber-200 font-medium mb-3">
-                        Klasyczny niewidzialny blok. Cat Mario przesyła pozdrowienia!
-                    </p>
-                    <div class="inline-block bg-slate-900/90 border border-red-400/40 px-4 py-1.5 rounded-xl text-xs text-slate-300 mono-font">
-                        Naciśnij <span class="text-white font-bold">[R]</span> lub <span class="text-white font-bold">[SPACJA]</span> (auto-respawn...)
+            <!-- ==============================================================
+                 MAIN MENU OVERLAY (LEFT LOGO & RETRO BUTTONS, RIGHT CINEMATIC FADE)
+                 ============================================================== -->
+            <section id="main-menu-overlay" class="absolute inset-0 z-30 flex items-stretch justify-start pointer-events-auto" style="background: linear-gradient(90deg, rgba(6, 8, 17, 0.96) 0%, rgba(6, 8, 17, 0.86) 44%, rgba(6, 8, 17, 0.12) 78%, rgba(6, 8, 17, 0.0) 100%);">
+                <!-- Left Column: Logo at Top-Left, Retro Buttons Below -->
+                <div class="w-full sm:w-[58%] max-w-[430px] p-5 sm:p-8 flex flex-col justify-between">
+                    <!-- Top-Left Retro-Modern Logo -->
+                    <div>
+                        <div class="inline-flex items-center gap-2 bg-purple-950/90 border border-purple-400/50 px-2.5 py-1 rounded-md mb-3">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-[10px] font-bold text-purple-200 mono-font tracking-wider">RETRO-MODERN RAGE EDITION</span>
+                        </div>
+
+                        <div class="flex items-center gap-3.5 mb-2">
+                            <!-- Crisp Purple Square Emblem -->
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-purple-600 border-3 border-purple-200 shadow-[0_5px_0_#3b0764] flex items-center justify-center shrink-0">
+                                <div class="flex gap-2">
+                                    <div class="w-3 h-3.5 bg-white flex items-center justify-end pr-0.5">
+                                        <div class="w-1.5 h-2 bg-slate-950"></div>
+                                    </div>
+                                    <div class="w-3 h-3.5 bg-white flex items-center justify-end pr-0.5">
+                                        <div class="w-1.5 h-2 bg-slate-950"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h1 class="retro-font text-base sm:text-xl text-white leading-snug tracking-tight drop-shadow-[0_3px_0_#581c87]">
+                                    FIOLETOWY<br><span class="text-purple-400">KWADRAT</span>
+                                </h1>
+                            </div>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+                            20 zdradzieckich poziomów w stylu Cat Mario. Pokonaj wzgórza, mroczny las i Zamek!
+                        </p>
+                    </div>
+
+                    <!-- Left Retro Menu Buttons -->
+                    <div class="flex flex-col gap-2.5 my-auto py-3 max-w-[300px]">
+                        <button id="btn-menu-play" class="btn-retro w-full py-3 px-4 rounded-xl font-bold text-white text-sm sm:text-base flex items-center justify-between">
+                            <span>▶ GRAJ TERAZ</span>
+                            <span id="menu-continue-badge" class="text-[10px] bg-purple-950/90 border border-purple-300/40 px-2 py-0.5 rounded mono-font">POZ. 1</span>
+                        </button>
+
+                        <button id="btn-menu-levels" class="btn-retro-secondary w-full py-2.5 px-4 rounded-xl font-bold text-slate-100 text-xs sm:text-sm flex items-center justify-between">
+                            <span>🗺️ WYBIERZ POZIOM</span>
+                            <span class="text-[10px] text-slate-400 mono-font">1 - 20</span>
+                        </button>
+
+                        <button id="btn-menu-settings" class="btn-retro-secondary w-full py-2.5 px-4 rounded-xl font-bold text-amber-300 text-xs sm:text-sm flex items-center justify-between">
+                            <span>⚙️ USTAWIENIA</span>
+                            <span class="text-[10px] text-slate-300 mono-font">AUDIO / EKRAN</span>
+                        </button>
+                    </div>
+
+                    <!-- Bottom Left Controls & Music Note -->
+                    <div class="text-[11px] text-slate-400 space-y-1">
+                        <div><strong class="text-purple-300">Sterowanie:</strong> A/D lub ◀/▶ • Skok: W/Spacja • Dash: Shift/K • Pauza: P</div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Victory Modal Overlay -->
-            <div id="victory-overlay" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center z-30 p-4 text-center">
-                <div class="bg-gradient-to-b from-purple-950/95 to-slate-900/95 border-2 border-purple-400 rounded-2xl p-6 max-w-md w-full shadow-[0_0_60px_rgba(168,85,247,0.6)]">
-                    <div class="text-5xl mb-2">👑🟪💥</div>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-amber-300 mb-2">
-                        NIEMOŻLIWE! PRZESZEDŁEŚ GRĘ!
-                    </h2>
-                    <p class="text-slate-300 text-xs sm:text-sm mb-4">
-                        Pokonałeś wszystkie 19 zdradzieckich poziomów wzgórz i lasu oraz rozstrzelałeś Mega-Robo Bossa w Zamku!
-                    </p>
-                    <div class="grid grid-cols-2 gap-3 mb-5 bg-slate-950/80 p-3 rounded-xl border border-purple-500/30">
-                        <div>
-                            <div class="text-[10px] text-slate-400 font-bold mono-font">ŁĄCZNE ŚMIERCI</div>
-                            <div id="final-deaths" class="text-2xl font-extrabold text-red-400 mono-font">0</div>
+            <!-- ==============================================================
+                 PAUSE MENU MODAL (Triggered by [P] or HUD Pause Button)
+                 ============================================================== -->
+            <section id="pause-menu-overlay" class="hidden absolute inset-0 z-30 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+                <div class="retro-panel rounded-2xl p-5 sm:p-6 max-w-sm w-full text-center">
+                    <div class="retro-font text-base sm:text-lg text-purple-300 mb-1">PAUZA</div>
+                    <p id="pause-level-label" class="text-xs text-slate-400 mb-4 mono-font">POZIOM 1: Sielankowe Wzgórza</p>
+
+                    <div class="flex flex-col gap-2.5">
+                        <button id="btn-pause-resume" class="btn-retro w-full py-2.5 rounded-xl font-bold text-white text-sm">
+                            ▶ KONTYNUUJ GRĘ (P)
+                        </button>
+                        <button id="btn-pause-restart" class="btn-retro-secondary w-full py-2.5 rounded-xl font-bold text-slate-100 text-sm">
+                            ↻ ZRESTARTUJ POZIOM (R)
+                        </button>
+                        <button id="btn-pause-settings" class="btn-retro-secondary w-full py-2.5 rounded-xl font-bold text-amber-300 text-sm">
+                            ⚙️ USTAWIENIA
+                        </button>
+                        <button id="btn-pause-mainmenu" class="btn-retro-secondary w-full py-2.5 rounded-xl font-bold text-rose-300 text-sm">
+                            🏠 MENU GŁÓWNE
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==============================================================
+                 SETTINGS MODAL (Accessible from Main Menu & Pause Menu)
+                 ============================================================== -->
+            <section id="settings-modal" class="hidden absolute inset-0 z-40 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+                <div class="retro-panel rounded-2xl p-5 sm:p-6 max-w-md w-full">
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+                        <h2 class="retro-font text-sm sm:text-base text-amber-300">⚙️ USTAWIENIA</h2>
+                        <button id="btn-settings-close" class="text-slate-400 hover:text-white font-bold text-sm px-2 py-0.5 rounded">✕</button>
+                    </div>
+
+                    <div class="space-y-3.5 text-xs sm:text-sm">
+                        <!-- Mute All Audio Toggle -->
+                        <div class="flex items-center justify-between bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
+                            <div>
+                                <div class="font-bold text-white">🔇 Wycisz Cały Dźwięk</div>
+                                <div class="text-[11px] text-slate-400">Szybkie wyłączenie muzyki oraz efektów</div>
+                            </div>
+                            <button id="btn-toggle-mute" class="btn-retro-secondary px-3 py-1.5 rounded-lg font-bold text-emerald-300 mono-font text-xs shrink-0">
+                                DŹWIĘK: WŁ
+                            </button>
                         </div>
-                        <div>
-                            <div class="text-[10px] text-slate-400 font-bold mono-font">RANGA RAGE-GAMERA</div>
-                            <div id="final-rank" class="text-sm sm:text-base font-extrabold text-amber-400 mt-1">Bóg Kwadratów</div>
+
+                        <!-- Music Volume Slider (.wav) -->
+                        <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="font-bold text-white">🎵 Głośność Muzyki (.wav)</span>
+                                <span id="music-vol-label" class="text-xs font-bold text-purple-300 mono-font">60%</span>
+                            </div>
+                            <input id="slider-music-vol" type="range" min="0" max="100" value="60" class="w-full accent-purple-500 cursor-pointer">
+                        </div>
+
+                        <!-- SFX Volume Slider -->
+                        <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="font-bold text-white">🔊 Efekty Dźwiękowe (SFX)</span>
+                                <span id="sfx-vol-label" class="text-xs font-bold text-cyan-300 mono-font">80%</span>
+                            </div>
+                            <input id="slider-sfx-vol" type="range" min="0" max="100" value="80" class="w-full accent-cyan-400 cursor-pointer">
+                        </div>
+
+                        <!-- Mobile Touch Controls Mode -->
+                        <div class="flex items-center justify-between bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
+                            <div>
+                                <div class="font-bold text-white">📱 Przyciski Dotykowe</div>
+                                <div class="text-[11px] text-slate-400">Sterowanie na ekranie dla telefonów (Landscape)</div>
+                            </div>
+                            <button id="btn-toggle-touch" class="btn-retro-secondary px-3 py-1.5 rounded-lg font-bold text-cyan-300 mono-font text-xs shrink-0">
+                                AUTO
+                            </button>
                         </div>
                     </div>
-                    <button id="btn-play-again" class="btn-arcade w-full py-3 rounded-xl font-bold text-white text-sm sm:text-base cursor-pointer">
-                        ZAGRAJ OD NOWA (POZIOM 1)
+
+                    <button id="btn-settings-save" class="btn-retro w-full mt-5 py-2.5 rounded-xl font-bold text-white text-sm">
+                        ZAPISZ I WRÓĆ
                     </button>
                 </div>
+            </section>
+
+            <!-- ==============================================================
+                 LEVEL SELECT MODAL
+                 ============================================================== -->
+            <section id="levels-modal" class="hidden absolute inset-0 z-40 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+                <div class="retro-panel rounded-2xl p-4 sm:p-6 max-w-lg w-full max-h-[92%] flex flex-col">
+                    <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+                        <h2 class="retro-font text-xs sm:text-sm text-purple-300">🗺️ WYBIERZ POZIOM (1 - 20)</h2>
+                        <button id="btn-levels-close" class="text-slate-400 hover:text-white font-bold text-sm px-2 py-0.5 rounded">✕</button>
+                    </div>
+
+                    <div id="levels-grid" class="grid grid-cols-4 sm:grid-cols-5 gap-2 overflow-y-auto pr-1 my-auto">
+                        <!-- Populated dynamically with 20 level buttons -->
+                    </div>
+
+                    <button id="btn-levels-back" class="btn-retro-secondary w-full mt-4 py-2 rounded-xl font-bold text-slate-200 text-xs sm:text-sm">
+                        WRÓĆ
+                    </button>
+                </div>
+            </section>
+
+            <!-- ==============================================================
+                 DEATH / TROLL OVERLAY BANNER
+                 ============================================================== -->
+            <div id="death-overlay" class="hidden absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] flex flex-col items-center justify-center pointer-events-none z-20">
+                <div class="rage-banner bg-red-950/95 border-2 border-red-500 px-5 py-4 rounded-2xl shadow-2xl text-center max-w-md mx-4">
+                    <div class="text-2xl sm:text-3xl font-extrabold text-red-400 tracking-wider mb-1">ZGINĄŁEŚ! 💀</div>
+                    <p id="troll-message" class="text-xs sm:text-sm text-amber-200 font-medium mb-2.5">
+                        Klasyczny niewidzialny blok. Cat Mario przesyła pozdrowienia!
+                    </p>
+                    <div class="inline-block bg-slate-900/90 border border-red-400/40 px-3 py-1 rounded-lg text-[11px] text-slate-300 mono-font">
+                        Naciśnij <span class="text-white font-bold">[R]</span> lub <span class="text-white font-bold">[SPACJA]</span>
+                    </div>
+                </div>
             </div>
 
-            <!-- Mobile / Touch Controls -->
-            <div class="sm:hidden absolute bottom-2.5 inset-x-3 flex justify-between items-end pointer-events-none z-20">
-                <div class="flex gap-2 pointer-events-auto">
-                    <button id="touch-left" class="touch-btn w-12 h-12 rounded-xl text-white font-bold text-lg flex items-center justify-center">◀</button>
-                    <button id="touch-right" class="touch-btn w-12 h-12 rounded-xl text-white font-bold text-lg flex items-center justify-center">▶</button>
+            <!-- ==============================================================
+                 VICTORY MODAL OVERLAY
+                 ============================================================== -->
+            <div id="victory-overlay" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center z-30 p-4 text-center">
+                <div class="retro-panel rounded-2xl p-5 sm:p-6 max-w-md w-full">
+                    <div class="text-4xl sm:text-5xl mb-2">👑🟪💥</div>
+                    <h2 class="retro-font text-sm sm:text-base text-amber-300 mb-2 leading-relaxed">
+                        PRZESZEDŁEŚ GRĘ!
+                    </h2>
+                    <p class="text-slate-300 text-xs sm:text-sm mb-4">
+                        Pokonałeś wszystkie 19 zdradzieckich poziomów wzgórz i lasu oraz rozgniotłeś Mega-Robo Bossa w Zamku!
+                    </p>
+                    <div class="grid grid-cols-2 gap-3 mb-5 bg-slate-900/90 p-3 rounded-xl border border-purple-500/30">
+                        <div>
+                            <div class="text-[10px] text-slate-400 font-bold mono-font">ŁĄCZNE ŚMIERCI</div>
+                            <div id="final-deaths" class="text-xl sm:text-2xl font-extrabold text-red-400 mono-font">0</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-slate-400 font-bold mono-font">RANGA GRACZA</div>
+                            <div id="final-rank" class="text-xs sm:text-sm font-extrabold text-amber-400 mt-1">Bóg Kwadratów</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <button id="btn-play-again" class="btn-retro flex-1 py-2.5 rounded-xl font-bold text-white text-xs sm:text-sm">
+                            ZAGRAJ OD NOWA
+                        </button>
+                        <button id="btn-victory-menu" class="btn-retro-secondary flex-1 py-2.5 rounded-xl font-bold text-slate-200 text-xs sm:text-sm">
+                            MENU GŁÓWNE
+                        </button>
+                    </div>
                 </div>
-                <div class="flex gap-2 pointer-events-auto">
-                    <button id="touch-dash" class="touch-btn px-3 h-12 rounded-xl text-cyan-300 font-bold text-xs flex items-center justify-center">DASH</button>
-                    <button id="touch-jump" class="touch-btn w-14 h-12 rounded-xl text-purple-200 font-bold text-sm flex items-center justify-center">SKOK</button>
+            </div>
+
+            <!-- ==============================================================
+                 MOBILE & LANDSCAPE ON-SCREEN TOUCH CONTROLS (Inside 4:3 Stage)
+                 ============================================================== -->
+            <div id="touch-controls" class="touch-auto absolute bottom-2.5 inset-x-3 justify-between items-end pointer-events-none z-20">
+                <!-- Left / Right D-Pad -->
+                <div class="flex gap-2.5 pointer-events-auto">
+                    <button id="touch-left" aria-label="W lewo" class="touch-btn w-13 h-13 sm:w-14 sm:h-14 px-4 py-3 rounded-2xl text-white font-extrabold text-lg flex items-center justify-center">
+                        ◀
+                    </button>
+                    <button id="touch-right" aria-label="W prawo" class="touch-btn w-13 h-13 sm:w-14 sm:h-14 px-4 py-3 rounded-2xl text-white font-extrabold text-lg flex items-center justify-center">
+                        ▶
+                    </button>
+                </div>
+                <!-- Dash & Jump Action Buttons -->
+                <div class="flex gap-2.5 pointer-events-auto">
+                    <button id="touch-dash" aria-label="Dash" class="touch-btn h-13 sm:h-14 px-4 py-3 rounded-2xl text-cyan-300 font-extrabold text-xs sm:text-sm flex items-center justify-center mono-font">
+                        DASH
+                    </button>
+                    <button id="touch-jump" aria-label="Skok" class="touch-btn h-13 sm:h-14 px-5 py-3 rounded-2xl text-purple-200 font-extrabold text-xs sm:text-sm flex items-center justify-center mono-font">
+                        SKOK ▲
+                    </button>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Bottom Controls Bar -->
-    <footer class="relative z-20 w-full max-w-[1040px] hud-glass rounded-xl px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs text-slate-300">
-        <div class="flex flex-wrap items-center gap-3">
-            <span><strong class="text-purple-300">Ruch:</strong> A/D lub ◀/▶</span>
-            <span><strong class="text-purple-300">Skok / Wall-Jump:</strong> W / Spacja / ▲</span>
-            <span><strong class="text-cyan-300">Dash (Zryw):</strong> Shift / K / Z</span>
-            <span><strong class="text-red-300">Reset:</strong> R</span>
-        </div>
-        <div class="text-amber-300 font-semibold flex items-center gap-2">
-            <span>🎯 <strong>Poziom 20 (Zamek):</strong> Klikaj LPM w Bossa!</span>
-        </div>
-    </footer>
-
 <script>
 /**
  * ============================================================================
- * FIOLETOWY KWADRAT: RAGE EDITION (Cat Mario / Syobon Action Style)
+ * FIOLETOWY KWADRAT: RAGE EDITION (Retro-Modern Edition)
  * - Fixed 60Hz Timestep Accumulator (144Hz / 240Hz+ Monitor Safe)
- * - 4:3 Aspect Ratio (800x600 Canvas) + Reactive Ambilight Side-Glow Engine
- * - 20 Handcrafted Levels + Castle Boss Fight with Mouse Shooting
+ * - Clean 4:3 Viewport + Pure Ambient Color Sync (No player glow or side lines)
+ * - Main Menu with Live Cinematic Scrolling Background + Pause Menu [P]
+ * - .WAV Music Crossfader System (example.wav)
+ * - Balanced Levels 5-19 + Jump-Stomp Vulnerable Boss Fight on Level 20
  * ============================================================================
  */
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// UI Elements
-const hudLevelBadge = document.getElementById('hud-level-badge');
-const hudLevelName = document.getElementById('hud-level-name');
-const hudLevelHint = document.getElementById('hud-level-hint');
-const dashBar = document.getElementById('dash-bar');
-const dashStatusText = document.getElementById('dash-status-text');
-const deathCountEl = document.getElementById('death-count');
-const deathPill = document.getElementById('death-pill');
-const fpsCounterEl = document.getElementById('fps-counter');
-const levelSelect = document.getElementById('level-select');
-const btnRestart = document.getElementById('btn-restart');
-const btnHints = document.getElementById('btn-hints');
-const hintModeText = document.getElementById('hint-mode-text');
-const btnSound = document.getElementById('btn-sound');
-const bossHud = document.getElementById('boss-hud');
-const bossHpText = document.getElementById('boss-hp-text');
-const bossHpBar = document.getElementById('boss-hp-bar');
-const deathOverlay = document.getElementById('death-overlay');
-const trollMessageEl = document.getElementById('troll-message');
-const victoryOverlay = document.getElementById('victory-overlay');
-const finalDeathsEl = document.getElementById('final-deaths');
-const finalRankEl = document.getElementById('final-rank');
-const btnPlayAgain = document.getElementById('btn-play-again');
-
-// Polish Troll Messages on Death
-const TROLL_MESSAGES = [
-    "Serio? Na tym padłeś? Przecież to było oczywiste!",
-    "Klasyczny niewidzialny blok! Cat Mario przesyła pozdrowienia.",
-    "Ta podłoga wyglądała zbyt stabilnie, żeby być prawdziwą...",
-    "Użyj DASH (Shift lub K), fioletowy kwadracie!",
-    "Pamiętaj: możesz odbijać się od ścian (Wall-Jump)!",
-    "Roboty mają mechaniczne oczy, widzą Twój każdy błąd.",
-    "Ta flaga była przynętą. Nigdy nie ufaj pierwszemu portalowi!",
-    "Kolce z sufitu? Klasyka gatunku. Patrz w górę!",
-    "Kto postawił ten blok akurat na trajektorii skoku?! (Ja).",
-    "Spokojnie, klawiatura jeszcze żyje. Spróbuj skoczyć wcześniej!",
-    "Gdyby to było łatwe, nie nazywałoby się Rage Game!",
-    "Ten robot tylko udawał powolnego. Zaskoczony?",
-    "Blisko! No dobra, wcale nie było blisko, ale próbuj dalej!",
-    "Wskazówka: Czasami lepiej zrobić Dash nad przepaścią niż skakać!"
-];
-
 // ============================================================================
-// DYNAMIC AMBILIGHT & SIDE-GLOW ENGINE
+// .WAV MUSIC MANAGER WITH SMOOTH CROSSFADING (Podmień ścieżki na własne pliki .wav!)
 // ============================================================================
-const THEME_PALETTES = {
-    day: {
-        left: '#0ea5e9',   // Sky Blue
-        right: '#10b981',  // Lush Emerald
-        top: '#8b5cf6'     // Soft Violet
-    },
-    forest: {
-        left: '#6366f1',   // Mystic Indigo
-        right: '#a855f7',  // Deep Purple
-        top: '#14b8a6'     // Forest Teal
-    },
-    darkforest: {
-        left: '#e11d48',   // Blood Moon Crimson
-        right: '#9333ea',  // Dark Violet
-        top: '#dc2626'     // Crimson Halo
-    },
-    castle: {
-        left: '#f97316',   // Molten Orange
-        right: '#06b6d4',  // Cyber Laser Cyan
-        top: '#ef4444'     // Boss Red
-    }
+const MUSIC_TRACK_PATHS = {
+    menu:  'menu_music.wav', // Muzyka w Menu Głównym (np. 'menu_music.wav')
+    hills: 'hills_forest.wav', // Poziomy 1-14: Wzgórza i Las (np. 'hills_forest.wav')
+    night: 'night_castle.wav', // Poziomy 15-19: Noc / Blisko Zamku (np. 'night_castle.wav')
+    boss:  'boss_battle.wav'  // Poziom 20: Walka z Bossem w Zamku (np. 'boss_battle.wav')
 };
 
-let ambientFlashAlpha = 0;
-let ambientFlashColor = '168, 85, 247';
+class MusicManager {
+    constructor(trackPaths) {
+        this.tracks = {};
+        this.currentKey = null;
+        this.targetVolume = 0.6;
+        this.muted = false;
+        this.isPaused = false;
+        this.unlocked = false;
 
-function applyThemeAmbilight(theme) {
-    const pal = THEME_PALETTES[theme] || THEME_PALETTES.day;
-    document.documentElement.style.setProperty('--glow-left', pal.left);
-    document.documentElement.style.setProperty('--glow-right', pal.right);
-    document.documentElement.style.setProperty('--glow-top', pal.top);
-}
+        for (const [key, src] of Object.entries(trackPaths)) {
+            const audio = new Audio();
+            audio.src = src;
+            audio.loop = true;
+            audio.volume = 0;
+            audio.preload = 'auto';
+            this.tracks[key] = audio;
+        }
 
-function triggerAmbientPulse(rgbString, intensity = 0.35) {
-    ambientFlashColor = rgbString;
-    ambientFlashAlpha = intensity;
-    document.documentElement.style.setProperty('--glow-flash', `rgba(${ambientFlashColor}, ${ambientFlashAlpha})`);
-}
-
-function updateAmbilight(theme) {
-    if (ambientFlashAlpha > 0) {
-        ambientFlashAlpha = Math.max(0, ambientFlashAlpha - 0.018);
-        document.documentElement.style.setProperty('--glow-flash', `rgba(${ambientFlashColor}, ${ambientFlashAlpha.toFixed(3)})`);
+        // Smooth volume fader interval (runs every 50ms)
+        setInterval(() => this.updateFade(), 50);
     }
 
-    // Dynamic left/right side-glow shift based on player horizontal position & proximity to portals/boss
-    const pal = THEME_PALETTES[theme] || THEME_PALETTES.day;
-    let leftColor = pal.left;
-    let rightColor = pal.right;
-
-    if (player.dashTimer > 0) {
-        leftColor = '#22d3ee';
-        rightColor = '#22d3ee';
-    } else if (player.dead) {
-        leftColor = '#ef4444';
-        rightColor = '#ef4444';
-    } else if (realGoal && Math.abs((player.x - cameraX) - (realGoal.x - cameraX)) < 220) {
-        rightColor = '#10b981';
-    } else if (boss && boss.state === 'charge') {
-        leftColor = '#ef4444';
-        rightColor = '#f97316';
+    unlock() {
+        if (this.unlocked) return;
+        this.unlocked = true;
+        if (this.currentKey) {
+            const track = this.tracks[this.currentKey];
+            if (track && track.paused && !this.isPaused) {
+                track.play().catch(() => {});
+            }
+        }
     }
 
-    document.documentElement.style.setProperty('--glow-left', leftColor);
-    document.documentElement.style.setProperty('--glow-right', rightColor);
+    playTrack(key) {
+        if (this.currentKey === key) return;
+        this.currentKey = key;
+        const nextTrack = this.tracks[key];
+        if (nextTrack && this.unlocked && !this.isPaused) {
+            nextTrack.play().catch(() => {});
+        }
+    }
+
+    setPaused(paused) {
+        this.isPaused = paused;
+        if (!this.unlocked || !this.currentKey) return;
+        const active = this.tracks[this.currentKey];
+        if (!active && paused) return;
+        if (!paused && active.paused) {
+            active.play().catch(() => {});
+        }
+    }
+
+    setVolume(vol0to1) {
+        this.targetVolume = Math.max(0, Math.min(1, vol0to1));
+    }
+
+    setMuted(muted) {
+        this.muted = muted;
+    }
+
+    updateFade() {
+        if (!this.unlocked) return;
+        const fadeStep = 0.04;
+
+        for (const [key, audio] of Object.entries(this.tracks)) {
+            const isTarget = (key === this.currentKey) && !this.isPaused && !this.muted;
+            const desiredVol = isTarget ? this.targetVolume : 0;
+
+            if (Math.abs(audio.volume - desiredVol) > 0.01) {
+                if (audio.volume < desiredVol) {
+                    if (audio.paused) audio.play().catch(() => {});
+                    audio.volume = Math.min(desiredVol, audio.volume + fadeStep);
+                } else {
+                    audio.volume = Math.max(0, audio.volume - fadeStep);
+                }
+            } else {
+                audio.volume = desiredVol;
+                if (desiredVol === 0 && !audio.paused) {
+                    audio.pause();
+                }
+            }
+        }
+    }
 }
+
+const music = new MusicManager(MUSIC_TRACK_PATHS);
 
 // ============================================================================
-// WEB AUDIO SYNTHESIZER (No external assets needed)
+// WEB AUDIO SYNTHESIZER FOR RETRO SFX
 // ============================================================================
 class SoundSystem {
     constructor() {
         this.ctx = null;
-        this.enabled = true;
+        this.volume = 0.8;
+        this.muted = false;
     }
     init() {
         if (!this.ctx) {
@@ -538,10 +626,11 @@ class SoundSystem {
         }
     }
     play(type) {
-        if (!this.enabled) return;
+        if (this.muted || this.volume <= 0.01) return;
         this.init();
         if (!this.ctx) return;
 
+        const v = this.volume;
         const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
@@ -552,40 +641,40 @@ class SoundSystem {
             osc.type = 'square';
             osc.frequency.setValueAtTime(190, now);
             osc.frequency.exponentialRampToValueAtTime(520, now + 0.11);
-            gain.gain.setValueAtTime(0.11, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.11);
+            gain.gain.setValueAtTime(0.12 * v, now);
+            gain.gain.linearRampToValueAtTime(0.005, now + 0.11);
             osc.start(now);
             osc.stop(now + 0.11);
         } else if (type === 'walljump') {
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(280, now);
             osc.frequency.exponentialRampToValueAtTime(680, now + 0.12);
-            gain.gain.setValueAtTime(0.15, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+            gain.gain.setValueAtTime(0.16 * v, now);
+            gain.gain.linearRampToValueAtTime(0.005, now + 0.12);
             osc.start(now);
             osc.stop(now + 0.12);
         } else if (type === 'dash') {
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(620, now);
             osc.frequency.exponentialRampToValueAtTime(140, now + 0.14);
-            gain.gain.setValueAtTime(0.14, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.14);
+            gain.gain.setValueAtTime(0.14 * v, now);
+            gain.gain.linearRampToValueAtTime(0.005, now + 0.14);
             osc.start(now);
             osc.stop(now + 0.14);
         } else if (type === 'troll') {
             osc.type = 'square';
             osc.frequency.setValueAtTime(580, now);
             osc.frequency.setValueAtTime(740, now + 0.05);
-            gain.gain.setValueAtTime(0.15, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.13);
+            gain.gain.setValueAtTime(0.15 * v, now);
+            gain.gain.linearRampToValueAtTime(0.005, now + 0.13);
             osc.start(now);
             osc.stop(now + 0.13);
         } else if (type === 'death') {
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(240, now);
             osc.frequency.linearRampToValueAtTime(60, now + 0.35);
-            gain.gain.setValueAtTime(0.18, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+            gain.gain.setValueAtTime(0.18 * v, now);
+            gain.gain.linearRampToValueAtTime(0.005, now + 0.35);
             osc.start(now);
             osc.stop(now + 0.35);
         } else if (type === 'win') {
@@ -594,40 +683,53 @@ class SoundSystem {
             osc.frequency.setValueAtTime(440, now + 0.08);
             osc.frequency.setValueAtTime(554, now + 0.16);
             osc.frequency.setValueAtTime(660, now + 0.24);
-            gain.gain.setValueAtTime(0.18, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.42);
+            gain.gain.setValueAtTime(0.18 * v, now);
+            gain.gain.linearRampToValueAtTime(0.005, now + 0.42);
             osc.start(now);
             osc.stop(now + 0.42);
-        } else if (type === 'hitboss') {
+        } else if (type === 'stomp') {
             osc.type = 'square';
-            osc.frequency.setValueAtTime(880, now);
-            osc.frequency.exponentialRampToValueAtTime(220, now + 0.08);
-            gain.gain.setValueAtTime(0.15, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+            osc.frequency.setValueAtTime(160, now);
+            osc.frequency.exponentialRampToValueAtTime(640, now + 0.18);
+            gain.gain.setValueAtTime(0.22 * v, now);
+            gain.gain.linearRampToValueAtTime(0.005, now + 0.18);
             osc.start(now);
-            osc.stop(now + 0.08);
+            osc.stop(now + 0.18);
         } else if (type === 'laser') {
             osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(920, now);
-            osc.frequency.exponentialRampToValueAtTime(180, now + 0.22);
-            gain.gain.setValueAtTime(0.11, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+            osc.frequency.setValueAtTime(820, now);
+            osc.frequency.exponentialRampToValueAtTime(180, now + 0.2);
+            gain.gain.setValueAtTime(0.11 * v, now);
+            gain.gain.linearRampToValueAtTime(0.005, now + 0.2);
             osc.start(now);
-            osc.stop(now + 0.22);
+            osc.stop(now + 0.2);
         }
     }
 }
 const sfx = new SoundSystem();
 
 // ============================================================================
-// LEVEL DESIGN: 20 HANDCRAFTED, VERIFIED BEATABLE CAT MARIO LEVELS
+// AMBIENT COLOR SYNC PALETTES
 // ============================================================================
-// Coordinate system: 1 unit = 40px tile.
-// 4:3 Canvas is 800x600 (20 tiles wide x 15 tiles high).
-// Floor baseline is y = 12 (480px) extending down to 600px.
+const THEME_PALETTES = {
+    day:        { left: '#0284c7', right: '#16a34a', top: '#7c3aed' },
+    forest:     { left: '#4f46e5', right: '#9333ea', top: '#0d9488' },
+    darkforest: { left: '#e11d48', right: '#7e22ce', top: '#dc2626' },
+    castle:     { left: '#ea580c', right: '#0891b2', top: '#dc2626' }
+};
 
+function applyThemeAmbilight(theme) {
+    const pal = THEME_PALETTES[theme] || THEME_PALETTES.day;
+    document.documentElement.style.setProperty('--glow-left', pal.left);
+    document.documentElement.style.setProperty('--glow-right', pal.right);
+    document.documentElement.style.setProperty('--glow-top', pal.top);
+}
+
+// ============================================================================
+// 20 HANDCRAFTED LEVELS (Rebalanced after Level 4 so enemies are fair & fun!)
+// ============================================================================
 const LEVELS = [
-    // LEVEL 1: Wprowadzenie + Klasyczny Niewidzialny Blok
+    // LEVEL 1
     {
         name: "1. Sielankowe Wzgórza",
         hint: "Skacz przez przepaście... ale uważaj na niewidzialny blok nad pierwszą dziurą!",
@@ -639,23 +741,14 @@ const LEVELS = [
             [0, 12, 8, 3], [11, 12, 8, 3], [22, 12, 8, 3],
             [14, 9, 3, 0.6]
         ],
-        invisBlocks: [
-            [9, 8.5],
-            [20, 8.5]
-        ],
-        fallingFloors: [
-            [23, 12, 2, 3]
-        ],
-        spikeTraps: [
-            { x: 16, y: 11.2, w: 1, dir: 'up', triggerX: 15.2 }
-        ],
-        enemies: [
-            { x: 13, y: 11.2, minX: 11.5, maxX: 18, speed: 1.8, trollJump: false }
-        ],
+        invisBlocks: [[9, 8.5], [20, 8.5]],
+        fallingFloors: [[23, 12, 2, 3]],
+        spikeTraps: [{ x: 16, y: 11.2, w: 1, dir: 'up', triggerX: 15.2 }],
+        enemies: [{ x: 13, y: 11.2, minX: 11.5, maxX: 18, speed: 1.6, trollJump: false }],
         fakeGoals: []
     },
 
-    // LEVEL 2: Zdradziecki Most
+    // LEVEL 2
     {
         name: "2. Zdradziecka Polana",
         hint: "Gdy ziemia się wali, użyj DASH (Shift / K) bez zatrzymywania się!",
@@ -665,25 +758,16 @@ const LEVELS = [
         goal: [29.5, 10],
         solids: [
             [0, 12, 6, 3], [13, 12, 6, 3], [25, 12, 7, 3],
-            [19, 9, 2, 0.6]
+            [19, 9, 2.2, 0.6]
         ],
-        invisBlocks: [
-            [12, 8.2], [20.5, 6.2]
-        ],
-        fallingFloors: [
-            [6, 12, 3.5, 3], [9.5, 12, 3.5, 3],
-            [22, 9, 2.5, 0.6]
-        ],
-        spikeTraps: [
-            { x: 15, y: 0, w: 1.5, dir: 'down', triggerX: 14.2 }
-        ],
-        enemies: [
-            { x: 16, y: 11.2, minX: 13.5, maxX: 18.2, speed: 2.2, trollSpeed: 5.2 }
-        ],
+        invisBlocks: [[12, 8.2], [20.5, 6.2]],
+        fallingFloors: [[6, 12, 3.5, 3], [9.5, 12, 3.5, 3], [22, 9, 2.5, 0.6]],
+        spikeTraps: [{ x: 15, y: 0, w: 1.5, dir: 'down', triggerX: 14.2 }],
+        enemies: [{ x: 16, y: 11.2, minX: 13.5, maxX: 18.2, speed: 1.8, trollSpeed: 3.6 }],
         fakeGoals: []
     },
 
-    // LEVEL 3: Nauka Wall-Jumpa z Niespodzianką
+    // LEVEL 3
     {
         name: "3. Ściana Płaczu",
         hint: "Skocz na ścianę i naciśnij SKOK ponownie, aby się od niej odbić (Wall-Jump)!",
@@ -698,23 +782,17 @@ const LEVELS = [
             [16, 10, 5, 5],
             [24, 7, 6, 8]
         ],
-        invisBlocks: [
-            [7.5, 8.5], [22, 6]
-        ],
-        fallingFloors: [
-            [21, 10, 3, 1]
-        ],
+        invisBlocks: [[7.5, 8.5], [22, 6]],
+        fallingFloors: [[21, 10, 3, 1]],
         spikeTraps: [
             { x: 5, y: 11.2, w: 1, dir: 'up', triggerX: 4.3 },
             { x: 18, y: 9.2, w: 1, dir: 'up', triggerX: 17.2 }
         ],
-        enemies: [
-            { x: 25.5, y: 6.2, minX: 24.3, maxX: 27, speed: 2.0, trollJump: true }
-        ],
+        enemies: [{ x: 25.5, y: 6.2, minX: 24.3, maxX: 27, speed: 1.6, trollJump: true }],
         fakeGoals: []
     },
 
-    // LEVEL 4: Fałszywa Nadzieja (Fake Portal!)
+    // LEVEL 4
     {
         name: "4. Fałszywa Nadzieja",
         hint: "Czy ten portal na dole na pewno jest prawdziwy? Spójrz wyżej...",
@@ -729,87 +807,75 @@ const LEVELS = [
             [23, 5, 1.2, 6],
             [26.5, 5.5, 4.5, 1]
         ],
-        invisBlocks: [
-            [10, 8.5], [10.8, 8.5]
-        ],
-        fallingFloors: [
-            [9, 12, 3, 3]
-        ],
-        spikeTraps: [
-            { x: 16, y: 0, w: 2, dir: 'down', triggerX: 15 }
-        ],
+        invisBlocks: [[10, 8.5], [10.8, 8.5]],
+        fallingFloors: [[9, 12, 3, 3]],
+        spikeTraps: [{ x: 16, y: 0, w: 1.8, dir: 'down', triggerX: 15 }],
         enemies: [
-            { x: 14, y: 11.2, minX: 12.5, maxX: 21, speed: 2.5, trollSpeed: 5.5 },
-            { x: 20, y: 11.2, minX: 12.5, maxX: 21, speed: 2.0, trollJump: true }
+            { x: 14, y: 11.2, minX: 12.5, maxX: 21, speed: 1.8, trollSpeed: 3.5 },
+            { x: 20, y: 11.2, minX: 14.5, maxX: 21, speed: 1.6, trollJump: false }
         ],
-        fakeGoals: [
-            [29, 10.2]
-        ]
+        fakeGoals: [[29, 10.2]]
     },
 
-    // LEVEL 5: Deszcz Robo-Kwadratów
+    // LEVEL 5 (Eased platform widths & enemy speeds)
     {
         name: "5. Deszcz z Nieba",
-        hint: "Niektóre robo-kwadraty i kolce spadają prosto z chmur!",
+        hint: "Uważaj na spadające sople! Roboty poruszają się teraz spokojniej.",
         theme: "day",
         width: 34,
         spawn: [1.5, 10],
         goal: [31.5, 8],
         solids: [
-            [0, 12, 7, 3],
-            [10, 11, 5, 4],
-            [18, 10, 5, 5],
-            [26, 9.8, 8, 5.2]
+            [0, 12, 7.5, 3],
+            [9.8, 11, 5.8, 4],
+            [17.8, 10, 5.8, 5],
+            [25.8, 9.8, 8.2, 5.2]
         ],
-        invisBlocks: [
-            [8, 7.8], [16, 6.8], [24, 6.5]
-        ],
+        invisBlocks: [[8, 7.8], [16, 6.8]],
         fallingFloors: [],
         spikeTraps: [
-            { x: 12, y: 0, w: 1.5, dir: 'down', triggerX: 10.8 },
-            { x: 20, y: 0, w: 1.5, dir: 'down', triggerX: 18.8 },
-            { x: 28.5, y: 9.0, w: 1.5, dir: 'up', triggerX: 27.5 }
+            { x: 12, y: 0, w: 1.2, dir: 'down', triggerX: 10.8 },
+            { x: 20, y: 0, w: 1.2, dir: 'down', triggerX: 18.8 },
+            { x: 28.5, y: 9.0, w: 1.2, dir: 'up', triggerX: 27.5 }
         ],
         enemies: [
-            { x: 11.5, y: 10.2, minX: 10.2, maxX: 14.3, speed: 2.3, trollJump: true },
-            { x: 19.5, y: 9.2, minX: 18.2, maxX: 22.3, speed: 2.8, trollSpeed: 6.0 }
+            { x: 11.5, y: 10.2, minX: 10.2, maxX: 15.0, speed: 1.6, trollJump: false },
+            { x: 19.5, y: 9.2, minX: 18.2, maxX: 23.0, speed: 1.8, trollSpeed: 3.4 }
         ],
         fakeGoals: []
     },
 
-    // LEVEL 6: Komnata Niewidzialnego Sufitu
+    // LEVEL 6
     {
         name: "6. Niewidzialny Sufit",
-        hint: "Jeśli skoczysz za wysoko, uderzysz głową w pustkę. Użyj płaskiego Dasha!",
+        hint: "Jeśli skoczysz za wysoko, uderzysz głową w blok. Użyj płaskiego Dasha!",
         theme: "day",
         width: 34,
         spawn: [1.5, 10],
         goal: [31.5, 10],
         solids: [
-            [0, 12, 6, 3],
-            [9.5, 12, 4, 3],
-            [17, 12, 4, 3],
-            [24.5, 12, 9.5, 3]
+            [0, 12, 6.5, 3],
+            [9.2, 12, 4.8, 3],
+            [16.8, 12, 4.8, 3],
+            [24.2, 12, 9.8, 3]
         ],
         invisBlocks: [
-            [6.8, 9.2], [7.8, 9.2],
-            [14.3, 9.2], [15.3, 9.2],
-            [21.8, 9.2], [22.8, 9.2]
+            [7.0, 9.0], [8.0, 9.0],
+            [14.5, 9.0], [15.5, 9.0],
+            [22.0, 9.0], [23.0, 9.0]
         ],
-        fallingFloors: [
-            [26, 12, 2.5, 3]
-        ],
+        fallingFloors: [[26, 12, 2.2, 3]],
         spikeTraps: [
-            { x: 11, y: 11.2, w: 1, dir: 'up', triggerX: 10.1 },
-            { x: 18.5, y: 11.2, w: 1, dir: 'up', triggerX: 17.6 }
+            { x: 11.2, y: 11.2, w: 1, dir: 'up', triggerX: 10.2 },
+            { x: 18.8, y: 11.2, w: 1, dir: 'up', triggerX: 17.8 }
         ],
         enemies: [
-            { x: 29.5, y: 11.2, minX: 28.6, maxX: 31, speed: 3.0, trollJump: true }
+            { x: 29.5, y: 11.2, minX: 28.5, maxX: 31, speed: 1.8, trollJump: false }
         ],
         fakeGoals: []
     },
 
-    // LEVEL 7: Bliźniacze Wieże
+    // LEVEL 7
     {
         name: "7. Wzgórza Wiatru",
         hint: "Wspinaj się między ścianami i przeskakuj nad kolcami!",
@@ -821,160 +887,136 @@ const LEVELS = [
             [0, 12, 7, 3],
             [7, 4, 1.2, 8],
             [11, 2, 1.2, 8],
-            [12.2, 9, 5, 1],
+            [12.2, 9, 5.5, 1],
             [20, 4, 1.2, 11],
             [24, 2, 1.2, 8.5],
-            [27, 12, 7, 3]
+            [26.5, 12, 7.5, 3]
         ],
-        invisBlocks: [
-            [18, 6.2], [25.8, 8.5]
-        ],
-        fallingFloors: [
-            [14, 9, 2, 1]
-        ],
+        invisBlocks: [[18, 6.2]],
+        fallingFloors: [[14.5, 9, 2, 1]],
         spikeTraps: [
             { x: 4.5, y: 11.2, w: 1, dir: 'up', triggerX: 3.8 },
-            { x: 13, y: 0, w: 1.5, dir: 'down', triggerX: 12.3 },
-            { x: 29, y: 11.2, w: 1.2, dir: 'up', triggerX: 28 }
+            { x: 29, y: 11.2, w: 1, dir: 'up', triggerX: 28 }
         ],
         enemies: [
-            { x: 28.5, y: 11.2, minX: 27.2, maxX: 31, speed: 2.5 }
+            { x: 28.5, y: 11.2, minX: 26.8, maxX: 31, speed: 1.8 }
         ],
         fakeGoals: []
     },
 
-    // LEVEL 8: Wejście do Lasu Zmierzchu
+    // LEVEL 8 (Forest begins)
     {
         name: "8. Las Zmierzchu",
-        hint: "Wchodzisz w gęsty las. Roboty tutaj reagują agresywnie na Twój ruch!",
+        hint: "Wchodzisz w gęsty las. Przeskakuj spokojnie nad strażnikami!",
         theme: "forest",
         width: 36,
         spawn: [1.5, 10],
         goal: [33.5, 7],
         solids: [
             [0, 12, 8, 3],
-            [10.5, 10.5, 6, 4.5],
-            [19, 9, 6, 6],
-            [28, 8.8, 8, 6.2]
+            [10.2, 10.5, 6.5, 4.5],
+            [18.8, 9, 6.5, 6],
+            [27.5, 8.8, 8.5, 6.2]
         ],
-        invisBlocks: [
-            [8.8, 7.8], [17.2, 6.5], [26, 6]
-        ],
-        fallingFloors: [
-            [25, 9, 2.5, 1]
-        ],
+        invisBlocks: [[8.8, 7.8], [17.2, 6.5]],
+        fallingFloors: [[25.3, 9, 2.2, 1]],
         spikeTraps: [
             { x: 6, y: 11.2, w: 1, dir: 'up', triggerX: 5.2 },
-            { x: 21, y: 0, w: 1.5, dir: 'down', triggerX: 19.8 }
+            { x: 21, y: 0, w: 1.2, dir: 'down', triggerX: 19.8 }
         ],
         enemies: [
-            { x: 12, y: 9.7, minX: 10.8, maxX: 16, speed: 2.2, trollSpeed: 5.8 },
-            { x: 20.5, y: 8.2, minX: 19.3, maxX: 24.5, speed: 2.2, trollJump: true },
-            { x: 30, y: 8.0, minX: 28.3, maxX: 33, speed: 2.6, trollSpeed: 5.8 }
+            { x: 12, y: 9.7, minX: 10.6, maxX: 16.2, speed: 1.7, trollSpeed: 3.3 },
+            { x: 20.5, y: 8.2, minX: 19.2, maxX: 24.8, speed: 1.7, trollJump: true },
+            { x: 30, y: 8.0, minX: 28.0, maxX: 33, speed: 1.9 }
         ],
         fakeGoals: []
     },
 
-    // LEVEL 9: Zgniły Drewniany Most
+    // LEVEL 9
     {
         name: "9. Zgniły Most",
-        hint: "Cały środek poziomu to zapadający się most! Biegnij, skacz i Dashuj!",
+        hint: "Środek poziomu to zapadający się most! Biegnij, skacz i Dashuj!",
         theme: "forest",
         width: 36,
         spawn: [1.5, 9],
         goal: [33.5, 9],
         solids: [
-            [0, 11, 5, 4],
-            [30, 11, 6, 4]
+            [0, 11, 5.5, 4],
+            [29.5, 11, 6.5, 4]
         ],
-        invisBlocks: [
-            [11, 7.2], [18, 7.2], [25, 7.2]
-        ],
+        invisBlocks: [[11, 7.0], [18, 7.0], [25, 7.0]],
         fallingFloors: [
-            [5, 11, 3, 0.8],
-            [9, 11, 3, 0.8],
-            [13, 10.5, 3, 0.8],
-            [17, 10.5, 3, 0.8],
-            [21, 11, 3, 0.8],
-            [25, 11, 3.5, 0.8]
+            [5.5, 11, 3.2, 0.8],
+            [9.2, 11, 3.2, 0.8],
+            [13.0, 10.5, 3.2, 0.8],
+            [16.8, 10.5, 3.2, 0.8],
+            [20.6, 11, 3.2, 0.8],
+            [24.4, 11, 4.0, 0.8]
         ],
         spikeTraps: [
-            { x: 14, y: 0, w: 1.5, dir: 'down', triggerX: 12.8 },
-            { x: 22, y: 0, w: 1.5, dir: 'down', triggerX: 20.8 },
-            { x: 31.2, y: 10.2, w: 1, dir: 'up', triggerX: 30.2 }
+            { x: 14, y: 0, w: 1.2, dir: 'down', triggerX: 12.8 },
+            { x: 22, y: 0, w: 1.2, dir: 'down', triggerX: 20.8 }
         ],
         enemies: [],
         fakeGoals: []
     },
 
-    // LEVEL 10: Leśny Labirynt Portalowy
+    // LEVEL 10
     {
         name: "10. Dwa Portale",
-        hint: "Jeden portal to pułapka, drugi to zbawienie. Zobacz, który jest trudniejszy!",
+        hint: "Jeden portal to pułapka, drugi to zbawienie. Wspinaj się na górną półkę!",
         theme: "forest",
         width: 35,
         spawn: [1.5, 10],
         goal: [16, 3.2],
         solids: [
             [0, 12, 9, 3],
-            [12, 12, 10, 3],
-            [25, 12, 8, 3],
+            [11.5, 12, 10.5, 3],
+            [24.5, 12, 8.5, 3],
             [24, 4.5, 1.2, 6.5],
             [19.5, 3, 1.2, 6],
-            [14.5, 5, 4, 0.8]
+            [14.2, 5, 4.5, 0.8]
         ],
-        invisBlocks: [
-            [10, 8.8], [23, 8.8]
-        ],
-        fallingFloors: [
-            [15, 12, 3, 3]
-        ],
-        spikeTraps: [
-            { x: 19, y: 11.2, w: 1.2, dir: 'up', triggerX: 18 }
-        ],
+        invisBlocks: [[10, 8.8], [23, 8.8]],
+        fallingFloors: [[15, 12, 2.5, 3]],
+        spikeTraps: [{ x: 19, y: 11.2, w: 1, dir: 'up', triggerX: 18 }],
         enemies: [
-            { x: 13, y: 11.2, minX: 12.2, maxX: 21.5, speed: 2.8, trollJump: true },
-            { x: 27, y: 11.2, minX: 25.3, maxX: 31, speed: 2.5, trollSpeed: 5.5 }
+            { x: 13, y: 11.2, minX: 12.0, maxX: 21.5, speed: 1.9, trollJump: false },
+            { x: 27, y: 11.2, minX: 25.0, maxX: 30.5, speed: 1.8, trollSpeed: 3.4 }
         ],
-        fakeGoals: [
-            [31, 10.2]
-        ]
+        fakeGoals: [[31, 10.2]]
     },
 
-    // LEVEL 11: Fabryka Dronów w Lesie
+    // LEVEL 11
     {
         name: "11. Patrol Strażników",
-        hint: "Wiele robo-kwadratów na wąskich półkach. Wykorzystaj skok i Dash nad nimi!",
+        hint: "Przeskakuj nad robo-kwadratami używając Dasha w powietrzu!",
         theme: "forest",
         width: 38,
         spawn: [1.5, 10],
         goal: [35.5, 8],
         solids: [
-            [0, 12, 6, 3],
-            [8, 10.5, 6, 4.5],
-            [16, 9, 6, 6],
-            [24, 10.5, 6, 4.5],
+            [0, 12, 6.5, 3],
+            [8, 10.5, 6.5, 4.5],
+            [16, 9, 6.5, 6],
+            [24, 10.5, 6.5, 4.5],
             [32, 9.8, 6, 5.2]
         ],
-        invisBlocks: [
-            [6.8, 7.5], [14.8, 6], [22.8, 6.5], [30.8, 6.8]
-        ],
+        invisBlocks: [[6.8, 7.5], [14.8, 6], [22.8, 6.5]],
         fallingFloors: [],
         spikeTraps: [
             { x: 4, y: 11.2, w: 1, dir: 'up', triggerX: 3.2 },
-            { x: 18.5, y: 0, w: 1.5, dir: 'down', triggerX: 17.2 },
-            { x: 33.2, y: 9.0, w: 1, dir: 'up', triggerX: 32.3 }
+            { x: 18.5, y: 0, w: 1.2, dir: 'down', triggerX: 17.2 }
         ],
         enemies: [
-            { x: 9.5, y: 9.7, minX: 8.2, maxX: 13.5, speed: 2.6, trollJump: true },
-            { x: 17.5, y: 8.2, minX: 16.2, maxX: 21.5, speed: 3.0, trollSpeed: 6.0 },
-            { x: 25.5, y: 9.7, minX: 24.2, maxX: 29.5, speed: 2.8, trollJump: true },
-            { x: 28.5, y: 9.7, minX: 24.2, maxX: 29.5, speed: 2.2 }
+            { x: 9.5, y: 9.7, minX: 8.2, maxX: 14.0, speed: 1.8, trollJump: false },
+            { x: 17.5, y: 8.2, minX: 16.2, maxX: 22.0, speed: 2.0, trollSpeed: 3.6 },
+            { x: 25.5, y: 9.7, minX: 24.2, maxX: 30.0, speed: 1.9, trollJump: true }
         ],
         fakeGoals: []
     },
 
-    // LEVEL 12: Komin Śmierci
+    // LEVEL 12
     {
         name: "12. Komin Śmierci",
         hint: "Wspinaczka po ścianach z pułapkami. Nie zatrzymuj się w miejscu!",
@@ -988,128 +1030,113 @@ const LEVELS = [
             [11, 2, 1.2, 8.5],
             [15, 4, 1.2, 11],
             [19, 2, 1.2, 8.5],
-            [23, 12, 9, 3]
+            [22.5, 12, 9.5, 3]
         ],
-        invisBlocks: [
-            [12.8, 5], [21, 7]
-        ],
-        fallingFloors: [
-            [23, 12, 2.5, 3]
-        ],
+        invisBlocks: [[12.8, 5], [21, 7]],
+        fallingFloors: [[22.5, 12, 2.2, 3]],
         spikeTraps: [
-            { x: 9, y: 0, w: 1.2, dir: 'down', triggerX: 7.5 },
-            { x: 17, y: 0, w: 1.2, dir: 'down', triggerX: 15.5 },
-            { x: 26.5, y: 11.2, w: 1.2, dir: 'up', triggerX: 25.6 }
+            { x: 9, y: 0, w: 1.1, dir: 'down', triggerX: 7.5 },
+            { x: 17, y: 0, w: 1.1, dir: 'down', triggerX: 15.5 },
+            { x: 26.5, y: 11.2, w: 1, dir: 'up', triggerX: 25.6 }
         ],
         enemies: [
-            { x: 27.5, y: 11.2, minX: 25.8, maxX: 30, speed: 2.5, trollJump: true }
+            { x: 27.5, y: 11.2, minX: 25.5, maxX: 30, speed: 1.9, trollJump: false }
         ],
         fakeGoals: []
     },
 
-    // LEVEL 13: Pechowa Trzynastka
+    // LEVEL 13
     {
         name: "13. Pechowa Trzynastka",
-        hint: "Wszystko tutaj próbuje Cię oszukać. Nawet pierwszy krok!",
+        hint: "Uważaj na zapadający się grunt tuż po starcie!",
         theme: "forest",
         width: 36,
         spawn: [2, 10],
         goal: [33.5, 10],
         solids: [
             [0, 12, 4, 3],
-            [7, 12, 5, 3],
-            [15, 9.5, 4, 1],
-            [22, 12, 5, 3],
-            [30, 12, 6, 3]
+            [7, 12, 5.5, 3],
+            [14.8, 9.5, 4.5, 1],
+            [21.8, 12, 5.5, 3],
+            [29.8, 12, 6.2, 3]
         ],
-        invisBlocks: [
-            [5, 8.5], [13, 7.5], [20, 7.5], [28, 8.5]
-        ],
+        invisBlocks: [[5, 8.5], [13, 7.5], [20, 7.5]],
         fallingFloors: [
             [4, 12, 3, 3],
-            [19, 9.5, 2.5, 1],
-            [27, 12, 3, 3]
+            [19.3, 9.5, 2.2, 1],
+            [27.3, 12, 2.5, 3]
         ],
         spikeTraps: [
-            { x: 8.5, y: 11.2, w: 1.2, dir: 'up', triggerX: 7.5 },
-            { x: 16.5, y: 0, w: 1.5, dir: 'down', triggerX: 15.2 },
-            { x: 31.2, y: 11.2, w: 1, dir: 'up', triggerX: 30.3 }
+            { x: 8.5, y: 11.2, w: 1, dir: 'up', triggerX: 7.5 },
+            { x: 16.5, y: 0, w: 1.2, dir: 'down', triggerX: 15.2 }
         ],
         enemies: [
-            { x: 9.5, y: 11.2, minX: 7.2, maxX: 11.5, speed: 2.5, trollSpeed: 5.5 },
-            { x: 23.5, y: 11.2, minX: 22.2, maxX: 26.5, speed: 2.8, trollJump: true }
+            { x: 9.5, y: 11.2, minX: 7.2, maxX: 12.0, speed: 1.9, trollSpeed: 3.6 },
+            { x: 23.5, y: 11.2, minX: 22.0, maxX: 26.8, speed: 2.0, trollJump: true }
         ],
         fakeGoals: []
     },
 
-    // LEVEL 14: Skok Wiary
+    // LEVEL 14
     {
         name: "14. Skok Wiary",
-        hint: "Łącz Wall-Jump z Dashem w powietrzu, aby pokonać gigantyczne przepaście!",
+        hint: "Łącz Wall-Jump z Dashem w powietrzu, aby pokonać szerokie przepaście!",
         theme: "forest",
         width: 38,
         spawn: [1.5, 10],
         goal: [35.5, 9],
         solids: [
-            [0, 12, 5, 3],
+            [0, 12, 5.5, 3],
             [8, 5, 1.2, 8],
-            [15, 5, 1.2, 8],
-            [22, 11, 5, 4],
-            [30, 4, 1.2, 7],
-            [33, 10.8, 5, 4.2]
+            [14.8, 5, 1.2, 8],
+            [21.5, 11, 5.5, 4],
+            [29.8, 4, 1.2, 7],
+            [32.8, 10.8, 5.2, 4.2]
         ],
-        invisBlocks: [
-            [11.5, 4.5], [28, 7.5]
-        ],
-        fallingFloors: [
-            [24, 11, 2.5, 4]
-        ],
+        invisBlocks: [[11.5, 4.5], [28, 7.5]],
+        fallingFloors: [[24.2, 11, 2.2, 4]],
         spikeTraps: [
-            { x: 22.5, y: 10.2, w: 1, dir: 'up', triggerX: 21.6 },
-            { x: 33.8, y: 10.0, w: 1, dir: 'up', triggerX: 33.0 }
+            { x: 22.2, y: 10.2, w: 1, dir: 'up', triggerX: 21.4 }
         ],
         enemies: [
-            { x: 34.5, y: 10.0, minX: 33.2, maxX: 37, speed: 2.4, trollJump: true }
+            { x: 34.5, y: 10.0, minX: 33.0, maxX: 37, speed: 1.9, trollJump: false }
         ],
         fakeGoals: []
     },
 
-    // LEVEL 15: Krwawy Księżyc (Mroczny Las)
+    // LEVEL 15 (Night / Dark Forest - triggers Night music)
     {
         name: "15. Krwawy Księżyc",
-        hint: "Zbliżasz się do Zamku Bossa. Noc zapadła, a pułapki są jeszcze gęstsze!",
+        hint: "Zbliżasz się do Zamku Bossa. Noc zapadła!",
         theme: "darkforest",
         width: 38,
         spawn: [1.5, 10],
         goal: [35.5, 10],
         solids: [
-            [0, 12, 6, 3],
-            [9, 10.5, 5, 4.5],
-            [17, 9, 5, 6],
-            [25, 10.5, 5, 4.5],
+            [0, 12, 6.5, 3],
+            [9, 10.5, 5.5, 4.5],
+            [17, 9, 5.5, 6],
+            [25, 10.5, 5.5, 4.5],
             [33, 12, 5, 3]
         ],
-        invisBlocks: [
-            [7, 8.2], [15, 6.8], [23, 7.2], [31, 8.2]
-        ],
+        invisBlocks: [[7, 8.2], [15, 6.8], [23, 7.2]],
         fallingFloors: [
-            [11, 10.5, 2.5, 1],
-            [27, 10.5, 2.5, 1]
+            [11.2, 10.5, 2.2, 1],
+            [27.2, 10.5, 2.2, 1]
         ],
         spikeTraps: [
             { x: 4, y: 11.2, w: 1, dir: 'up', triggerX: 3.1 },
-            { x: 18.5, y: 0, w: 2, dir: 'down', triggerX: 17.2 },
-            { x: 33.8, y: 11.2, w: 1, dir: 'up', triggerX: 32.9 }
+            { x: 18.5, y: 0, w: 1.5, dir: 'down', triggerX: 17.2 }
         ],
         enemies: [
-            { x: 10, y: 9.7, minX: 9.2, maxX: 13.5, speed: 3.0, trollSpeed: 6.2 },
-            { x: 18, y: 8.2, minX: 17.2, maxX: 21.5, speed: 3.0, trollJump: true },
-            { x: 26, y: 9.7, minX: 25.2, maxX: 29.5, speed: 3.0, trollSpeed: 6.2 }
+            { x: 10, y: 9.7, minX: 9.2, maxX: 14.0, speed: 2.1, trollSpeed: 4.0 },
+            { x: 18, y: 8.2, minX: 17.2, maxX: 22.0, speed: 2.1, trollJump: true },
+            { x: 26, y: 9.7, minX: 25.2, maxX: 30.0, speed: 2.1, trollSpeed: 4.0 }
         ],
         fakeGoals: []
     },
 
-    // LEVEL 16: Mechaniczna Zasadzka
+    // LEVEL 16
     {
         name: "16. Mechaniczna Zasadzka",
         hint: "Uważaj na fałszywy portal na środku mapy!",
@@ -1119,68 +1146,58 @@ const LEVELS = [
         goal: [35.5, 6],
         solids: [
             [0, 12, 7, 3],
-            [10, 12, 8, 3],
-            [21, 10, 6, 5],
+            [10, 12, 8.5, 3],
+            [21, 10, 6.5, 5],
             [29, 3.5, 1.2, 8],
             [32.5, 7.8, 5.5, 7.2]
         ],
-        invisBlocks: [
-            [8.2, 8.5], [19.2, 7.5], [31, 5.5]
-        ],
-        fallingFloors: [
-            [7, 12, 3, 3],
-            [23, 10, 2.5, 1]
-        ],
+        invisBlocks: [[8.2, 8.5], [19.2, 7.5], [31, 5.5]],
+        fallingFloors: [[7, 12, 3, 3], [23.2, 10, 2.2, 1]],
         spikeTraps: [
-            { x: 12, y: 0, w: 1.5, dir: 'down', triggerX: 11 },
+            { x: 12, y: 0, w: 1.3, dir: 'down', triggerX: 11 },
             { x: 33.2, y: 7.0, w: 1, dir: 'up', triggerX: 32.4 }
         ],
         enemies: [
-            { x: 13, y: 11.2, minX: 10.3, maxX: 17.5, speed: 2.8, trollJump: true },
-            { x: 22, y: 9.2, minX: 21.2, maxX: 26.5, speed: 3.0, trollSpeed: 6.0 }
+            { x: 13, y: 11.2, minX: 10.3, maxX: 18.0, speed: 2.1, trollJump: true },
+            { x: 22, y: 9.2, minX: 21.2, maxX: 27.0, speed: 2.2, trollSpeed: 4.2 }
         ],
-        fakeGoals: [
-            [16, 10.2]
-        ]
+        fakeGoals: [[16, 10.2]]
     },
 
-    // LEVEL 17: Bieg Przez Kolce
+    // LEVEL 17
     {
         name: "17. Ścieżka Cierpienia",
-        hint: "Szybkie decyzje: skok, wall-jump, dash! Nie daj się zamknąć!",
+        hint: "Szybkie decyzje: skok, wall-jump, dash!",
         theme: "darkforest",
         width: 40,
         spawn: [1.5, 10],
         goal: [37.5, 10],
         solids: [
-            [0, 12, 5, 3],
-            [8, 12, 4, 3],
+            [0, 12, 5.5, 3],
+            [8, 12, 4.5, 3],
             [14, 5, 1.2, 8],
-            [18, 9.5, 5, 5.5],
-            [26, 9.5, 5, 5.5],
-            [34, 12, 6, 3]
+            [17.8, 9.5, 5.5, 5.5],
+            [25.8, 9.5, 5.5, 5.5],
+            [33.8, 12, 6.2, 3]
         ],
-        invisBlocks: [
-            [6, 8.8], [16, 6.0], [24, 6.8], [32, 8.2]
-        ],
+        invisBlocks: [[6, 8.8], [16, 6.0], [24, 6.8], [32, 8.2]],
         fallingFloors: [
-            [8, 12, 2.5, 3],
-            [20, 9.5, 2.5, 1],
-            [28, 9.5, 2.5, 1]
+            [8, 12, 2.2, 3],
+            [20, 9.5, 2.2, 1],
+            [28, 9.5, 2.2, 1]
         ],
         spikeTraps: [
-            { x: 18.5, y: 8.7, w: 1, dir: 'up', triggerX: 17.6 },
-            { x: 26.5, y: 8.7, w: 1, dir: 'up', triggerX: 25.6 },
-            { x: 35, y: 0, w: 1.5, dir: 'down', triggerX: 34.0 }
+            { x: 18.2, y: 8.7, w: 1, dir: 'up', triggerX: 17.4 },
+            { x: 26.2, y: 8.7, w: 1, dir: 'up', triggerX: 25.4 }
         ],
         enemies: [
-            { x: 19.5, y: 8.7, minX: 18.2, maxX: 22.5, speed: 3.0, trollJump: true },
-            { x: 35.5, y: 11.2, minX: 34.2, maxX: 37, speed: 3.2, trollSpeed: 6.2 }
+            { x: 19.5, y: 8.7, minX: 18.0, maxX: 22.8, speed: 2.1, trollJump: true },
+            { x: 35.5, y: 11.2, minX: 34.0, maxX: 37, speed: 2.2, trollSpeed: 4.2 }
         ],
         fakeGoals: []
     },
 
-    // LEVEL 18: Przedmurze Zamku
+    // LEVEL 18
     {
         name: "18. Przedmurze Zamku",
         hint: "Widać już mury zamczyska! Pokonaj wieże strażnicze!",
@@ -1192,32 +1209,26 @@ const LEVELS = [
             [0, 12, 6, 3],
             [6, 5, 1.2, 7],
             [9.5, 3, 1.2, 7.5],
-            [10.7, 9, 5, 1],
-            [18, 11, 6, 4],
+            [10.7, 9, 5.5, 1],
+            [18, 11, 6.5, 4],
             [26, 4.5, 1.2, 8.5],
             [30, 2.5, 1.2, 8],
             [33, 6.8, 7, 8.2]
         ],
-        invisBlocks: [
-            [16.5, 7.5], [24.5, 8], [31.8, 4.8]
-        ],
-        fallingFloors: [
-            [12.5, 9, 2.5, 1],
-            [20, 11, 2.5, 1]
-        ],
+        invisBlocks: [[16.5, 7.5], [24.5, 8], [31.8, 4.8]],
+        fallingFloors: [[12.5, 9, 2.2, 1], [20, 11, 2.2, 1]],
         spikeTraps: [
             { x: 4, y: 11.2, w: 1, dir: 'up', triggerX: 3.1 },
-            { x: 19, y: 0, w: 1.5, dir: 'down', triggerX: 18.0 },
-            { x: 34.2, y: 6.0, w: 1.2, dir: 'up', triggerX: 33.2 }
+            { x: 19, y: 0, w: 1.3, dir: 'down', triggerX: 18.0 }
         ],
         enemies: [
-            { x: 19, y: 10.2, minX: 18.2, maxX: 23.5, speed: 3.2, trollJump: true },
-            { x: 35, y: 6.0, minX: 33.3, maxX: 37, speed: 3.2, trollSpeed: 6.5 }
+            { x: 19, y: 10.2, minX: 18.2, maxX: 24.0, speed: 2.2, trollJump: true },
+            { x: 35, y: 6.0, minX: 33.3, maxX: 37, speed: 2.2, trollSpeed: 4.3 }
         ],
         fakeGoals: []
     },
 
-    // LEVEL 19: Most Zwodzony (Ostatni krok przed Bossem!)
+    // LEVEL 19
     {
         name: "19. Brama Zamku",
         hint: "Wejdź do bramy zamkowej! Ale nie daj się nabrać na fałszywe wejście!",
@@ -1227,49 +1238,40 @@ const LEVELS = [
         goal: [39, 9.8],
         solids: [
             [0, 12, 6, 3],
-            [12, 10, 5, 5],
-            [20, 8, 5, 7],
+            [12, 10, 5.5, 5],
+            [20, 8, 5.5, 7],
             [28, 11.5, 14, 3.5],
             [34, 4, 1.2, 5.5]
         ],
-        invisBlocks: [
-            [7.5, 8.5], [10, 7.5], [18, 6.0], [26, 6.0]
-        ],
-        fallingFloors: [
-            [6, 12, 3, 1],
-            [9, 11, 3, 1],
-            [29, 11.5, 3, 3.5]
-        ],
+        invisBlocks: [[7.5, 8.5], [10, 7.5], [18, 7.0], [26, 6.0]],
+        fallingFloors: [[6, 12, 3, 1], [9, 11, 3, 1], [29, 11.5, 2.5, 3.5]],
         spikeTraps: [
-            { x: 14, y: 9.2, w: 1.2, dir: 'up', triggerX: 13.0 },
-            { x: 22, y: 0, w: 1.5, dir: 'down', triggerX: 20.8 },
-            { x: 36, y: 10.7, w: 1.2, dir: 'up', triggerX: 35.0 }
+            { x: 14, y: 9.2, w: 1, dir: 'up', triggerX: 13.0 },
+            { x: 22, y: 0, w: 1.3, dir: 'down', triggerX: 20.8 }
         ],
         enemies: [
-            { x: 13.5, y: 9.2, minX: 12.2, maxX: 16.5, speed: 3.0, trollJump: true },
-            { x: 21.5, y: 7.2, minX: 20.2, maxX: 24.5, speed: 3.4, trollSpeed: 6.5 },
-            { x: 36.5, y: 10.7, minX: 32.5, maxX: 38.2, speed: 3.4, trollJump: true }
+            { x: 13.5, y: 9.2, minX: 12.2, maxX: 17.0, speed: 2.2, trollJump: false },
+            { x: 21.5, y: 7.2, minX: 20.2, maxX: 25.0, speed: 2.3, trollSpeed: 4.4 },
+            { x: 36.5, y: 10.7, minX: 32.5, maxX: 38.2, speed: 2.2, trollJump: true }
         ],
-        fakeGoals: [
-            [32.5, 9.7]
-        ]
+        fakeGoals: [[32.5, 9.7]]
     },
 
-    // LEVEL 20: FINAŁ - ZAMEK I MEGA-ROBO BOSS (Fitted to 20-tile 800x600 4:3 Arena!)
+    // LEVEL 20: FINAŁ - ZAMEK I MEGA-ROBO BOSS (SKOCZ NA GŁOWĘ BOSSA GDY SIĘ PRZEGRZEJE!)
     {
         name: "20. ZAMEK: MEGA-ROBO BOSS",
-        hint: "UNIKAJ ATAKÓW (WSAD + Shift) I KLIKAJ MYSZKĄ (LPM) BEZPOŚREDNIO W BOSSA ABY GO ZNISZCZYĆ!",
+        hint: "UNIKAJ ATAKÓW I WSKOCZ NA GŁOWĘ BOSSA GDY JEST OGŁUSZONY (5 SKOKÓW = ZWYCIĘSTWO)!",
         theme: "castle",
-        width: 20, // Exact 800px single-screen 4:3 arena so mouse aiming is 100% locked!
+        width: 20, // 800px 4:3 arena
         spawn: [2.5, 10],
-        goal: null, // Spawns when Boss dies!
+        goal: null, // Spawns when Boss is defeated
         solids: [
-            [0, 12.5, 20, 2.5],  // Castle Stone Floor (500..600px)
-            [0, 0, 1, 15],       // Left Castle Wall (Wall-jumpable!)
-            [19, 0, 1, 15],      // Right Castle Wall (Wall-jumpable!)
-            [2.6, 9.0, 3.6, 0.6],// Left Arena Platform
-            [13.8, 9.0, 3.6, 0.6],// Right Arena Platform
-            [8.2, 6.2, 3.6, 0.6] // Top Center Platform
+            [0, 12.5, 20, 2.5],   // Castle Stone Floor
+            [0, 0, 1, 15],        // Left Castle Wall
+            [19, 0, 1, 15],       // Right Castle Wall
+            [2.4, 9.0, 3.8, 0.6], // Left Arena Platform
+            [13.8, 9.0, 3.8, 0.6],// Right Arena Platform
+            [8.1, 6.2, 3.8, 0.6]  // Top Center Platform
         ],
         invisBlocks: [],
         fallingFloors: [],
@@ -1280,36 +1282,72 @@ const LEVELS = [
     }
 ];
 
-// Populate Level Selector Dropdown
-LEVELS.forEach((lvl, idx) => {
-    const opt = document.createElement('option');
-    opt.value = idx;
-    opt.textContent = lvl.name;
-    levelSelect.appendChild(opt);
-});
+// ============================================================================
+// UI ELEMENTS & STATE MANAGEMENT
+// ============================================================================
+const inGameHud = document.getElementById('in-game-hud');
+const hudLevelBadge = document.getElementById('hud-level-badge');
+const hudLevelName = document.getElementById('hud-level-name');
+const dashBar = document.getElementById('dash-bar');
+const deathCountEl = document.getElementById('death-count');
+const bossHud = document.getElementById('boss-hud');
+const bossHpText = document.getElementById('boss-hp-text');
+const bossHpBar = document.getElementById('boss-hp-bar');
 
-// ============================================================================
-// GAME STATE & ENTITIES
-// ============================================================================
+const mainMenuOverlay = document.getElementById('main-menu-overlay');
+const pauseMenuOverlay = document.getElementById('pause-menu-overlay');
+const settingsModal = document.getElementById('settings-modal');
+const levelsModal = document.getElementById('levels-modal');
+const deathOverlay = document.getElementById('death-overlay');
+const trollMessageEl = document.getElementById('troll-message');
+const victoryOverlay = document.getElementById('victory-overlay');
+const finalDeathsEl = document.getElementById('final-deaths');
+const finalRankEl = document.getElementById('final-rank');
+const touchControls = document.getElementById('touch-controls');
+
+const TROLL_MESSAGES = [
+    "Serio? Na tym padłeś? Przecież to było oczywiste!",
+    "Klasyczny niewidzialny blok! Cat Mario przesyła pozdrowienia.",
+    "Ta podłoga wyglądała zbyt stabilnie, żeby być prawdziwą...",
+    "Użyj DASH (Shift lub K), fioletowy kwadracie!",
+    "Pamiętaj: możesz odbijać się od ścian (Wall-Jump)!",
+    "Roboty mają mechaniczne oczy, widzą Twój każdy błąd.",
+    "Ta flaga była przynętą. Nigdy nie ufaj pierwszemu portalowi!",
+    "Kolce z sufitu? Klasyka gatunku. Patrz w górę!",
+    "Kto postawił ten blok akurat na trajektorii skoku?! (Ja).",
+    "Spokojnie, klawiatura jeszcze żyje. Spróbuj skoczyć wcześniej!",
+    "Gdyby to było łatwe, nie nazywałoby się Rage Game!"
+];
+
 const TILE = 40;
+let gameState = 'MENU'; // 'MENU', 'PLAYING', 'PAUSED', 'VICTORY'
 let currentLevelIdx = 0;
+let savedPlayerLevelIdx = 0;
 let deathCount = 0;
-let showHints = false;
+let audioMuted = false;
+let touchMode = 'AUTO'; // 'AUTO', 'ON', 'OFF'
 let screenShake = 0;
 let cameraX = 0;
-let tickCount = 0; // Increments at locked 60Hz for deterministic animations
+let tickCount = 0;
 
-// Ambient background floating particles (fireflies, embers, pollen)
-const bgMotes = Array.from({ length: 32 }, () => ({
+// Cinematic Main Menu Showcase Cycling State
+const MENU_SHOWCASE_LEVELS = [0, 7, 14, 17]; // Day Hills -> Twilight Forest -> Blood Moon -> Castle Outskirts
+let menuShowcasePos = 0;
+let menuCycleTimer = 0;
+let menuFadeState = 'NONE'; // 'NONE', 'FADING_OUT', 'FADING_IN'
+let menuFadeAlpha = 0;
+let menuCamDir = 1;
+
+// Subtle background motes ONLY for Forest / DarkForest / Castle (REMOVED during Day!)
+const bgMotes = Array.from({ length: 22 }, () => ({
     x: Math.random() * 800,
     y: Math.random() * 540,
-    r: Math.random() * 2.5 + 1,
-    vx: (Math.random() - 0.5) * 0.4,
-    vy: -Math.random() * 0.45 - 0.15,
+    r: Math.random() * 2 + 1,
+    vx: (Math.random() - 0.5) * 0.35,
+    vy: -Math.random() * 0.35 - 0.1,
     phase: Math.random() * Math.PI * 2
 }));
 
-// Input State
 const keys = {
     left: false,
     right: false,
@@ -1318,14 +1356,6 @@ const keys = {
     dashPressed: false
 };
 
-// Mouse state for Level 20 Boss Fight
-const mouse = {
-    x: 400,
-    y: 300,
-    clicked: false
-};
-
-// Player Object (Purple Square with 2 Expressive Eyes)
 const player = {
     x: 80,
     y: 400,
@@ -1340,11 +1370,9 @@ const player = {
     dashCooldown: 0,
     wallJumpLock: 0,
     dead: false,
-    deathTimer: 0,
-    trail: []
+    deathTimer: 0
 };
 
-// Active Level Runtime Objects
 let solids = [];
 let invisBlocks = [];
 let fallingFloors = [];
@@ -1358,25 +1386,52 @@ let projectiles = [];
 let boss = null;
 
 // ============================================================================
+// MUSIC SELECTION HELPER
+// ============================================================================
+function syncMusicForState() {
+    if (gameState === 'MENU') {
+        music.setPaused(false);
+        music.playTrack('menu');
+        return;
+    }
+    if (gameState === 'PAUSED') {
+        music.setPaused(true);
+        return;
+    }
+    music.setPaused(false);
+    const lvl = LEVELS[currentLevelIdx];
+    if (lvl.isBossLevel) {
+        music.playTrack('boss');
+    } else if (lvl.theme === 'darkforest') {
+        music.playTrack('night');
+    } else {
+        music.playTrack('hills');
+    }
+}
+
+// ============================================================================
 // LEVEL INITIALIZATION
 // ============================================================================
-function loadLevel(idx) {
+function loadLevel(idx, isMenuPreview = false) {
     currentLevelIdx = Math.max(0, Math.min(LEVELS.length - 1, idx));
+    if (!isMenuPreview) {
+        savedPlayerLevelIdx = currentLevelIdx;
+        document.getElementById('menu-continue-badge').textContent = `POZ. ${savedPlayerLevelIdx + 1}`;
+    }
+
     const lvl = LEVELS[currentLevelIdx];
 
-    levelSelect.value = currentLevelIdx;
-    hudLevelBadge.textContent = `POZIOM ${currentLevelIdx + 1}/20`;
+    hudLevelBadge.textContent = `${currentLevelIdx + 1}/20`;
     hudLevelName.textContent = lvl.name;
-    hudLevelHint.textContent = lvl.hint;
+    document.getElementById('pause-level-label').textContent = lvl.name;
 
     applyThemeAmbilight(lvl.theme);
+    syncMusicForState();
 
-    if (lvl.isBossLevel) {
+    if (lvl.isBossLevel && gameState === 'PLAYING') {
         bossHud.classList.remove('hidden');
-        canvas.classList.add('boss-cursor');
     } else {
         bossHud.classList.add('hidden');
-        canvas.classList.remove('boss-cursor');
     }
 
     deathOverlay.classList.add('hidden');
@@ -1395,9 +1450,7 @@ function loadLevel(idx) {
     player.wallJumpLock = 0;
     player.dead = false;
     player.deathTimer = 0;
-    player.trail = [];
 
-    // Build Solids
     solids = lvl.solids.map(s => ({
         x: s[0] * TILE,
         y: s[1] * TILE,
@@ -1406,7 +1459,6 @@ function loadLevel(idx) {
         isPlatform: s[3] <= 0.8
     }));
 
-    // Build Invisible Troll Blocks
     invisBlocks = lvl.invisBlocks.map(b => ({
         x: b[0] * TILE,
         y: b[1] * TILE,
@@ -1416,7 +1468,6 @@ function loadLevel(idx) {
         bumpY: 0
     }));
 
-    // Build Falling Floors
     fallingFloors = lvl.fallingFloors.map(f => ({
         x: f[0] * TILE,
         y: f[1] * TILE,
@@ -1428,7 +1479,6 @@ function loadLevel(idx) {
         vy: 0
     }));
 
-    // Build Spike Traps
     spikeTraps = lvl.spikeTraps.map(t => ({
         x: t.x * TILE,
         y: t.y * TILE,
@@ -1441,17 +1491,16 @@ function loadLevel(idx) {
         vy: 0
     }));
 
-    // Build Robotic Square Enemies
     enemies = lvl.enemies.map(e => ({
         x: e.x * TILE,
         y: e.y * TILE,
         w: 32,
         h: 32,
-        vx: e.speed || 2,
+        vx: e.speed || 1.8,
         vy: 0,
         minX: e.minX * TILE,
         maxX: e.maxX * TILE,
-        baseSpeed: e.speed || 2,
+        baseSpeed: e.speed || 1.8,
         trollSpeed: e.trollSpeed || null,
         trollJump: e.trollJump || false,
         jumped: false,
@@ -1459,7 +1508,6 @@ function loadLevel(idx) {
         eyeColor: e.trollSpeed ? '#ff0055' : (e.trollJump ? '#00f2fe' : '#ef4444')
     }));
 
-    // Build Fake & Real Goals
     fakeGoals = (lvl.fakeGoals || []).map(fg => ({
         x: fg[0] * TILE,
         y: fg[1] * TILE,
@@ -1479,21 +1527,20 @@ function loadLevel(idx) {
     floatingTexts = [];
     projectiles = [];
 
-    // Initialize Boss if Level 20 (Fitted for 800x600 4:3 Castle Arena)
+    // Initialize Boss if Level 20 (Stompable Vulnerable Boss!)
     if (lvl.isBossLevel) {
         boss = {
             x: 560,
-            y: 360,
+            y: 392,
             w: 108,
             h: 108,
-            vx: -2.4,
+            vx: -2.3,
             vy: 0,
             hp: 500,
             maxHp: 500,
-            state: 'patrol',
-            stateTimer: 90,
+            state: 'patrol', // 'patrol', 'charge_warn', 'charge', 'slam_jump', 'slam_down', 'vulnerable'
+            stateTimer: 100,
             flashTimer: 0,
-            clickCooldown: 0,
             facing: -1,
             shockwaves: []
         };
@@ -1502,7 +1549,12 @@ function loadLevel(idx) {
         boss = null;
     }
 
-    cameraX = Math.max(0, Math.min(lvl.width * TILE - canvas.width, player.x - canvas.width * 0.35));
+    if (gameState !== 'MENU') {
+        cameraX = Math.max(0, Math.min(lvl.width * TILE - canvas.width, player.x - canvas.width * 0.35));
+    } else {
+        cameraX = 0;
+        menuCamDir = 1;
+    }
 }
 
 function updateBossHUD() {
@@ -1513,9 +1565,9 @@ function updateBossHUD() {
 }
 
 // ============================================================================
-// PARTICLE & FLOATING TEXT EFFECTS
+// PARTICLE & FLOATING TEXT HELPERS
 // ============================================================================
-function spawnParticles(x, y, color, count = 12, speed = 5) {
+function spawnParticles(x, y, color, count = 10, speed = 4.5) {
     for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const spd = (Math.random() * 0.7 + 0.3) * speed;
@@ -1524,7 +1576,7 @@ function spawnParticles(x, y, color, count = 12, speed = 5) {
             y,
             vx: Math.cos(angle) * spd,
             vy: Math.sin(angle) * spd - 1,
-            size: Math.random() * 5 + 3,
+            size: Math.random() * 4 + 3,
             color,
             alpha: 1,
             decay: Math.random() * 0.025 + 0.02
@@ -1538,32 +1590,26 @@ function spawnFloatingText(x, y, text, color = '#fbbf24') {
         y,
         text,
         color,
-        vy: -1.8,
+        vy: -1.6,
         alpha: 1
     });
 }
 
 // ============================================================================
-// PLAYER DEATH & LEVEL CLEAR
+// PLAYER DEATH & LEVEL COMPLETION
 // ============================================================================
 function killPlayer(customReason) {
     if (player.dead) return;
     player.dead = true;
-    player.deathTimer = 65; // 65 fixed 60Hz ticks (~1.08s)
+    player.deathTimer = 60;
     deathCount++;
     deathCountEl.textContent = deathCount;
 
-    // Bump animation on HUD pill
-    deathPill.classList.remove('bump-anim');
-    void deathPill.offsetWidth;
-    deathPill.classList.add('bump-anim');
-
-    screenShake = 15;
+    screenShake = 12;
     sfx.play('death');
-    triggerAmbientPulse('239, 68, 68', 0.48);
 
-    spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#a855f7', 28, 7);
-    spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#f43f5e', 16, 5);
+    spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#a855f7', 22, 6);
+    spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#f43f5e', 12, 4.5);
 
     const msg = customReason || TROLL_MESSAGES[Math.floor(Math.random() * TROLL_MESSAGES.length)];
     trollMessageEl.textContent = msg;
@@ -1571,12 +1617,23 @@ function killPlayer(customReason) {
 }
 
 function completeLevel() {
+    if (gameState === 'VICTORY') return;
     sfx.play('win');
-    triggerAmbientPulse('16, 185, 129', 0.45);
-    spawnParticles(player.x + 15, player.y + 15, '#34d399', 32, 6);
+    spawnParticles(player.x + 15, player.y + 15, '#34d399', 26, 5.5);
+
     if (currentLevelIdx < LEVELS.length - 1) {
         loadLevel(currentLevelIdx + 1);
     } else {
+        // Freeze player controls & set VICTORY state so this only runs ONCE
+        gameState = 'VICTORY';
+        player.vx = 0;
+        player.vy = 0;
+        keys.left = false;
+        keys.right = false;
+        keys.up = false;
+        keys.jumpPressed = false;
+        keys.dashPressed = false;
+
         finalDeathsEl.textContent = deathCount;
         let rank = "Bóg Kwadratów 🏆";
         if (deathCount > 150) rank = "Niezniszczalny Masochista 💀";
@@ -1587,33 +1644,75 @@ function completeLevel() {
     }
 }
 
-// ============================================================================
-// AABB COLLISION HELPER
-// ============================================================================
 function rectOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
     return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 }
 
 // ============================================================================
-// FIXED 60HZ PHYSICS & LOGIC UPDATE STEP
+// FIXED 60HZ PHYSICS & CINEMATIC UPDATE STEP
 // ============================================================================
 function update() {
     tickCount++;
     const lvl = LEVELS[currentLevelIdx];
 
-    // Update Ambilight Glow
-    updateAmbilight(lvl.theme);
-
-    // Update Ambient Floating Motes
-    for (const m of bgMotes) {
-        m.x += m.vx;
-        m.y += m.vy;
-        if (m.y < -10) { m.y = 580; m.x = Math.random() * 800; }
-        if (m.x < -10) m.x = 810;
-        if (m.x > 810) m.x = -10;
+    // Update non-day ambient motes
+    if (lvl.theme !== 'day') {
+        for (const m of bgMotes) {
+            m.x += m.vx;
+            m.y += m.vy;
+            if (m.y < -10) { m.y = 580; m.x = Math.random() * 800; }
+            if (m.x < -10) m.x = 810;
+            if (m.x > 810) m.x = -10;
+        }
     }
 
-    // Update Screen Shake
+    // If in Main Menu: Run live Cinematic Camera Panning & Smooth Level Fade Cycling
+    if (gameState === 'MENU') {
+        const maxCamX = Math.max(0, lvl.width * TILE - canvas.width);
+        cameraX += menuCamDir * 1.1;
+        if (cameraX >= maxCamX) {
+            cameraX = maxCamX;
+            menuCamDir = -1;
+        } else if (cameraX <= 0) {
+            cameraX = 0;
+            menuCamDir = 1;
+        }
+
+        // Keep enemies patrolling in the cinematic background
+        for (const e of enemies) {
+            e.x += Math.sign(e.vx) * e.baseSpeed;
+            if (e.x <= e.minX) { e.x = e.minX; e.vx = Math.abs(e.vx); }
+            else if (e.x + e.w >= e.maxX) { e.x = e.maxX - e.w; e.vx = -Math.abs(e.vx); }
+        }
+
+        // Cycle showcase levels every ~6 seconds with smooth fade out / fade in
+        if (menuFadeState === 'NONE') {
+            menuCycleTimer++;
+            if (menuCycleTimer >= 360) {
+                menuFadeState = 'FADING_OUT';
+            }
+        } else if (menuFadeState === 'FADING_OUT') {
+            menuFadeAlpha = Math.min(1, menuFadeAlpha + 0.03);
+            if (menuFadeAlpha >= 1) {
+                menuShowcasePos = (menuShowcasePos + 1) % MENU_SHOWCASE_LEVELS.length;
+                loadLevel(MENU_SHOWCASE_LEVELS[menuShowcasePos], true);
+                menuFadeState = 'FADING_IN';
+            }
+        } else if (menuFadeState === 'FADING_IN') {
+            menuFadeAlpha = Math.max(0, menuFadeAlpha - 0.03);
+            if (menuFadeAlpha <= 0) {
+                menuFadeState = 'NONE';
+                menuCycleTimer = 0;
+            }
+        }
+        return;
+    }
+
+    // If Paused: Freeze physics
+    if (gameState === 'PAUSED') {
+        return;
+    }
+
     if (screenShake > 0) screenShake *= 0.85;
     if (screenShake < 0.4) screenShake = 0;
 
@@ -1635,10 +1734,9 @@ function update() {
         if (ft.alpha <= 0) floatingTexts.splice(i, 1);
     }
 
-    // Update Player Dash Trail Afterimages
-    for (let i = player.trail.length - 1; i >= 0; i--) {
-        player.trail[i].alpha -= 0.08;
-        if (player.trail[i].alpha <= 0) player.trail.splice(i, 1);
+    // If Victory screen is active, freeze player & world logic after updating particles
+    if (gameState === 'VICTORY') {
+        return;
     }
 
     // Handle Player Death State
@@ -1655,13 +1753,6 @@ function update() {
     if (player.dashCooldown > 0) player.dashCooldown--;
     const dashPct = Math.max(0, Math.min(100, ((36 - player.dashCooldown) / 36) * 100));
     dashBar.style.width = `${dashPct}%`;
-    if (player.dashCooldown === 0) {
-        dashStatusText.textContent = "GOTOWY";
-        dashStatusText.className = "text-[9px] font-extrabold text-emerald-400 mono-font";
-    } else {
-        dashStatusText.textContent = `${Math.ceil((player.dashCooldown / 60) * 10) / 10}s`;
-        dashStatusText.className = "text-[9px] font-extrabold text-cyan-300/70 mono-font";
-    }
 
     // Trigger Dash
     if (keys.dashPressed && player.dashCooldown <= 0 && player.dashTimer <= 0) {
@@ -1670,31 +1761,25 @@ function update() {
         player.dashCooldown = 36;
         const dir = keys.left ? -1 : (keys.right ? 1 : player.facing);
         player.facing = dir;
-        player.vx = dir * 13.2;
+        player.vx = dir * 13.0;
         player.vy = 0;
         sfx.play('dash');
-        triggerAmbientPulse('34, 211, 238', 0.28);
-        spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#22d3ee', 12, 4.5);
+        spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#22d3ee', 8, 4);
     }
     keys.dashPressed = false;
 
     // Horizontal Movement
     if (player.dashTimer > 0) {
         player.dashTimer--;
-        player.trail.push({
-            x: player.x,
-            y: player.y,
-            alpha: 0.65
-        });
         particles.push({
-            x: player.x + Math.random() * player.w,
-            y: player.y + Math.random() * player.h,
-            vx: -player.vx * 0.1,
-            vy: (Math.random() - 0.5),
-            size: 6,
+            x: player.x + player.w / 2,
+            y: player.y + player.h / 2,
+            vx: -player.vx * 0.08,
+            vy: (Math.random() - 0.5) * 0.5,
+            size: 5,
             color: '#22d3ee',
-            alpha: 0.75,
-            decay: 0.08
+            alpha: 0.65,
+            decay: 0.09
         });
     } else {
         if (player.wallJumpLock > 0) {
@@ -1713,12 +1798,10 @@ function update() {
                 if (Math.abs(player.vx) < 0.1) player.vx = 0;
             }
         }
-        // Gravity
         player.vy += 0.58;
         if (player.vy > 14) player.vy = 14;
     }
 
-    // Combine Solid Colliders
     const activeColliders = [...solids];
     for (const ib of invisBlocks) {
         if (ib.revealed) activeColliders.push(ib);
@@ -1730,15 +1813,9 @@ function update() {
 
     // Move Horizontally & Check X Collisions
     player.x += player.vx;
-    if (player.x < 0) {
-        player.x = 0;
-        player.vx = 0;
-    }
+    if (player.x < 0) { player.x = 0; player.vx = 0; }
     const maxWorldW = lvl.width * TILE;
-    if (player.x + player.w > maxWorldW) {
-        player.x = maxWorldW - player.w;
-        player.vx = 0;
-    }
+    if (player.x + player.w > maxWorldW) { player.x = maxWorldW - player.w; player.vx = 0; }
 
     player.wallDir = 0;
     for (const c of activeColliders) {
@@ -1755,7 +1832,6 @@ function update() {
         }
     }
 
-    // Forgiving Wall-Jump proximity check
     if (!player.onGround && player.wallDir === 0) {
         for (const c of solids) {
             if (c.isPlatform || c.h < TILE * 1.5) continue;
@@ -1768,18 +1844,6 @@ function update() {
     // Wall Slide friction
     if (!player.onGround && player.wallDir !== 0 && player.vy > 2.1 && ((player.wallDir === 1 && keys.right) || (player.wallDir === -1 && keys.left))) {
         player.vy = 2.1;
-        if (Math.random() < 0.45) {
-            particles.push({
-                x: player.wallDir === 1 ? player.x + player.w : player.x,
-                y: player.y + player.h - 4,
-                vx: -player.wallDir * 1.1,
-                vy: -0.6,
-                size: 4,
-                color: '#e9d5ff',
-                alpha: 0.8,
-                decay: 0.06
-            });
-        }
     }
 
     // Move Vertically & Check Y Collisions
@@ -1797,9 +1861,8 @@ function update() {
                 player.vy = 2.5;
                 player.dashTimer = 0;
                 sfx.play('troll');
-                triggerAmbientPulse('251, 191, 36', 0.32);
-                spawnParticles(ib.x + TILE / 2, ib.y + TILE, '#fbbf24', 12, 4);
-                spawnFloatingText(ib.x + 20, ib.y - 4, "BĘC! TROLL!", "#facc15");
+                spawnParticles(ib.x + TILE / 2, ib.y + TILE, '#fbbf24', 10, 4);
+                spawnFloatingText(ib.x + 20, ib.y - 4, "BĘC!", "#facc15");
             }
         }
     }
@@ -1815,9 +1878,8 @@ function update() {
 
                 if (c.triggered !== undefined && !c.triggered) {
                     c.triggered = true;
-                    c.timer = 7;
+                    c.timer = 9; // Slightly more forgiving rumble time
                     sfx.play('troll');
-                    triggerAmbientPulse('251, 146, 60', 0.25);
                 }
             } else if (player.vy < 0) {
                 player.y = c.y + c.h;
@@ -1833,7 +1895,7 @@ function update() {
             player.onGround = false;
             keys.jumpPressed = false;
             sfx.play('jump');
-            spawnParticles(player.x + player.w / 2, player.y + player.h, '#e2e8f0', 7, 2.5);
+            spawnParticles(player.x + player.w / 2, player.y + player.h, '#e2e8f0', 6, 2.5);
         } else if (player.wallDir !== 0) {
             player.vy = -11.8;
             player.vx = -player.wallDir * 7.8;
@@ -1842,12 +1904,12 @@ function update() {
             player.dashCooldown = 0;
             keys.jumpPressed = false;
             sfx.play('walljump');
-            spawnParticles(player.wallDir === 1 ? player.x + player.w : player.x, player.y + player.h / 2, '#c084fc', 12, 4);
+            spawnParticles(player.wallDir === 1 ? player.x + player.w : player.x, player.y + player.h / 2, '#c084fc', 10, 4);
         }
     }
     keys.jumpPressed = false;
 
-    // Pit Death Check (Below 600px 4:3 canvas)
+    // Pit Death Check
     if (player.y > canvas.height + 24) {
         killPlayer("Grawitacja zawsze wygrywa. Wpadłeś w przepaść!");
         return;
@@ -1859,7 +1921,7 @@ function update() {
             if (ff.timer > 0) {
                 ff.timer--;
             } else {
-                ff.vy += 0.75;
+                ff.vy += 0.72;
                 ff.y += ff.vy;
             }
         }
@@ -1872,7 +1934,7 @@ function update() {
             sfx.play('troll');
         }
         if (st.triggered && st.dir === 'down') {
-            st.vy += 0.75;
+            st.vy += 0.68;
             st.y += st.vy;
         }
         const spikeActive = st.dir === 'up' ? st.triggered : true;
@@ -1894,12 +1956,12 @@ function update() {
 
         let currentSpeed = e.baseSpeed;
         e.turboActive = false;
-        if (e.trollSpeed && distToPlayer < 170) {
+        if (e.trollSpeed && distToPlayer < 145) {
             currentSpeed = e.trollSpeed;
             e.turboActive = true;
         }
-        if (e.trollJump && !e.jumped && distToPlayer < 140 && player.y < e.y + 20) {
-            e.vy = -10.5;
+        if (e.trollJump && !e.jumped && distToPlayer < 115 && player.y < e.y + 20) {
+            e.vy = -9.2; // Fairer jump height so player can react
             e.jumped = true;
             sfx.play('jump');
         }
@@ -1925,8 +1987,8 @@ function update() {
             }
         }
 
-        if (rectOverlap(player.x + 3, player.y + 3, player.w - 6, player.h - 6, e.x + 3, e.y + 3, e.w - 6, e.h - 6)) {
-            killPlayer("Zostałeś zezłomowany przez Robo-Kwadrat z mechanicznym okiem!");
+        if (rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, e.x + 4, e.y + 4, e.w - 8, e.h - 8)) {
+            killPlayer("Zostałeś zezłomowany przez Robo-Kwadrat!");
             return;
         }
     }
@@ -1961,64 +2023,22 @@ function update() {
             continue;
         }
         if (rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, p.x - p.r, p.y - p.r, p.r * 2, p.r * 2)) {
-            killPlayer("Trafił Cię laserowy pocisk Mega-Robo Bossa!");
+            killPlayer("Trafił Cię plazmowy pocisk Mega-Robo Bossa!");
             return;
         }
     }
 
-    // Smooth Horizontal Camera Follow (for 800px 4:3 viewport)
+    // Smooth Horizontal Camera Follow
     const targetCamX = player.x - canvas.width * 0.36;
     const maxCamX = Math.max(0, lvl.width * TILE - canvas.width);
     cameraX += (Math.max(0, Math.min(maxCamX, targetCamX)) - cameraX) * 0.14;
 }
 
 // ============================================================================
-// LEVEL 20: MEGA-ROBO BOSS AI & MOUSE CLICK SHOOTING MECHANIC (800x600 Arena)
+// LEVEL 20: REDESIGNED BOSS FIGHT (JUMP ON BOSS HEAD WHEN VULNERABLE!)
 // ============================================================================
 function updateBoss() {
     if (boss.flashTimer > 0) boss.flashTimer--;
-    if (boss.clickCooldown > 0) boss.clickCooldown--;
-
-    // Check Mouse Click directly on Boss
-    if (mouse.clicked) {
-        mouse.clicked = false;
-        const worldMouseX = mouse.x + cameraX;
-        const worldMouseY = mouse.y;
-
-        spawnParticles(worldMouseX, worldMouseY, '#38bdf8', 6, 3.5);
-
-        if (rectOverlap(worldMouseX - 10, worldMouseY - 10, 20, 20, boss.x - 12, boss.y - 12, boss.w + 24, boss.h + 24)) {
-            if (boss.clickCooldown <= 0) {
-                const isCrit = Math.random() < 0.22;
-                const dmg = isCrit ? 15 : 10;
-                boss.hp -= dmg;
-                boss.flashTimer = 5;
-                boss.clickCooldown = 4;
-                screenShake = 5;
-                sfx.play('hitboss');
-                triggerAmbientPulse(isCrit ? '244, 63, 94' : '56, 189, 248', 0.28);
-                updateBossHUD();
-
-                spawnParticles(worldMouseX, worldMouseY, '#fbbf24', 14, 6);
-                spawnFloatingText(worldMouseX, worldMouseY - 12, isCrit ? `KRYTYK -${dmg}!` : `-${dmg}`, isCrit ? '#f43f5e' : '#38bdf8');
-
-                if (boss.hp <= 0) {
-                    sfx.play('win');
-                    screenShake = 26;
-                    triggerAmbientPulse('16, 185, 129', 0.55);
-                    spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#f97316', 65, 10);
-                    spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#38bdf8', 45, 8);
-                    spawnFloatingText(boss.x + 54, boss.y + 30, "MEGA-ROBO ZNISZCZONY!", "#4ade80");
-                    realGoal = { x: 380, y: 428, w: 42, h: 72 };
-                    projectiles = [];
-                    enemies = [];
-                    bossHud.classList.add('hidden');
-                    boss = null;
-                    return;
-                }
-            }
-        }
-    }
 
     boss.facing = (player.x < boss.x + boss.w / 2) ? -1 : 1;
     boss.stateTimer--;
@@ -2032,89 +2052,83 @@ function updateBoss() {
         if (boss.x <= minArenaX) { boss.x = minArenaX; boss.vx = Math.abs(boss.vx); }
         if (boss.x + boss.w >= maxArenaX) { boss.x = maxArenaX - boss.w; boss.vx = -Math.abs(boss.vx); }
 
-        if (boss.stateTimer % 48 === 0) {
+        // Fire slow, dodgeable plasma orb every 65 ticks
+        if (boss.stateTimer % 65 === 0) {
             const eyeX = boss.x + boss.w / 2 + boss.facing * 20;
             const eyeY = boss.y + 42;
             const angle = Math.atan2((player.y + 15) - eyeY, (player.x + 15) - eyeX);
             projectiles.push({
                 x: eyeX,
                 y: eyeY,
-                vx: Math.cos(angle) * 5.4,
-                vy: Math.sin(angle) * 5.4,
-                r: 9
+                vx: Math.cos(angle) * 4.4,
+                vy: Math.sin(angle) * 4.4,
+                r: 8
             });
             sfx.play('laser');
         }
 
         if (boss.stateTimer <= 0) {
-            const rand = Math.random();
-            if (rand < 0.45) {
+            if (Math.random() < 0.5) {
                 boss.state = 'charge_warn';
-                boss.stateTimer = 38;
-                spawnFloatingText(boss.x + 54, boss.y - 15, "⚠️ SZARŻA!", "#ef4444");
-            } else if (rand < 0.85) {
+                boss.stateTimer = 42;
+            } else {
                 boss.state = 'slam_jump';
-                boss.vy = -14.2;
+                boss.vy = -13.8;
                 boss.stateTimer = 60;
                 sfx.play('jump');
-                spawnFloatingText(boss.x + 54, boss.y - 15, "⚠️ WSTRZĄS!", "#f97316");
-            } else {
-                const eyeX = boss.x + boss.w / 2;
-                const eyeY = boss.y + 42;
-                for (let a = -0.35; a <= 0.35; a += 0.35) {
-                    const baseAngle = Math.atan2((player.y + 15) - eyeY, (player.x + 15) - eyeX) + a;
-                    projectiles.push({
-                        x: eyeX,
-                        y: eyeY,
-                        vx: Math.cos(baseAngle) * 6.0,
-                        vy: Math.sin(baseAngle) * 6.0,
-                        r: 8
-                    });
-                }
-                sfx.play('laser');
-                boss.stateTimer = 110;
             }
         }
     } else if (boss.state === 'charge_warn') {
         if (boss.stateTimer <= 0) {
             boss.state = 'charge';
-            boss.vx = boss.facing * 10.8;
-            boss.stateTimer = 50;
+            boss.vx = boss.facing * 9.5;
+            boss.stateTimer = 65;
             sfx.play('dash');
-            triggerAmbientPulse('239, 68, 68', 0.35);
         }
     } else if (boss.state === 'charge') {
         boss.x += boss.vx;
         spawnParticles(boss.x + boss.w / 2, boss.y + boss.h - 10, '#ef4444', 2, 3);
+
+        // When Boss crashes into either castle wall, it gets STUNNED / VULNERABLE!
         if (boss.x <= minArenaX || boss.x + boss.w >= maxArenaX || boss.stateTimer <= 0) {
             boss.x = Math.max(minArenaX, Math.min(maxArenaX - boss.w, boss.x));
-            screenShake = 10;
-            boss.vx = (boss.x < 400 ? 1 : -1) * 2.8;
-            boss.state = 'patrol';
-            boss.stateTimer = 110;
+            screenShake = 12;
+            sfx.play('troll');
+            boss.state = 'vulnerable';
+            boss.stateTimer = 210; // 3.5 seconds to jump on its head!
         }
     } else if (boss.state === 'slam_jump') {
-        boss.x += ((player.x - boss.w / 2) - boss.x) * 0.045;
+        boss.x += ((player.x - boss.w / 2) - boss.x) * 0.04;
         boss.x = Math.max(minArenaX, Math.min(maxArenaX - boss.w, boss.x));
         boss.vy += 0.55;
         boss.y += boss.vy;
         if (boss.vy >= 0) {
             boss.state = 'slam_down';
-            boss.vy = 15;
+            boss.vy = 14;
         }
     } else if (boss.state === 'slam_down') {
         boss.y += boss.vy;
         if (boss.y >= floorY) {
             boss.y = floorY;
             boss.vy = 0;
-            screenShake = 16;
+            screenShake = 15;
             sfx.play('death');
-            triggerAmbientPulse('249, 115, 22', 0.4);
-            boss.shockwaves.push({ x: boss.x, y: 12.5 * TILE - 22, vx: -7.2, w: 24, h: 22 });
-            boss.shockwaves.push({ x: boss.x + boss.w - 24, y: 12.5 * TILE - 22, vx: 7.2, w: 24, h: 22 });
+            boss.shockwaves.push({ x: boss.x, y: 12.5 * TILE - 20, vx: -6.2, w: 22, h: 20 });
+            boss.shockwaves.push({ x: boss.x + boss.w - 22, y: 12.5 * TILE - 20, vx: 6.2, w: 22, h: 20 });
+
+            // After slamming the floor, Boss overheats and becomes VULNERABLE!
+            boss.state = 'vulnerable';
+            boss.stateTimer = 210; // 3.5 seconds vulnerable window
+        }
+    } else if (boss.state === 'vulnerable') {
+        // Sparks fly while stunned
+        if (tickCount % 8 === 0) {
+            spawnParticles(boss.x + Math.random() * boss.w, boss.y + 10, '#22d3ee', 3, 2.5);
+        }
+        if (boss.stateTimer <= 0) {
             boss.state = 'patrol';
-            boss.vx = (Math.random() < 0.5 ? 1 : -1) * 3.0;
-            boss.stateTimer = 115;
+            boss.vx = (boss.x < 400 ? 1 : -1) * 2.6;
+            boss.stateTimer = 100;
         }
     }
 
@@ -2122,26 +2136,65 @@ function updateBoss() {
     for (let i = boss.shockwaves.length - 1; i >= 0; i--) {
         const sw = boss.shockwaves[i];
         sw.x += sw.vx;
-        spawnParticles(sw.x + sw.w / 2, sw.y + sw.h, '#f97316', 1, 2);
         if (sw.x < 40 || sw.x > 760) {
             boss.shockwaves.splice(i, 1);
             continue;
         }
         if (rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, sw.x, sw.y, sw.w, sw.h)) {
-            killPlayer("Zmiotła Cię fala uderzeniowa Mega-Robo Bossa! Skacz lub wejdź na platformę!");
+            killPlayer("Zmiotła Cię fala uderzeniowa! Przeskocz ją lub wejdź na platformę!");
             return;
         }
     }
 
-    // Check Direct Contact with Boss Body
-    if (rectOverlap(player.x + 5, player.y + 5, player.w - 10, player.h - 10, boss.x + 8, boss.y + 8, boss.w - 16, boss.h - 16)) {
-        killPlayer("Zostałeś zmiażdżony przez pancerz Mega-Robo Bossa!");
-        return;
+    // Check Player vs Boss Collision (Stomp on Top vs Side Hit)
+    if (rectOverlap(player.x + 2, player.y + 2, player.w - 4, player.h - 4, boss.x + 4, boss.y + 4, boss.w - 8, boss.h - 8)) {
+        const playerBottom = player.y + player.h;
+        const bossTop = boss.y + 34;
+
+        // If player is falling onto the top of the Boss during 'vulnerable' or 'patrol'
+        if (player.vy > 0 && playerBottom <= bossTop + 18 && (boss.state === 'vulnerable' || boss.state === 'patrol')) {
+            // SUCCESSFUL HEAD STOMP!
+            player.y = boss.y - player.h - 2;
+            player.vy = -12.8; // High bounce off the boss
+            player.dashCooldown = 0;
+
+            const dmg = 100; // 5 stomps to defeat 500 HP Boss!
+            boss.hp -= dmg;
+            boss.flashTimer = 12;
+            screenShake = 14;
+            sfx.play('stomp');
+            updateBossHUD();
+
+            spawnParticles(player.x + player.w / 2, boss.y, '#22d3ee', 22, 6);
+            spawnParticles(player.x + player.w / 2, boss.y, '#facc15', 14, 5);
+
+            if (boss.hp <= 0) {
+                // BOSS DEFEATED!
+                sfx.play('win');
+                screenShake = 26;
+                spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#f97316', 60, 9);
+                spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#38bdf8', 40, 7);
+                realGoal = { x: 380, y: 428, w: 42, h: 72 };
+                projectiles = [];
+                enemies = [];
+                bossHud.classList.add('hidden');
+                boss = null;
+                return;
+            } else {
+                // Boss recovers and starts patrolling faster
+                boss.state = 'patrol';
+                boss.vx = (player.x < boss.x + boss.w / 2 ? 1 : -1) * 3.0;
+                boss.stateTimer = 85;
+            }
+        } else {
+            killPlayer("Zostałeś zmiażdżony przez pancerz Mega-Robo Bossa!");
+            return;
+        }
     }
 }
 
 // ============================================================================
-// ENHANCED RENDERING ENGINE (800x600 4:3 CANVAS)
+// CLEAN RETRO-MODERN RENDERING ENGINE (800x600 4:3 CANVAS)
 // ============================================================================
 function draw() {
     const lvl = LEVELS[currentLevelIdx];
@@ -2153,7 +2206,7 @@ function draw() {
         ctx.translate(sx, sy);
     }
 
-    // 1. Draw Rich Multi-Layer Parallax Background
+    // 1. Draw Background Environment (Clean Daytime Sky without particles)
     drawEnvironment(lvl.theme);
 
     ctx.save();
@@ -2168,58 +2221,35 @@ function draw() {
     for (const ff of fallingFloors) {
         const shakeX = (ff.triggered && ff.timer > 0) ? (Math.random() - 0.5) * 6 : 0;
         drawSolidBlock(ff.x + shakeX, ff.y, ff.w, ff.h, lvl.theme, true, true);
-        if (showHints) {
-            ctx.strokeStyle = 'rgba(251, 191, 36, 0.8)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(ff.x + 2, ff.y + 2, ff.w - 4, ff.h - 4);
-        }
     }
 
     // 4. Draw Invisible Troll Blocks
     for (const ib of invisBlocks) {
         if (ib.revealed) {
             const by = ib.y + ib.bumpY;
-            const grad = ctx.createLinearGradient(ib.x, by, ib.x, by + ib.h);
-            grad.addColorStop(0, '#fde047');
-            grad.addColorStop(1, '#d97706');
-            ctx.fillStyle = grad;
+            ctx.fillStyle = '#f59e0b';
             ctx.fillRect(ib.x, by, ib.w, ib.h);
-
             ctx.strokeStyle = '#78350f';
             ctx.lineWidth = 3;
             ctx.strokeRect(ib.x + 1.5, by + 1.5, ib.w - 3, ib.h - 3);
-
-            // Corner rivets
-            ctx.fillStyle = '#78350f';
-            ctx.fillRect(ib.x + 4, by + 4, 3, 3);
-            ctx.fillRect(ib.x + ib.w - 7, by + 4, 3, 3);
-            ctx.fillRect(ib.x + 4, by + ib.h - 7, 3, 3);
-            ctx.fillRect(ib.x + ib.w - 7, by + ib.h - 7, 3, 3);
 
             ctx.fillStyle = '#451a03';
             ctx.font = 'bold 18px Fredoka';
             ctx.textAlign = 'center';
             ctx.fillText('>:)', ib.x + ib.w / 2, by + 26);
-        } else if (showHints) {
-            ctx.strokeStyle = 'rgba(250, 204, 21, 0.45)';
-            ctx.setLineDash([4, 4]);
-            ctx.strokeRect(ib.x + 2, ib.y + 2, ib.w - 4, ib.h - 4);
-            ctx.setLineDash([]);
         }
     }
 
     // 5. Draw Spike Traps
     for (const st of spikeTraps) {
-        if (st.dir === 'down' || st.triggered || showHints) {
-            ctx.globalAlpha = (!st.triggered && st.dir === 'up' && showHints) ? 0.35 : 1;
+        if (st.dir === 'down' || st.triggered) {
             drawSpikes(st.x, st.y, st.w, st.h, st.dir);
-            ctx.globalAlpha = 1;
         }
     }
 
     // 6. Draw Fake & Real Portals
     for (const fg of fakeGoals) {
-        drawGoalPortal(fg.x, fg.y, fg.w, fg.h, showHints ? '#f43f5e' : '#a855f7', showHints ? 'FAŁSZ!' : 'META');
+        drawGoalPortal(fg.x, fg.y, fg.w, fg.h, '#a855f7', 'META');
     }
     if (realGoal) {
         drawGoalPortal(realGoal.x, realGoal.y, realGoal.w, realGoal.h, '#10b981', 'META');
@@ -2237,9 +2267,6 @@ function draw() {
 
     // 9. Draw Boss Projectiles
     for (const p of projectiles) {
-        ctx.save();
-        ctx.shadowColor = '#f43f5e';
-        ctx.shadowBlur = 12;
         ctx.fillStyle = '#f43f5e';
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -2248,15 +2275,10 @@ function draw() {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r * 0.48, 0, Math.PI * 2);
         ctx.fill();
-        ctx.restore();
     }
 
-    // 10. Draw Player Dash Trail & Player
-    if (!player.dead) {
-        for (const tr of player.trail) {
-            ctx.fillStyle = `rgba(34, 211, 238, ${tr.alpha * 0.45})`;
-            ctx.fillRect(tr.x, tr.y, player.w, player.h);
-        }
+    // 10. Draw Crisp Player (No Glow) when playing
+    if (!player.dead && gameState !== 'MENU') {
         drawPlayer();
     }
 
@@ -2270,7 +2292,7 @@ function draw() {
 
     for (const ft of floatingTexts) {
         ctx.globalAlpha = Math.max(0, ft.alpha);
-        ctx.font = '800 16px Fredoka';
+        ctx.font = '800 15px Fredoka';
         ctx.textAlign = 'center';
         ctx.fillStyle = '#000';
         ctx.fillText(ft.text, ft.x + 1.5, ft.y + 1.5);
@@ -2281,16 +2303,16 @@ function draw() {
 
     ctx.restore();
 
-    // 12. Subtle Inner Vignette & Crosshair on Level 20
-    if (lvl.isBossLevel && boss) {
-        drawCrosshair(mouse.x, mouse.y);
+    // Smooth Cinematic Fade Overlay when cycling levels in Main Menu
+    if (gameState === 'MENU' && menuFadeAlpha > 0) {
+        ctx.fillStyle = `rgba(6, 8, 17, ${menuFadeAlpha})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
     ctx.restore();
 }
 
 function drawEnvironment(theme) {
-    // Sky Gradient
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     if (theme === 'day') {
         grad.addColorStop(0, '#0284c7');
@@ -2312,69 +2334,35 @@ function drawEnvironment(theme) {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Sun / Blood Moon with Halo
-    if (theme === 'day') {
-        const sunGlow = ctx.createRadialGradient(660, 95, 10, 660, 95, 95);
-        sunGlow.addColorStop(0, 'rgba(254, 240, 138, 0.95)');
-        sunGlow.addColorStop(0.4, 'rgba(253, 224, 71, 0.35)');
-        sunGlow.addColorStop(1, 'rgba(253, 224, 71, 0)');
-        ctx.fillStyle = sunGlow;
+    // Moon in Forest / Dark Forest
+    if (theme === 'forest' || theme === 'darkforest') {
+        ctx.fillStyle = theme === 'darkforest' ? '#ef4444' : '#e0e7ff';
         ctx.beginPath();
-        ctx.arc(660, 95, 95, 0, Math.PI * 2);
-        ctx.fill();
-    } else if (theme === 'forest' || theme === 'darkforest') {
-        const isBlood = theme === 'darkforest';
-        const moonGlow = ctx.createRadialGradient(650, 105, 15, 650, 105, 110);
-        moonGlow.addColorStop(0, isBlood ? 'rgba(239, 68, 68, 0.65)' : 'rgba(199, 210, 254, 0.45)');
-        moonGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = moonGlow;
-        ctx.beginPath();
-        ctx.arc(650, 105, 110, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = isBlood ? '#ef4444' : '#e0e7ff';
-        ctx.beginPath();
-        ctx.arc(650, 105, 42, 0, Math.PI * 2);
+        ctx.arc(650, 100, 40, 0, Math.PI * 2);
         ctx.fill();
     }
 
     if (theme === 'castle') {
-        // Castle Stone Pillars & Flickering Torches
-        const flicker = Math.sin(tickCount * 0.2) * 6;
         for (let x = 70; x < 800; x += 170) {
             ctx.fillStyle = '#0f1420';
             ctx.fillRect(x, 0, 52, 600);
             ctx.strokeStyle = '#1e293b';
             ctx.lineWidth = 2;
             ctx.strokeRect(x, 0, 52, 600);
-
-            // Torch bracket
-            ctx.fillStyle = '#475569';
-            ctx.fillRect(x + 20, 215, 12, 22);
-
-            // Torch Glow
-            const glow = ctx.createRadialGradient(x + 26, 208, 4, x + 26, 208, 72 + flicker);
-            glow.addColorStop(0, 'rgba(251, 191, 36, 0.75)');
-            glow.addColorStop(0.45, 'rgba(249, 115, 22, 0.32)');
-            glow.addColorStop(1, 'rgba(249, 115, 22, 0)');
-            ctx.fillStyle = glow;
-            ctx.beginPath();
-            ctx.arc(x + 26, 208, 72 + flicker, 0, Math.PI * 2);
-            ctx.fill();
         }
     } else {
         // Parallax Distant Mountain Peaks
         const mountOffset = -(cameraX * 0.15) % 400;
-        ctx.fillStyle = theme === 'day' ? 'rgba(56, 189, 248, 0.45)' : (theme === 'forest' ? '#1e1b4b' : '#180926');
+        ctx.fillStyle = theme === 'day' ? 'rgba(56, 189, 248, 0.42)' : (theme === 'forest' ? '#1e1b4b' : '#180926');
         for (let mx = mountOffset - 200; mx < 1000; mx += 400) {
             ctx.beginPath();
             ctx.moveTo(mx, 600);
-            ctx.lineTo(mx + 200, 220);
+            ctx.lineTo(mx + 200, 230);
             ctx.lineTo(mx + 400, 600);
             ctx.fill();
         }
 
-        // Parallax Troll Clouds (with cheeky Cat Mario eyes)
+        // Parallax Troll Clouds
         const cloudOffset = -(cameraX * 0.22) % 320;
         for (let cx = cloudOffset - 100; cx < 960; cx += 320) {
             ctx.fillStyle = theme === 'day' ? 'rgba(255,255,255,0.9)' : 'rgba(148, 163, 184, 0.22)';
@@ -2410,73 +2398,49 @@ function drawEnvironment(theme) {
         }
     }
 
-    // Draw Ambient Floating Motes (Pollen / Fireflies / Blood Embers)
-    for (const m of bgMotes) {
-        const pulse = 0.45 + Math.sin(tickCount * 0.06 + m.phase) * 0.35;
-        ctx.globalAlpha = pulse;
-        ctx.fillStyle = theme === 'day' ? '#fef9c3' : (theme === 'forest' ? '#a5f3fc' : '#fca5a5');
-        ctx.beginPath();
-        ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
-        ctx.fill();
+    // Subtle Motes ONLY in Forest / DarkForest / Castle (No particles in Daytime!)
+    if (theme !== 'day') {
+        for (const m of bgMotes) {
+            const pulse = 0.4 + Math.sin(tickCount * 0.06 + m.phase) * 0.3;
+            ctx.globalAlpha = pulse;
+            ctx.fillStyle = theme === 'forest' ? '#a5f3fc' : '#fca5a5';
+            ctx.beginPath();
+            ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
     }
-    ctx.globalAlpha = 1;
 }
 
 function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling) {
     if (theme === 'castle') {
-        const grad = ctx.createLinearGradient(x, y, x, y + h);
-        grad.addColorStop(0, isPlatform ? '#475569' : '#1e293b');
-        grad.addColorStop(1, '#0f172a');
-        ctx.fillStyle = grad;
+        ctx.fillStyle = isPlatform ? '#475569' : '#1e293b';
         ctx.fillRect(x, y, w, h);
-
-        // Top highlight bevel
         ctx.fillStyle = isPlatform ? '#94a3b8' : '#334155';
         ctx.fillRect(x, y, w, 4);
-
         ctx.strokeStyle = '#475569';
         ctx.lineWidth = 2;
         ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
         return;
     }
 
-    // Rich Earth / Wood Gradient Body
-    const bodyGrad = ctx.createLinearGradient(x, y, x, y + h);
-    if (theme === 'day') {
-        bodyGrad.addColorStop(0, '#92400e');
-        bodyGrad.addColorStop(1, '#451a03');
-    } else if (theme === 'forest') {
-        bodyGrad.addColorStop(0, '#451a03');
-        bodyGrad.addColorStop(1, '#1c0a00');
-    } else {
-        bodyGrad.addColorStop(0, '#27272a');
-        bodyGrad.addColorStop(1, '#09090b');
-    }
-    ctx.fillStyle = bodyGrad;
+    ctx.fillStyle = theme === 'day' ? '#854d0e' : (theme === 'forest' ? '#451a03' : '#27272a');
     ctx.fillRect(x, y, w, h);
 
-    // Lush Grass Top Cap with Overhang
-    const grassH = Math.min(13, h);
+    const grassH = Math.min(12, h);
     ctx.fillStyle = theme === 'day' ? '#22c55e' : (theme === 'forest' ? '#10b981' : '#dc2626');
     ctx.fillRect(x, y, w, grassH);
 
-    // Top bright highlight strip
-    ctx.fillStyle = theme === 'day' ? '#86efac' : (theme === 'forest' ? '#6ee7b7' : '#f87171');
-    ctx.fillRect(x, y, w, 3);
-
-    // Subtle warning cracks on falling floors
     if (isFalling) {
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(x + w * 0.3, y + grassH);
         ctx.lineTo(x + w * 0.35, y + h * 0.65);
-        ctx.moveTo(x + w * 0.7, y + grassH);
-        ctx.lineTo(x + w * 0.65, y + h * 0.75);
         ctx.stroke();
     }
 
-    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+    ctx.strokeStyle = 'rgba(0,0,0,0.38)';
     ctx.lineWidth = 2;
     ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
 }
@@ -2484,16 +2448,12 @@ function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling) {
 function drawSpikes(x, y, w, h, dir) {
     const count = Math.max(2, Math.floor(w / 14));
     const sw = w / count;
+    ctx.fillStyle = '#e2e8f0';
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 1.5;
 
     for (let i = 0; i < count; i++) {
         const sx = x + i * sw;
-        const grad = ctx.createLinearGradient(sx, y, sx + sw, y + h);
-        grad.addColorStop(0, '#f8fafc');
-        grad.addColorStop(1, '#64748b');
-        ctx.fillStyle = grad;
-        ctx.strokeStyle = '#1e293b';
-        ctx.lineWidth = 1.5;
-
         ctx.beginPath();
         if (dir === 'up') {
             ctx.moveTo(sx, y + h);
@@ -2507,49 +2467,19 @@ function drawSpikes(x, y, w, h, dir) {
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-
-        // Crimson tip accent
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath();
-        if (dir === 'up') {
-            ctx.moveTo(sx + sw * 0.35, y + 8);
-            ctx.lineTo(sx + sw / 2, y);
-            ctx.lineTo(sx + sw * 0.65, y + 8);
-        } else {
-            ctx.moveTo(sx + sw * 0.35, y + h - 8);
-            ctx.lineTo(sx + sw / 2, y + h);
-            ctx.lineTo(sx + sw * 0.65, y + h - 8);
-        }
-        ctx.fill();
     }
 }
 
 function drawGoalPortal(x, y, w, h, color, label) {
     ctx.save();
-    const pulse = Math.sin(tickCount * 0.08) * 4;
-
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 18;
-
-    // Outer Energy Halo
     ctx.fillStyle = color;
-    ctx.globalAlpha = 0.25 + Math.sin(tickCount * 0.08) * 0.1;
-    ctx.fillRect(x - 5, y - 5, w + 10, h + 5);
-
-    // Inner Vortex Core
-    ctx.globalAlpha = 0.55;
-    ctx.fillRect(x + 4, y + 4, w - 8, h - 4);
+    ctx.globalAlpha = 0.28 + Math.sin(tickCount * 0.08) * 0.1;
+    ctx.fillRect(x - 4, y - 4, w + 8, h + 4);
     ctx.globalAlpha = 1;
 
-    // Portal Frame
     ctx.strokeStyle = color;
     ctx.lineWidth = 4;
     ctx.strokeRect(x, y, w, h);
-
-    // Inner bright energy line
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(x + 5, y + 5 + pulse * 0.3, w - 10, h - 10);
 
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 11px JetBrains Mono';
@@ -2559,7 +2489,7 @@ function drawGoalPortal(x, y, w, h, color, label) {
 }
 
 // ============================================================================
-// DRAW PLAYER (PURPLE SQUARE WITH 2 EXPRESSIVE EYES)
+// DRAW PLAYER (CLEAN RETRO-MODERN PURPLE SQUARE WITH 2 EYES - NO GLOW)
 // ============================================================================
 function drawPlayer() {
     ctx.save();
@@ -2567,26 +2497,14 @@ function drawPlayer() {
     const cy = player.y + player.h / 2;
     ctx.translate(cx, cy);
 
-    const stretchX = player.dashTimer > 0 ? 1.24 : (1 - Math.abs(player.vy) * 0.012);
-    const stretchY = player.dashTimer > 0 ? 0.80 : (1 + Math.abs(player.vy) * 0.012);
+    const stretchX = player.dashTimer > 0 ? 1.22 : (1 - Math.abs(player.vy) * 0.012);
+    const stretchY = player.dashTimer > 0 ? 0.82 : (1 + Math.abs(player.vy) * 0.012);
     ctx.scale(stretchX, stretchY);
 
-    if (player.dashTimer > 0) {
-        ctx.shadowColor = '#22d3ee';
-        ctx.shadowBlur = 18;
-    } else {
-        ctx.shadowColor = '#9333ea';
-        ctx.shadowBlur = 10;
-    }
-
-    // Gradient Purple Square Body
-    const bodyGrad = ctx.createLinearGradient(-player.w / 2, -player.h / 2, player.w / 2, player.h / 2);
-    bodyGrad.addColorStop(0, '#a855f7');
-    bodyGrad.addColorStop(1, '#6b21a8');
-    ctx.fillStyle = bodyGrad;
+    // Crisp Purple Square Body (Zero shadowBlur!)
+    ctx.fillStyle = '#9333ea';
     ctx.fillRect(-player.w / 2, -player.h / 2, player.w, player.h);
 
-    // Glossy Bevel Highlight
     ctx.strokeStyle = player.dashTimer > 0 ? '#67e8f9' : '#e9d5ff';
     ctx.lineWidth = 2.5;
     ctx.strokeRect(-player.w / 2 + 1, -player.h / 2 + 1, player.w - 2, player.h - 2);
@@ -2600,7 +2518,6 @@ function drawPlayer() {
     ctx.fillRect(-10 + lookX * 0.5, -6 + lookY * 0.4, 7, eyeH);
     ctx.fillRect(2 + lookX * 0.5, -6 + lookY * 0.4, 7, eyeH);
 
-    // Pupils
     ctx.fillStyle = '#090d16';
     ctx.fillRect(-8 + lookX, -4 + lookY, 3.5, Math.min(4, eyeH - 1));
     ctx.fillRect(4 + lookX, -4 + lookY, 3.5, Math.min(4, eyeH - 1));
@@ -2609,23 +2526,12 @@ function drawPlayer() {
 }
 
 // ============================================================================
-// DRAW ROBOTIC ENEMY SQUARE (WITH MECHANICAL VISOR & THRUSTERS)
+// DRAW ROBOTIC ENEMY SQUARE
 // ============================================================================
 function drawRoboEnemy(e) {
     ctx.save();
     ctx.translate(e.x + e.w / 2, e.y + e.h / 2);
 
-    // Thruster flame when troll-jumping or turbo-charging
-    if (e.jumped || e.turboActive) {
-        ctx.fillStyle = '#f97316';
-        ctx.beginPath();
-        ctx.moveTo(-8, e.h / 2);
-        ctx.lineTo(0, e.h / 2 + 10 + Math.random() * 5);
-        ctx.lineTo(8, e.h / 2);
-        ctx.fill();
-    }
-
-    // Antenna on top
     ctx.strokeStyle = '#94a3b8';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -2635,25 +2541,19 @@ function drawRoboEnemy(e) {
 
     ctx.fillStyle = e.eyeColor;
     ctx.beginPath();
-    ctx.arc(0, -e.h / 2 - 8, 3.2, 0, Math.PI * 2);
+    ctx.arc(0, -e.h / 2 - 8, 3, 0, Math.PI * 2);
     ctx.fill();
 
-    // Metallic Robot Square Body
-    const rGrad = ctx.createLinearGradient(-e.w / 2, -e.h / 2, e.w / 2, e.h / 2);
-    rGrad.addColorStop(0, '#475569');
-    rGrad.addColorStop(1, '#1e293b');
-    ctx.fillStyle = rGrad;
+    ctx.fillStyle = '#334155';
     ctx.fillRect(-e.w / 2, -e.h / 2, e.w, e.h);
 
     ctx.strokeStyle = e.turboActive ? '#f43f5e' : '#94a3b8';
     ctx.lineWidth = 2;
     ctx.strokeRect(-e.w / 2 + 1, -e.h / 2 + 1, e.w - 2, e.h - 2);
 
-    // Dark Visor Slot
     ctx.fillStyle = '#090d16';
     ctx.fillRect(-e.w / 2 + 3, -6, e.w - 6, 10);
 
-    // Two Glowing Mechanical Eyes inside Visor
     const dir = Math.sign(e.vx) || 1;
     ctx.fillStyle = e.eyeColor;
     ctx.fillRect(-9 + dir * 2, -4, 6, 6);
@@ -2667,7 +2567,7 @@ function drawRoboEnemy(e) {
 }
 
 // ============================================================================
-// DRAW MEGA-ROBO BOSS (LEVEL 20)
+// DRAW MEGA-ROBO BOSS (WITH CLEAR VULNERABLE STOMP INDICATOR)
 // ============================================================================
 function drawBoss() {
     ctx.save();
@@ -2682,22 +2582,30 @@ function drawBoss() {
     const shakeX = boss.state === 'charge_warn' ? (Math.random() - 0.5) * 10 : 0;
     ctx.translate(boss.x + boss.w / 2 + shakeX, boss.y + boss.h / 2);
 
+    const isVulnerable = boss.state === 'vulnerable';
+
     // Boss Main Armor Body
-    ctx.fillStyle = boss.flashTimer > 0 ? '#ffffff' : '#1e293b';
+    ctx.fillStyle = boss.flashTimer > 0 ? '#ffffff' : (isVulnerable ? '#164e63' : '#1e293b');
     ctx.fillRect(-boss.w / 2, -boss.h / 2, boss.w, boss.h);
 
-    // Heavy Steel Frame
-    ctx.strokeStyle = boss.state === 'charge_warn' ? '#ef4444' : '#94a3b8';
+    // Heavy Frame Border
+    ctx.strokeStyle = isVulnerable ? '#22d3ee' : (boss.state === 'charge_warn' ? '#ef4444' : '#94a3b8');
     ctx.lineWidth = 5;
     ctx.strokeRect(-boss.w / 2 + 2, -boss.h / 2 + 2, boss.w - 4, boss.h - 4);
+
+    // Highlighted Target Pad on Top of Boss Head when Vulnerable
+    if (isVulnerable) {
+        ctx.fillStyle = (Math.floor(tickCount / 6) % 2 === 0) ? '#22d3ee' : '#facc15';
+        ctx.fillRect(-boss.w / 2 + 10, -boss.h / 2 - 4, boss.w - 20, 8);
+    }
 
     // Dual Giant Mechanical Eyes
     const lookX = boss.facing * 6;
     ctx.fillStyle = '#090d16';
     ctx.fillRect(-boss.w / 2 + 12, -24, boss.w - 24, 30);
 
-    const eyeGlow = boss.hp < 200 ? '#ef4444' : '#f97316';
-    ctx.fillStyle = boss.flashTimer > 0 ? '#38bdf8' : eyeGlow;
+    const eyeGlow = isVulnerable ? '#22d3ee' : (boss.hp < 200 ? '#ef4444' : '#f97316');
+    ctx.fillStyle = boss.flashTimer > 0 ? '#ffffff' : eyeGlow;
     ctx.fillRect(-34 + lookX, -18, 22, 18);
     ctx.fillRect(12 + lookX, -18, 22, 18);
 
@@ -2705,7 +2613,7 @@ function drawBoss() {
     ctx.fillRect(-26 + lookX, -12, 6, 6);
     ctx.fillRect(20 + lookX, -12, 6, 6);
 
-    // Angry Mechanical Grille Mouth
+    // Mechanical Grille Mouth
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(-28, 18, 56, 16);
     ctx.fillStyle = '#64748b';
@@ -2713,33 +2621,87 @@ function drawBoss() {
         ctx.fillRect(gx, 20, 5, 12);
     }
 
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.font = 'bold 11px JetBrains Mono';
-    ctx.textAlign = 'center';
-    ctx.fillText('🎯 KLIKAJ LPM!', 0, -boss.h / 2 - 10);
-
-    ctx.restore();
-}
-
-function drawCrosshair(mx, my) {
-    ctx.save();
-    ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(mx, my, 14, 0, Math.PI * 2);
-    ctx.moveTo(mx - 20, my);
-    ctx.lineTo(mx + 20, my);
-    ctx.moveTo(mx, my - 20);
-    ctx.lineTo(mx, my + 20);
-    ctx.stroke();
     ctx.restore();
 }
 
 // ============================================================================
-// INPUT LISTENERS
+// MENU, PAUSE & SETTINGS NAVIGATION
+// ============================================================================
+function startGame(levelIndex = savedPlayerLevelIdx) {
+    music.unlock();
+    menuFadeAlpha = 0;
+    menuFadeState = 'NONE';
+    gameState = 'PLAYING';
+    mainMenuOverlay.classList.add('hidden');
+    pauseMenuOverlay.classList.add('hidden');
+    settingsModal.classList.add('hidden');
+    levelsModal.classList.add('hidden');
+    inGameHud.classList.remove('hidden');
+    loadLevel(levelIndex, false);
+}
+
+function togglePause() {
+    if (gameState === 'PLAYING') {
+        gameState = 'PAUSED';
+        pauseMenuOverlay.classList.remove('hidden');
+        syncMusicForState();
+    } else if (gameState === 'PAUSED') {
+        gameState = 'PLAYING';
+        pauseMenuOverlay.classList.add('hidden');
+        settingsModal.classList.add('hidden');
+        syncMusicForState();
+    }
+}
+
+function returnToMainMenu() {
+    gameState = 'MENU';
+    menuCycleTimer = 0;
+    menuFadeState = 'NONE';
+    menuFadeAlpha = 0;
+    pauseMenuOverlay.classList.add('hidden');
+    settingsModal.classList.add('hidden');
+    levelsModal.classList.add('hidden');
+    victoryOverlay.classList.add('hidden');
+    deathOverlay.classList.add('hidden');
+    inGameHud.classList.add('hidden');
+    bossHud.classList.add('hidden');
+    mainMenuOverlay.classList.remove('hidden');
+
+    loadLevel(MENU_SHOWCASE_LEVELS[menuShowcasePos], true);
+}
+
+// Populate 20-Level Grid in Level Select Modal
+const levelsGrid = document.getElementById('levels-grid');
+LEVELS.forEach((lvl, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-retro-secondary py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-0.5 text-center';
+    btn.innerHTML = `
+        <span class="text-xs sm:text-sm font-extrabold text-purple-300 mono-font">${idx + 1}</span>
+        <span class="text-[9px] text-slate-300 truncate w-full">${lvl.name.split('. ')[1] || lvl.name}</span>
+    `;
+    btn.addEventListener('click', () => {
+        startGame(idx);
+    });
+    levelsGrid.appendChild(btn);
+});
+
+// ============================================================================
+// EVENT LISTENERS (KEYBOARD, MENU BUTTONS, TOUCH)
 // ============================================================================
 window.addEventListener('keydown', (e) => {
+    music.unlock();
     const code = e.code;
+
+    if (code === 'KeyP' || code === 'Escape') {
+        if (gameState === 'PLAYING' || gameState === 'PAUSED') {
+            togglePause();
+            e.preventDefault();
+        }
+        return;
+    }
+
+    if (gameState !== 'PLAYING') return;
+
     if (code === 'KeyA' || code === 'ArrowLeft') keys.left = true;
     if (code === 'KeyD' || code === 'ArrowRight') keys.right = true;
     if (code === 'KeyW' || code === 'Space' || code === 'ArrowUp') {
@@ -2763,57 +2725,107 @@ window.addEventListener('keyup', (e) => {
     if (code === 'KeyW' || code === 'Space' || code === 'ArrowUp') keys.up = false;
 });
 
-function updateMousePos(e) {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    mouse.x = (e.clientX - rect.left) * scaleX;
-    mouse.y = (e.clientY - rect.top) * scaleY;
-}
-
-canvas.addEventListener('mousemove', updateMousePos);
-canvas.addEventListener('mousedown', (e) => {
-    if (e.button === 0) {
-        updateMousePos(e);
-        mouse.clicked = true;
-    }
+// Main Menu Buttons
+document.getElementById('btn-menu-play').addEventListener('click', () => startGame(savedPlayerLevelIdx));
+document.getElementById('btn-menu-levels').addEventListener('click', () => {
+    music.unlock();
+    levelsModal.classList.remove('hidden');
+});
+document.getElementById('btn-menu-settings').addEventListener('click', () => {
+    music.unlock();
+    settingsModal.classList.remove('hidden');
 });
 
-// UI Controls
-levelSelect.addEventListener('change', (e) => {
-    loadLevel(parseInt(e.target.value, 10));
-    levelSelect.blur();
+// HUD Buttons
+document.getElementById('btn-hud-pause').addEventListener('click', togglePause);
+document.getElementById('btn-hud-restart').addEventListener('click', () => loadLevel(currentLevelIdx, false));
+
+// Pause Menu Buttons
+document.getElementById('btn-pause-resume').addEventListener('click', togglePause);
+document.getElementById('btn-pause-restart').addEventListener('click', () => {
+    togglePause();
+    loadLevel(currentLevelIdx, false);
+});
+document.getElementById('btn-pause-settings').addEventListener('click', () => {
+    settingsModal.classList.remove('hidden');
+});
+document.getElementById('btn-pause-mainmenu').addEventListener('click', returnToMainMenu);
+
+// Settings Modal Controls
+const btnToggleMute = document.getElementById('btn-toggle-mute');
+btnToggleMute.addEventListener('click', () => {
+    audioMuted = !audioMuted;
+    music.setMuted(audioMuted);
+    sfx.muted = audioMuted;
+    btnToggleMute.textContent = audioMuted ? 'WYCISZONY' : 'DŹWIĘK: WŁ';
+    btnToggleMute.className = audioMuted
+        ? 'btn-retro-secondary px-3 py-1.5 rounded-lg font-bold text-rose-400 mono-font text-xs shrink-0'
+        : 'btn-retro-secondary px-3 py-1.5 rounded-lg font-bold text-emerald-300 mono-font text-xs shrink-0';
 });
 
-btnRestart.addEventListener('click', () => {
-    loadLevel(currentLevelIdx);
-    btnRestart.blur();
+const sliderMusicVol = document.getElementById('slider-music-vol');
+const musicVolLabel = document.getElementById('music-vol-label');
+sliderMusicVol.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value, 10);
+    musicVolLabel.textContent = `${val}%`;
+    music.setVolume(val / 100);
 });
 
-btnHints.addEventListener('click', () => {
-    showHints = !showHints;
-    hintModeText.textContent = showHints ? "Podpowiedzi: WŁ" : "Podpowiedzi: WYŁ";
-    btnHints.blur();
+const sliderSfxVol = document.getElementById('slider-sfx-vol');
+const sfxVolLabel = document.getElementById('sfx-vol-label');
+sliderSfxVol.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value, 10);
+    sfxVolLabel.textContent = `${val}%`;
+    sfx.volume = val / 100;
 });
 
-btnSound.addEventListener('click', () => {
-    sfx.enabled = !sfx.enabled;
-    btnSound.textContent = sfx.enabled ? '🔊' : '🔇';
-    btnSound.blur();
+const btnToggleTouch = document.getElementById('btn-toggle-touch');
+btnToggleTouch.addEventListener('click', () => {
+    if (touchMode === 'AUTO') touchMode = 'ON';
+    else if (touchMode === 'ON') touchMode = 'OFF';
+    else touchMode = 'AUTO';
+
+    btnToggleTouch.textContent = touchMode;
+    touchControls.classList.remove('touch-auto', 'touch-force-on', 'touch-force-off');
+    if (touchMode === 'AUTO') touchControls.classList.add('touch-auto');
+    else if (touchMode === 'ON') touchControls.classList.add('touch-force-on');
+    else touchControls.classList.add('touch-force-off');
 });
 
-btnPlayAgain.addEventListener('click', () => {
+document.getElementById('btn-settings-close').addEventListener('click', () => settingsModal.classList.add('hidden'));
+document.getElementById('btn-settings-save').addEventListener('click', () => settingsModal.classList.add('hidden'));
+
+// Level Select Modal Close
+document.getElementById('btn-levels-close').addEventListener('click', () => levelsModal.classList.add('hidden'));
+document.getElementById('btn-levels-back').addEventListener('click', () => levelsModal.classList.add('hidden'));
+
+// Victory Modal Buttons
+document.getElementById('btn-play-again').addEventListener('click', () => {
     deathCount = 0;
     deathCountEl.textContent = '0';
-    loadLevel(0);
+    startGame(0);
 });
+document.getElementById('btn-victory-menu').addEventListener('click', returnToMainMenu);
 
 // Mobile Touch Buttons
 const bindTouch = (id, onDown, onUp) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('touchstart', (e) => { e.preventDefault(); onDown(); });
-    el.addEventListener('touchend', (e) => { e.preventDefault(); if (onUp) onUp(); });
+    el.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        music.unlock();
+        el.classList.add('active-press');
+        onDown();
+    }, { passive: false });
+    el.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        el.classList.remove('active-press');
+        if (onUp) onUp();
+    }, { passive: false });
+    el.addEventListener('touchcancel', () => {
+        el.classList.remove('active-press');
+        if (onUp) onUp();
+    });
 };
 bindTouch('touch-left', () => keys.left = true, () => keys.left = false);
 bindTouch('touch-right', () => keys.right = true, () => keys.right = false);
@@ -2827,42 +2839,25 @@ const FIXED_DT = 1000 / 60; // Exact 16.6667ms per physics step (60Hz lock)
 let lastFrameTime = performance.now();
 let accumulator = 0;
 
-// Live FPS Monitor
-let frameCounter = 0;
-let fpsLastCheck = performance.now();
-
 function gameLoop(timestamp) {
     let deltaTime = timestamp - lastFrameTime;
     lastFrameTime = timestamp;
 
-    // Prevent spiral of death if user switches browser tabs
     if (deltaTime > 100) deltaTime = 100;
-
     accumulator += deltaTime;
 
-    // Run physics updates at a locked 60Hz rate regardless of 60Hz/144Hz/240Hz monitor
     while (accumulator >= FIXED_DT) {
         update();
         accumulator -= FIXED_DT;
     }
 
-    // Render every display refresh frame
     draw();
-
-    // Update live monitor FPS counter in HUD
-    frameCounter++;
-    if (timestamp - fpsLastCheck >= 500) {
-        const currentFps = Math.round((frameCounter * 1000) / (timestamp - fpsLastCheck));
-        if (fpsCounterEl) fpsCounterEl.textContent = `${currentFps} FPS`;
-        frameCounter = 0;
-        fpsLastCheck = timestamp;
-    }
 
     requestAnimationFrame(gameLoop);
 }
 
 window.onload = function () {
-    loadLevel(0);
+    loadLevel(MENU_SHOWCASE_LEVELS[0], true);
     lastFrameTime = performance.now();
     requestAnimationFrame(gameLoop);
 };
