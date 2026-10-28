@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fioletowy Kwadrat: Rage Edition (Retro-Modern)</title>
+    <title>PRZYGODA DAVE'A</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -131,6 +131,15 @@
             box-shadow: 0 1px 0 #0f172a;
         }
 
+        /* Gamepad Focus Highlight in Menus */
+        .gamepad-focus {
+            outline: 3px solid #22d3ee !important;
+            outline-offset: 2px !important;
+            filter: brightness(1.18);
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 0 18px rgba(34, 211, 238, 0.65) !important;
+        }
+
         /* Touch Controls inside 4:3 wrapper - always visible on mobile/touch or landscape */
         .touch-btn {
             background: rgba(15, 23, 42, 0.72);
@@ -234,9 +243,9 @@
                         ↻
                     </button>
 
-                    <!-- Pause Button [P] -->
-                    <button id="btn-hud-pause" title="Pauza (P)" class="btn-retro text-xs font-bold px-2.5 py-1 rounded-lg text-white mono-font">
-                        ❚❚ P
+                    <!-- Pause Button [P / OPTIONS] -->
+                    <button id="btn-hud-pause" title="Pauza (P / OPTIONS)" class="btn-retro text-xs font-bold px-2.5 py-1 rounded-lg text-white mono-font">
+                        ❚❚
                     </button>
                 </div>
             </header>
@@ -248,7 +257,7 @@
                 <div class="flex justify-between items-center mb-1 px-1">
                     <span class="text-[11px] sm:text-xs font-extrabold text-red-400 tracking-wider flex items-center gap-1.5">
                         <span class="inline-block w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-                        MEGA-ROBO KWADRAT MK-XX
+                        MEGA-ROBO KWADRAT EVAD 
                     </span>
                     <span id="boss-hp-text" class="text-xs font-extrabold text-amber-300 mono-font">500 / 500 HP</span>
                 </div>
@@ -262,12 +271,14 @@
                  ============================================================== -->
             <section id="main-menu-overlay" class="absolute inset-0 z-30 flex items-stretch justify-start pointer-events-auto" style="background: linear-gradient(90deg, rgba(6, 8, 17, 0.96) 0%, rgba(6, 8, 17, 0.86) 44%, rgba(6, 8, 17, 0.12) 78%, rgba(6, 8, 17, 0.0) 100%);">
                 <!-- Left Column: Logo at Top-Left, Retro Buttons Below -->
-                <div class="w-full sm:w-[58%] max-w-[430px] p-5 sm:p-8 flex flex-col justify-between">
+                <div class="w-full sm:w-[60%] max-w-[450px] p-5 sm:p-8 flex flex-col justify-between">
                     <!-- Top-Left Retro-Modern Logo -->
                     <div>
-                        <div class="inline-flex items-center gap-2 bg-purple-950/90 border border-purple-400/50 px-2.5 py-1 rounded-md mb-3">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span class="text-[10px] font-bold text-purple-200 mono-font tracking-wider">RETRO-MODERN RAGE EDITION</span>
+                        <div class="flex flex-wrap items-center gap-2 mb-3">
+                            <div id="gamepad-status-badge" class="hidden items-center gap-1.5 bg-cyan-950/90 border border-cyan-400/50 px-2.5 py-1 rounded-md">
+                                <span class="text-xs">🎮</span>
+                                <span class="text-[10px] font-bold text-cyan-200 mono-font">PAD AKTYWNY</span>
+                            </div>
                         </div>
 
                         <div class="flex items-center gap-3.5 mb-2">
@@ -284,7 +295,7 @@
                             </div>
                             <div>
                                 <h1 class="retro-font text-base sm:text-xl text-white leading-snug tracking-tight drop-shadow-[0_3px_0_#581c87]">
-                                    FIOLETOWY<br><span class="text-purple-400">KWADRAT</span>
+                                    PRZYGODA<br><span class="text-purple-400">DAVE'A</span>
                                 </h1>
                             </div>
                         </div>
@@ -296,7 +307,7 @@
                     <!-- Left Retro Menu Buttons -->
                     <div class="flex flex-col gap-2.5 my-auto py-3 max-w-[300px]">
                         <button id="btn-menu-play" class="btn-retro w-full py-3 px-4 rounded-xl font-bold text-white text-sm sm:text-base flex items-center justify-between">
-                            <span>▶ GRAJ TERAZ</span>
+                            <span>▶ GRAJ</span>
                             <span id="menu-continue-badge" class="text-[10px] bg-purple-950/90 border border-purple-300/40 px-2 py-0.5 rounded mono-font">POZ. 1</span>
                         </button>
 
@@ -307,19 +318,20 @@
 
                         <button id="btn-menu-settings" class="btn-retro-secondary w-full py-2.5 px-4 rounded-xl font-bold text-amber-300 text-xs sm:text-sm flex items-center justify-between">
                             <span>⚙️ USTAWIENIA</span>
-                            <span class="text-[10px] text-slate-300 mono-font">AUDIO / EKRAN</span>
+                            <span class="text-[10px] text-slate-300 mono-font">OPTIONS / AUDIO</span>
                         </button>
                     </div>
 
-                    <!-- Bottom Left Controls & Music Note -->
+                    <!-- Bottom Left Controls & Gamepad Note -->
                     <div class="text-[11px] text-slate-400 space-y-1">
-                        <div><strong class="text-purple-300">Sterowanie:</strong> A/D lub ◀/▶ • Skok: W/Spacja • Dash: Shift/K • Pauza: P</div>
+                        <div><strong class="text-purple-300">Klawiatura:</strong> A/D lub ◀/▶ • Skok: W/Spacja • Dash: Shift/K • Pauza: P</div>
+                        <div><strong class="text-cyan-300">Gamepad (PS):</strong> Gałka/D-Pad ◀/▶ • Skok: ✕ / ▢ / ▲ • Dash: ◯ / △ / R2 • Opcje: OPTIONS</div>
                     </div>
                 </div>
             </section>
 
             <!-- ==============================================================
-                 PAUSE MENU MODAL (Triggered by [P] or HUD Pause Button)
+                 PAUSE MENU MODAL (Triggered by [P], [OPTIONS] or HUD Pause Button)
                  ============================================================== -->
             <section id="pause-menu-overlay" class="hidden absolute inset-0 z-30 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
                 <div class="retro-panel rounded-2xl p-5 sm:p-6 max-w-sm w-full text-center">
@@ -328,10 +340,10 @@
 
                     <div class="flex flex-col gap-2.5">
                         <button id="btn-pause-resume" class="btn-retro w-full py-2.5 rounded-xl font-bold text-white text-sm">
-                            ▶ KONTYNUUJ GRĘ (P)
+                            ▶ KONTYNUUJ GRĘ
                         </button>
                         <button id="btn-pause-restart" class="btn-retro-secondary w-full py-2.5 rounded-xl font-bold text-slate-100 text-sm">
-                            ↻ ZRESTARTUJ POZIOM (R)
+                            ↻ ZRESTARTUJ POZIOM
                         </button>
                         <button id="btn-pause-settings" class="btn-retro-secondary w-full py-2.5 rounded-xl font-bold text-amber-300 text-sm">
                             ⚙️ USTAWIENIA
@@ -344,7 +356,7 @@
             </section>
 
             <!-- ==============================================================
-                 SETTINGS MODAL (Accessible from Main Menu & Pause Menu)
+                 SETTINGS MODAL (Accessible from Main Menu, Pause Menu & Pad OPTIONS)
                  ============================================================== -->
             <section id="settings-modal" class="hidden absolute inset-0 z-40 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
                 <div class="retro-panel rounded-2xl p-5 sm:p-6 max-w-md w-full">
@@ -368,19 +380,19 @@
                         <!-- Music Volume Slider (.wav) -->
                         <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
                             <div class="flex justify-between items-center mb-1.5">
-                                <span class="font-bold text-white">🎵 Głośność Muzyki (.wav)</span>
+                                <span class="font-bold text-white">🎵 Głośność Muzyki</span>
                                 <span id="music-vol-label" class="text-xs font-bold text-purple-300 mono-font">60%</span>
                             </div>
-                            <input id="slider-music-vol" type="range" min="0" max="100" value="60" class="w-full accent-purple-500 cursor-pointer">
+                            <input id="slider-music-vol" type="range" min="0" max="100" value="60" class="w-full accent-purple-500 cursor-pointer rounded-lg">
                         </div>
 
                         <!-- SFX Volume Slider -->
                         <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-xl">
                             <div class="flex justify-between items-center mb-1.5">
-                                <span class="font-bold text-white">🔊 Efekty Dźwiękowe (SFX)</span>
+                                <span class="font-bold text-white">🔊 Efekty Dźwiękowe</span>
                                 <span id="sfx-vol-label" class="text-xs font-bold text-cyan-300 mono-font">80%</span>
                             </div>
-                            <input id="slider-sfx-vol" type="range" min="0" max="100" value="80" class="w-full accent-cyan-400 cursor-pointer">
+                            <input id="slider-sfx-vol" type="range" min="0" max="100" value="80" class="w-full accent-cyan-400 cursor-pointer rounded-lg">
                         </div>
 
                         <!-- Mobile Touch Controls Mode -->
@@ -411,7 +423,7 @@
                         <button id="btn-levels-close" class="text-slate-400 hover:text-white font-bold text-sm px-2 py-0.5 rounded">✕</button>
                     </div>
 
-                    <div id="levels-grid" class="grid grid-cols-4 sm:grid-cols-5 gap-2 overflow-y-auto pr-1 my-auto">
+                    <div id="levels-grid" class="grid grid-cols-4 sm:grid-cols-5 gap-2 overflow-y-auto p-1 my-auto">
                         <!-- Populated dynamically with 20 level buttons -->
                     </div>
 
@@ -431,7 +443,7 @@
                         Klasyczny niewidzialny blok. Cat Mario przesyła pozdrowienia!
                     </p>
                     <div class="inline-block bg-slate-900/90 border border-red-400/40 px-3 py-1 rounded-lg text-[11px] text-slate-300 mono-font">
-                        Naciśnij <span class="text-white font-bold">[R]</span> lub <span class="text-white font-bold">[SPACJA]</span>
+                        Naciśnij <span class="text-white font-bold">[R]</span>, <span class="text-white font-bold">[SPACJA]</span> lub <span class="text-cyan-300 font-bold">[✕ / ▢ NA PADZIE]</span>
                     </div>
                 </div>
             </div>
@@ -446,7 +458,7 @@
                         PRZESZEDŁEŚ GRĘ!
                     </h2>
                     <p class="text-slate-300 text-xs sm:text-sm mb-4">
-                        Pokonałeś wszystkie 19 zdradzieckich poziomów wzgórz i lasu oraz rozgniotłeś Mega-Robo Bossa w Zamku!
+                        Pokonałeś wszystkie 19 zdradzieckich poziomów wzgórz i lasu oraz rozgniotłeś Evad Bossa w Zamku!
                     </p>
                     <div class="grid grid-cols-2 gap-3 mb-5 bg-slate-900/90 p-3 rounded-xl border border-purple-500/30">
                         <div>
@@ -502,6 +514,7 @@
  * - Fixed 60Hz Timestep Accumulator (144Hz / 240Hz+ Monitor Safe)
  * - Clean 4:3 Viewport + Pure Ambient Color Sync (No player glow or side lines)
  * - Main Menu with Live Cinematic Scrolling Background + Pause Menu [P]
+ * - Full Gamepad Support (PS/Xbox: D-Pad, Left Stick, X/Square Jump, Circle/Triangle/R2 Dash, Options)
  * - .WAV Music Crossfader System (example.wav)
  * - Balanced Levels 5-19 + Jump-Stomp Vulnerable Boss Fight on Level 20
  * ============================================================================
@@ -703,6 +716,14 @@ class SoundSystem {
             gain.gain.linearRampToValueAtTime(0.005, now + 0.2);
             osc.start(now);
             osc.stop(now + 0.2);
+        } else if (type === 'ui') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(480, now);
+            osc.frequency.exponentialRampToValueAtTime(660, now + 0.045);
+            gain.gain.setValueAtTime(0.06 * v, now);
+            gain.gain.linearRampToValueAtTime(0.003, now + 0.045);
+            osc.start(now);
+            osc.stop(now + 0.045);
         }
     }
 }
@@ -751,7 +772,7 @@ const LEVELS = [
     // LEVEL 2
     {
         name: "2. Zdradziecka Polana",
-        hint: "Gdy ziemia się wali, użyj DASH (Shift / K) bez zatrzymywania się!",
+        hint: "Gdy ziemia się wali, użyj DASH (Shift / K / ◯ / R2) bez zatrzymywania się!",
         theme: "day",
         width: 32,
         spawn: [1.5, 10],
@@ -1304,18 +1325,19 @@ const victoryOverlay = document.getElementById('victory-overlay');
 const finalDeathsEl = document.getElementById('final-deaths');
 const finalRankEl = document.getElementById('final-rank');
 const touchControls = document.getElementById('touch-controls');
+const gamepadStatusBadge = document.getElementById('gamepad-status-badge');
 
 const TROLL_MESSAGES = [
     "Serio? Na tym padłeś? Przecież to było oczywiste!",
     "Klasyczny niewidzialny blok! Cat Mario przesyła pozdrowienia.",
     "Ta podłoga wyglądała zbyt stabilnie, żeby być prawdziwą...",
-    "Użyj DASH (Shift lub K), fioletowy kwadracie!",
+    "Użyj DASH (Shift, K, ◯ lub R2), fioletowy kwadracie!",
     "Pamiętaj: możesz odbijać się od ścian (Wall-Jump)!",
     "Roboty mają mechaniczne oczy, widzą Twój każdy błąd.",
     "Ta flaga była przynętą. Nigdy nie ufaj pierwszemu portalowi!",
     "Kolce z sufitu? Klasyka gatunku. Patrz w górę!",
     "Kto postawił ten blok akurat na trajektorii skoku?! (Ja).",
-    "Spokojnie, klawiatura jeszcze żyje. Spróbuj skoczyć wcześniej!",
+    "Spokojnie, kontroler jeszcze żyje. Spróbuj skoczyć wcześniej!",
     "Gdyby to było łatwe, nie nazywałoby się Rage Game!"
 ];
 
@@ -1347,6 +1369,24 @@ const bgMotes = Array.from({ length: 22 }, () => ({
     vy: -Math.random() * 0.35 - 0.1,
     phase: Math.random() * Math.PI * 2
 }));
+
+// Separate input states for Keyboard/Touch vs Gamepad so they never overwrite each other
+const kbTouchInput = {
+    left: false,
+    right: false,
+    up: false
+};
+
+const gamepadInput = {
+    left: false,
+    right: false,
+    prevJump: false,
+    prevDash: false,
+    prevOptions: false,
+    prevConfirm: false,
+    prevBack: false,
+    navCooldownUntil: 0
+};
 
 const keys = {
     left: false,
@@ -1384,6 +1424,321 @@ let particles = [];
 let floatingTexts = [];
 let projectiles = [];
 let boss = null;
+
+// ============================================================================
+// GAMEPAD API & MENU NAVIGATION SYSTEM
+// ============================================================================
+let activeMenuContext = null;
+let activeMenuIndex = 0;
+
+window.addEventListener('gamepadconnected', () => {
+    if (gamepadStatusBadge) {
+        gamepadStatusBadge.classList.remove('hidden');
+        gamepadStatusBadge.classList.add('inline-flex');
+    }
+});
+
+window.addEventListener('gamepaddisconnected', () => {
+    const pads = navigator.getGamepads ? Array.from(navigator.getGamepads()).filter(Boolean) : [];
+    if (pads.length === 0 && gamepadStatusBadge) {
+        gamepadStatusBadge.classList.add('hidden');
+        gamepadStatusBadge.classList.remove('inline-flex');
+    }
+    gamepadInput.left = false;
+    gamepadInput.right = false;
+});
+
+function getActiveMenuInfo() {
+    if (!settingsModal.classList.contains('hidden')) {
+        return {
+            id: 'SETTINGS',
+            cols: 1,
+            items: [
+                document.getElementById('btn-toggle-mute'),
+                document.getElementById('slider-music-vol'),
+                document.getElementById('slider-sfx-vol'),
+                document.getElementById('btn-toggle-touch'),
+                document.getElementById('btn-settings-save'),
+                document.getElementById('btn-settings-close')
+            ]
+        };
+    }
+    if (!levelsModal.classList.contains('hidden')) {
+        const levelButtons = Array.from(document.querySelectorAll('#levels-grid button'));
+        const cols = window.innerWidth >= 640 ? 5 : 4;
+        return {
+            id: 'LEVELS',
+            cols,
+            items: [
+                ...levelButtons,
+                document.getElementById('btn-levels-back')
+            ]
+        };
+    }
+    if (!victoryOverlay.classList.contains('hidden')) {
+        return {
+            id: 'VICTORY',
+            cols: 2,
+            items: [
+                document.getElementById('btn-play-again'),
+                document.getElementById('btn-victory-menu')
+            ]
+        };
+    }
+    if (!pauseMenuOverlay.classList.contains('hidden')) {
+        return {
+            id: 'PAUSE',
+            cols: 1,
+            items: [
+                document.getElementById('btn-pause-resume'),
+                document.getElementById('btn-pause-restart'),
+                document.getElementById('btn-pause-settings'),
+                document.getElementById('btn-pause-mainmenu')
+            ]
+        };
+    }
+    if (!mainMenuOverlay.classList.contains('hidden')) {
+        return {
+            id: 'MAIN_MENU',
+            cols: 1,
+            items: [
+                document.getElementById('btn-menu-play'),
+                document.getElementById('btn-menu-levels'),
+                document.getElementById('btn-menu-settings')
+            ]
+        };
+    }
+    return null;
+}
+
+function clearGamepadFocusHighlights() {
+    document.querySelectorAll('.gamepad-focus').forEach(el => el.classList.remove('gamepad-focus'));
+}
+
+function applyGamepadMenuFocus(menuInfo) {
+    clearGamepadFocusHighlights();
+    if (!menuInfo || !menuInfo.items.length) return;
+    activeMenuIndex = Math.max(0, Math.min(menuInfo.items.length - 1, activeMenuIndex));
+    const targetEl = menuInfo.items[activeMenuIndex];
+    if (targetEl) {
+        targetEl.classList.add('gamepad-focus');
+        if (menuInfo.id === 'LEVELS') {
+            targetEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+    }
+}
+
+function isBtnPressed(btn, threshold = 0.35) {
+    if (!btn) return false;
+    return typeof btn === 'object' ? (btn.pressed || btn.value >= threshold) : btn >= threshold;
+}
+
+function pollGamepad(timestamp) {
+    if (!navigator.getGamepads) return;
+    const gamepads = navigator.getGamepads();
+    let pad = null;
+    for (let i = 0; i < gamepads.length; i++) {
+        if (gamepads[i] && gamepads[i].connected) {
+            pad = gamepads[i];
+            break;
+        }
+    }
+
+    if (!pad) {
+        gamepadInput.left = false;
+        gamepadInput.right = false;
+        return;
+    }
+
+    if (gamepadStatusBadge && gamepadStatusBadge.classList.contains('hidden')) {
+        gamepadStatusBadge.classList.remove('hidden');
+        gamepadStatusBadge.classList.add('inline-flex');
+    }
+
+    // Standard Gamepad Buttons & Axes (PlayStation DualShock / DualSense & Xbox)
+    const btnCross    = isBtnPressed(pad.buttons[0]); // PS: X (Krzyżyk) -> Skok / Zatwierdź w menu
+    const btnCircle   = isBtnPressed(pad.buttons[1]); // PS: O (Kółko)   -> Dash / Wstecz w menu
+    const btnSquare   = isBtnPressed(pad.buttons[2]); // PS: ▢ (Kwadrat) -> Skok
+    const btnTriangle = isBtnPressed(pad.buttons[3]); // PS: △ (Trójkąt) -> Dash
+    const btnR2       = isBtnPressed(pad.buttons[7], 0.25); // Right Trigger (R2) -> Dash
+    const btnShare    = isBtnPressed(pad.buttons[8]); // Share / Select -> Szybki Restart w grze
+    const btnOptions  = isBtnPressed(pad.buttons[9]); // Options / Start -> Opcje / Pauza
+
+    const dpadUp      = isBtnPressed(pad.buttons[12]); // D-Pad Góra -> Skok / Menu Góra
+    const dpadDown    = isBtnPressed(pad.buttons[13]); // D-Pad Dół  -> Menu Dół
+    const dpadLeft    = isBtnPressed(pad.buttons[14]); // D-Pad Lewo -> Ruch w lewo / Menu Lewo
+    const dpadRight   = isBtnPressed(pad.buttons[15]); // D-Pad Prawo -> Ruch w prawo / Menu Prawo
+
+    const stickX      = pad.axes && pad.axes.length > 0 ? pad.axes[0] : 0; // Lewa gałka X
+    const stickY      = pad.axes && pad.axes.length > 1 ? pad.axes[1] : 0; // Lewa gałka Y
+    const DEADZONE    = 0.28;
+
+    const moveLeft  = dpadLeft  || stickX < -DEADZONE;
+    const moveRight = dpadRight || stickX > DEADZONE;
+    const moveUp    = dpadUp    || stickY < -0.5;
+    const moveDown  = dpadDown  || stickY > 0.5;
+
+    // 1. Handle OPTIONS button rising edge (Otwieranie Opcji / Pauzy)
+    if (btnOptions && !gamepadInput.prevOptions) {
+        music.unlock();
+        sfx.play('ui');
+        if (!settingsModal.classList.contains('hidden')) {
+            settingsModal.classList.add('hidden');
+        } else if (!levelsModal.classList.contains('hidden')) {
+            levelsModal.classList.add('hidden');
+        } else if (gameState === 'MENU') {
+            settingsModal.classList.remove('hidden');
+        } else if (gameState === 'PLAYING' || gameState === 'PAUSED') {
+            togglePause();
+        }
+    }
+    gamepadInput.prevOptions = btnOptions;
+
+    // 2. Check if any Menu / Modal is currently active
+    const menuInfo = getActiveMenuInfo();
+
+    if (menuInfo) {
+        gamepadInput.left = false;
+        gamepadInput.right = false;
+
+        // Reset focus index when switching between menus
+        if (activeMenuContext !== menuInfo.id) {
+            activeMenuContext = menuInfo.id;
+            activeMenuIndex = (menuInfo.id === 'LEVELS') ? savedPlayerLevelIdx : 0;
+            applyGamepadMenuFocus(menuInfo);
+        }
+
+        // Navigate Menu with D-Pad or Left Stick
+        if (timestamp >= gamepadInput.navCooldownUntil) {
+            const focusedEl = menuInfo.items[activeMenuIndex];
+            const isRangeSlider = focusedEl && focusedEl.tagName === 'INPUT' && focusedEl.type === 'range';
+
+            if (moveUp) {
+                if (menuInfo.id === 'LEVELS') {
+                    if (activeMenuIndex === menuInfo.items.length - 1) {
+                        activeMenuIndex = menuInfo.items.length - 2;
+                    } else if (activeMenuIndex >= menuInfo.cols) {
+                        activeMenuIndex -= menuInfo.cols;
+                    }
+                } else {
+                    activeMenuIndex = (activeMenuIndex - 1 + menuInfo.items.length) % menuInfo.items.length;
+                }
+                applyGamepadMenuFocus(menuInfo);
+                sfx.play('ui');
+                gamepadInput.navCooldownUntil = timestamp + 180;
+            } else if (moveDown) {
+                if (menuInfo.id === 'LEVELS') {
+                    const lastLevelIdx = menuInfo.items.length - 2;
+                    if (activeMenuIndex <= lastLevelIdx) {
+                        if (activeMenuIndex + menuInfo.cols <= lastLevelIdx) {
+                            activeMenuIndex += menuInfo.cols;
+                        } else {
+                            activeMenuIndex = menuInfo.items.length - 1; // Przycisk WRÓĆ
+                        }
+                    }
+                } else {
+                    activeMenuIndex = (activeMenuIndex + 1) % menuInfo.items.length;
+                }
+                applyGamepadMenuFocus(menuInfo);
+                sfx.play('ui');
+                gamepadInput.navCooldownUntil = timestamp + 180;
+            } else if (moveLeft) {
+                if (isRangeSlider) {
+                    const nextVal = Math.max(0, parseInt(focusedEl.value, 10) - 5);
+                    focusedEl.value = nextVal;
+                    focusedEl.dispatchEvent(new Event('input'));
+                    sfx.play('ui');
+                    gamepadInput.navCooldownUntil = timestamp + 110;
+                } else if (menuInfo.cols > 1) {
+                    activeMenuIndex = Math.max(0, activeMenuIndex - 1);
+                    applyGamepadMenuFocus(menuInfo);
+                    sfx.play('ui');
+                    gamepadInput.navCooldownUntil = timestamp + 160;
+                }
+            } else if (moveRight) {
+                if (isRangeSlider) {
+                    const nextVal = Math.min(100, parseInt(focusedEl.value, 10) + 5);
+                    focusedEl.value = nextVal;
+                    focusedEl.dispatchEvent(new Event('input'));
+                    sfx.play('ui');
+                    gamepadInput.navCooldownUntil = timestamp + 110;
+                } else if (menuInfo.cols > 1) {
+                    activeMenuIndex = Math.min(menuInfo.items.length - 1, activeMenuIndex + 1);
+                    applyGamepadMenuFocus(menuInfo);
+                    sfx.play('ui');
+                    gamepadInput.navCooldownUntil = timestamp + 160;
+                }
+            }
+        }
+
+        // Confirm selection in Menu with X (Cross) or Square
+        const confirmPressed = btnCross || btnSquare;
+        if (confirmPressed && !gamepadInput.prevConfirm) {
+            music.unlock();
+            const targetEl = menuInfo.items[activeMenuIndex];
+            if (targetEl && typeof targetEl.click === 'function') {
+                sfx.play('ui');
+                targetEl.click();
+            }
+        }
+        gamepadInput.prevConfirm = confirmPressed;
+
+        // Close Modal / Go Back in Menu with Circle (Kółko)
+        if (btnCircle && !gamepadInput.prevBack) {
+            music.unlock();
+            sfx.play('ui');
+            if (!settingsModal.classList.contains('hidden')) {
+                settingsModal.classList.add('hidden');
+            } else if (!levelsModal.classList.contains('hidden')) {
+                levelsModal.classList.add('hidden');
+            } else if (gameState === 'PAUSED') {
+                togglePause();
+            }
+        }
+        gamepadInput.prevBack = btnCircle;
+
+        // Keep edge trackers updated so player doesn't accidentally jump immediately on menu exit
+        gamepadInput.prevJump = dpadUp || btnCross || btnSquare;
+        gamepadInput.prevDash = btnCircle || btnTriangle || btnR2;
+        return;
+    }
+
+    // 3. In-Game Gameplay Controls (gameState === 'PLAYING')
+    if (activeMenuContext !== null) {
+        activeMenuContext = null;
+        clearGamepadFocusHighlights();
+    }
+
+    gamepadInput.left = moveLeft;
+    gamepadInput.right = moveRight;
+
+    // Jump: D-Pad Up, PS Cross (X), PS Square (Kwadrat)
+    const jumpNow = dpadUp || btnCross || btnSquare;
+    if (jumpNow && !gamepadInput.prevJump) {
+        music.unlock();
+        keys.jumpPressed = true;
+    }
+    gamepadInput.prevJump = jumpNow;
+
+    // Dash: PS Circle (Kółko), PS Triangle (Trójkąt), Right Trigger (R2)
+    const dashNow = btnCircle || btnTriangle || btnR2;
+    if (dashNow && !gamepadInput.prevDash) {
+        music.unlock();
+        if (player.dead) {
+            keys.jumpPressed = true; // Szybkie odrodzenie po śmierci również kółkiem/trójkątem
+        } else {
+            keys.dashPressed = true;
+        }
+    }
+    gamepadInput.prevDash = dashNow;
+
+    // Share / Select: Quick Level Restart
+    if (btnShare && !gamepadInput.prevBack) {
+        loadLevel(currentLevelIdx, false);
+    }
+    gamepadInput.prevBack = btnShare;
+    gamepadInput.prevConfirm = btnCross || btnSquare;
+}
 
 // ============================================================================
 // MUSIC SELECTION HELPER
@@ -1628,6 +1983,11 @@ function completeLevel() {
         gameState = 'VICTORY';
         player.vx = 0;
         player.vy = 0;
+        kbTouchInput.left = false;
+        kbTouchInput.right = false;
+        kbTouchInput.up = false;
+        gamepadInput.left = false;
+        gamepadInput.right = false;
         keys.left = false;
         keys.right = false;
         keys.up = false;
@@ -1654,6 +2014,10 @@ function rectOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
 function update() {
     tickCount++;
     const lvl = LEVELS[currentLevelIdx];
+
+    // Combine Keyboard/Touch and Gamepad directional states seamlessly
+    keys.left = kbTouchInput.left || gamepadInput.left;
+    keys.right = kbTouchInput.right || gamepadInput.right;
 
     // Update non-day ambient motes
     if (lvl.theme !== 'day') {
@@ -2249,10 +2613,10 @@ function draw() {
 
     // 6. Draw Fake & Real Portals
     for (const fg of fakeGoals) {
-        drawGoalPortal(fg.x, fg.y, fg.w, fg.h, '#a855f7', 'META');
+        drawGoalPortal(fg.x, fg.y, fg.w, fg.h, '#a855f7', '⚬');
     }
     if (realGoal) {
-        drawGoalPortal(realGoal.x, realGoal.y, realGoal.w, realGoal.h, '#10b981', 'META');
+        drawGoalPortal(realGoal.x, realGoal.y, realGoal.w, realGoal.h, '#10b981', '⚬');
     }
 
     // 7. Draw Robotic Square Enemies
@@ -2472,19 +2836,31 @@ function drawSpikes(x, y, w, h, dir) {
 
 function drawGoalPortal(x, y, w, h, color, label) {
     ctx.save();
+    
+    // --- STEP 1: Configure the Glow Effect ---
+    ctx.shadowColor = color;
+    // Optional: Make the glow blur pulse with tickCount for a dynamic "neon" feel
+    ctx.shadowBlur = 15 + Math.sin(tickCount * 0.08) * 5; 
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // --- STEP 2: Draw the Pulsing Background ---
     ctx.fillStyle = color;
     ctx.globalAlpha = 0.28 + Math.sin(tickCount * 0.08) * 0.1;
-    ctx.fillRect(x - 4, y - 4, w + 8, h + 4);
+    ctx.fillRect(x - 4, y - 4, w + 8, h + 8); // Fixed height bug (+ 8 instead of + 4)
     ctx.globalAlpha = 1;
 
+    // --- STEP 3: Draw the Portal Border ---
     ctx.strokeStyle = color;
     ctx.lineWidth = 4;
     ctx.strokeRect(x, y, w, h);
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 11px JetBrains Mono';
+    // --- STEP 4: Draw the Label Text ---
+    ctx.fillStyle = color;
+    ctx.font = 'bold 22px JetBrains Mono';
     ctx.textAlign = 'center';
     ctx.fillText(label, x + w / 2, y - 8);
+    
     ctx.restore();
 }
 
@@ -2505,8 +2881,8 @@ function drawPlayer() {
     ctx.fillStyle = '#9333ea';
     ctx.fillRect(-player.w / 2, -player.h / 2, player.w, player.h);
 
-    ctx.strokeStyle = player.dashTimer > 0 ? '#67e8f9' : '#e9d5ff';
-    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = player.dashTimer > 0 ? '#67e8f9' : '#e0c5ed';
+    ctx.lineWidth = 1.5;
     ctx.strokeRect(-player.w / 2 + 1, -player.h / 2 + 1, player.w - 2, player.h - 2);
 
     // Two Expressive Eyes
@@ -2637,6 +3013,7 @@ function startGame(levelIndex = savedPlayerLevelIdx) {
     settingsModal.classList.add('hidden');
     levelsModal.classList.add('hidden');
     inGameHud.classList.remove('hidden');
+    clearGamepadFocusHighlights();
     loadLevel(levelIndex, false);
 }
 
@@ -2649,6 +3026,7 @@ function togglePause() {
         gameState = 'PLAYING';
         pauseMenuOverlay.classList.add('hidden');
         settingsModal.classList.add('hidden');
+        clearGamepadFocusHighlights();
         syncMusicForState();
     }
 }
@@ -2693,6 +3071,16 @@ window.addEventListener('keydown', (e) => {
     const code = e.code;
 
     if (code === 'KeyP' || code === 'Escape') {
+        if (!settingsModal.classList.contains('hidden')) {
+            settingsModal.classList.add('hidden');
+            e.preventDefault();
+            return;
+        }
+        if (!levelsModal.classList.contains('hidden')) {
+            levelsModal.classList.add('hidden');
+            e.preventDefault();
+            return;
+        }
         if (gameState === 'PLAYING' || gameState === 'PAUSED') {
             togglePause();
             e.preventDefault();
@@ -2702,11 +3090,11 @@ window.addEventListener('keydown', (e) => {
 
     if (gameState !== 'PLAYING') return;
 
-    if (code === 'KeyA' || code === 'ArrowLeft') keys.left = true;
-    if (code === 'KeyD' || code === 'ArrowRight') keys.right = true;
+    if (code === 'KeyA' || code === 'ArrowLeft') kbTouchInput.left = true;
+    if (code === 'KeyD' || code === 'ArrowRight') kbTouchInput.right = true;
     if (code === 'KeyW' || code === 'Space' || code === 'ArrowUp') {
-        if (!keys.up) keys.jumpPressed = true;
-        keys.up = true;
+        if (!kbTouchInput.up) keys.jumpPressed = true;
+        kbTouchInput.up = true;
         e.preventDefault();
     }
     if (code === 'ShiftLeft' || code === 'ShiftRight' || code === 'KeyK' || code === 'KeyZ') {
@@ -2720,9 +3108,9 @@ window.addEventListener('keydown', (e) => {
 
 window.addEventListener('keyup', (e) => {
     const code = e.code;
-    if (code === 'KeyA' || code === 'ArrowLeft') keys.left = false;
-    if (code === 'KeyD' || code === 'ArrowRight') keys.right = false;
-    if (code === 'KeyW' || code === 'Space' || code === 'ArrowUp') keys.up = false;
+    if (code === 'KeyA' || code === 'ArrowLeft') kbTouchInput.left = false;
+    if (code === 'KeyD' || code === 'ArrowRight') kbTouchInput.right = false;
+    if (code === 'KeyW' || code === 'Space' || code === 'ArrowUp') kbTouchInput.up = false;
 });
 
 // Main Menu Buttons
@@ -2761,6 +3149,9 @@ btnToggleMute.addEventListener('click', () => {
     btnToggleMute.className = audioMuted
         ? 'btn-retro-secondary px-3 py-1.5 rounded-lg font-bold text-rose-400 mono-font text-xs shrink-0'
         : 'btn-retro-secondary px-3 py-1.5 rounded-lg font-bold text-emerald-300 mono-font text-xs shrink-0';
+    if (activeMenuContext === 'SETTINGS') {
+        btnToggleMute.classList.add('gamepad-focus');
+    }
 });
 
 const sliderMusicVol = document.getElementById('slider-music-vol');
@@ -2827,9 +3218,9 @@ const bindTouch = (id, onDown, onUp) => {
         if (onUp) onUp();
     });
 };
-bindTouch('touch-left', () => keys.left = true, () => keys.left = false);
-bindTouch('touch-right', () => keys.right = true, () => keys.right = false);
-bindTouch('touch-jump', () => { keys.jumpPressed = true; keys.up = true; }, () => keys.up = false);
+bindTouch('touch-left', () => kbTouchInput.left = true, () => kbTouchInput.left = false);
+bindTouch('touch-right', () => kbTouchInput.right = true, () => kbTouchInput.right = false);
+bindTouch('touch-jump', () => { keys.jumpPressed = true; kbTouchInput.up = true; }, () => kbTouchInput.up = false);
 bindTouch('touch-dash', () => { keys.dashPressed = true; });
 
 // ============================================================================
@@ -2842,6 +3233,9 @@ let accumulator = 0;
 function gameLoop(timestamp) {
     let deltaTime = timestamp - lastFrameTime;
     lastFrameTime = timestamp;
+
+    // Poll Gamepad state on every animation frame
+    pollGamepad(timestamp);
 
     if (deltaTime > 100) deltaTime = 100;
     accumulator += deltaTime;
