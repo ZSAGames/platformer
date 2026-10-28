@@ -1,0 +1,2871 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fioletowy Kwadrat: Rage Edition (Cat Mario Style)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glow-left: #38bdf8;
+            --glow-right: #22c55e;
+            --glow-top: #a855f7;
+            --glow-flash: rgba(168, 85, 247, 0);
+            --bg-deep: #070913;
+        }
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-deep);
+            color: #f8fafc;
+            font-family: 'Fredoka', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ==========================================================================
+           AMBIENT BACKGROUND SYNCED WITH GAME SIDE GLOW (AMBILIGHT ENGINE)
+           ========================================================================== */
+        #ambient-backdrop {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 14% 52%, color-mix(in srgb, var(--glow-left) 38%, transparent) 0%, transparent 55%),
+                radial-gradient(circle at 86% 52%, color-mix(in srgb, var(--glow-right) 38%, transparent) 0%, transparent 55%),
+                radial-gradient(circle at 50% 18%, color-mix(in srgb, var(--glow-top) 28%, transparent) 0%, transparent 60%),
+                radial-gradient(circle at 50% 50%, #111827 0%, #05070f 100%);
+            transition: background 0.35s ease;
+        }
+        #ambient-grid {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 44px 44px;
+            mask-image: radial-gradient(circle at center, rgba(0,0,0,0.85) 20%, transparent 90%);
+        }
+        #ambient-flash {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            background: radial-gradient(circle at center, var(--glow-flash) 0%, transparent 72%);
+            transition: background 0.08s ease-out;
+        }
+
+        /* ==========================================================================
+           4:3 GAME STAGE FITTED TO VIEWPORT WITH DUAL SIDE-GLOW HALOS
+           ========================================================================== */
+        #stage-container {
+            position: relative;
+            z-index: 10;
+            flex: 1 1 auto;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+            padding: 4px 12px;
+        }
+        #game-wrapper {
+            position: relative;
+            aspect-ratio: 4 / 3;
+            height: 100%;
+            max-height: calc(100vh - 134px);
+            max-width: calc((100vh - 134px) * (4 / 3));
+            width: auto;
+            border-radius: 18px;
+            background: #090d16;
+            box-shadow:
+                -45px 0 95px -15px color-mix(in srgb, var(--glow-left) 62%, transparent),
+                45px 0 95px -15px color-mix(in srgb, var(--glow-right) 62%, transparent),
+                0 -25px 75px -15px color-mix(in srgb, var(--glow-top) 48%, transparent),
+                0 25px 60px rgba(0, 0, 0, 0.85),
+                0 0 0 2px rgba(255, 255, 255, 0.14),
+                0 0 28px 2px color-mix(in srgb, var(--glow-top) 45%, transparent);
+            transition: box-shadow 0.25s ease;
+            overflow: hidden;
+        }
+        @media (max-aspect-ratio: 4/3) {
+            #game-wrapper {
+                width: 96vw;
+                height: auto;
+                max-width: 96vw;
+                max-height: calc(96vw * 0.75);
+            }
+        }
+
+        /* Side-glow LED lightbars mounted to left & right edges of the 4:3 frame */
+        .side-glow-bar {
+            position: absolute;
+            top: 8%;
+            bottom: 8%;
+            width: 5px;
+            border-radius: 999px;
+            pointer-events: none;
+            z-index: 25;
+            opacity: 0.85;
+            filter: blur(1px);
+            transition: background 0.25s ease, box-shadow 0.25s ease;
+        }
+        .side-glow-left {
+            left: 3px;
+            background: var(--glow-left);
+            box-shadow: 0 0 18px 4px var(--glow-left);
+        }
+        .side-glow-right {
+            right: 3px;
+            background: var(--glow-right);
+            box-shadow: 0 0 18px 4px var(--glow-right);
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .boss-cursor {
+            cursor: crosshair !important;
+        }
+
+        /* ==========================================================================
+           SLEEK ARCADE HUD & BUTTON STYLING
+           ========================================================================== */
+        .hud-glass {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(9, 13, 24, 0.92) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.55),
+                0 0 24px -4px color-mix(in srgb, var(--glow-top) 35%, transparent),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(14px);
+        }
+        .btn-arcade {
+            background: linear-gradient(180deg, #9333ea 0%, #6b21a8 100%);
+            border: 1px solid #d8b4fe;
+            box-shadow: 0 3px 0 #3b0764, 0 4px 12px rgba(147, 51, 234, 0.4);
+            transition: all 0.12s ease;
+        }
+        .btn-arcade:hover {
+            filter: brightness(1.14);
+            transform: translateY(-1px);
+        }
+        .btn-arcade:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #3b0764;
+        }
+        .btn-utility {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            box-shadow: 0 3px 0 rgba(2, 6, 23, 0.9);
+            transition: all 0.12s ease;
+        }
+        .btn-utility:hover {
+            background: rgba(51, 65, 85, 0.95);
+            border-color: rgba(192, 132, 252, 0.5);
+            transform: translateY(-1px);
+        }
+        .btn-utility:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 rgba(2, 6, 23, 0.9);
+        }
+        .touch-btn {
+            background: rgba(15, 23, 42, 0.78);
+            border: 2px solid rgba(192, 132, 252, 0.65);
+            backdrop-filter: blur(6px);
+        }
+        .touch-btn:active {
+            background: rgba(147, 51, 234, 0.85);
+            transform: scale(0.94);
+        }
+        @keyframes pulseDanger {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+        .rage-banner {
+            animation: pulseDanger 0.65s infinite ease-in-out;
+        }
+        @keyframes deathBump {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.28); }
+            100% { transform: scale(1); }
+        }
+        .bump-anim {
+            animation: deathBump 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="py-1.5 px-2 sm:py-2 sm:px-4">
+
+    <!-- Dynamic Ambilight Background Layers -->
+    <div id="ambient-backdrop"></div>
+    <div id="ambient-grid"></div>
+    <div id="ambient-flash"></div>
+
+    <!-- Top Upgraded Arcade HUD -->
+    <header class="relative z-20 w-full max-w-[1040px] hud-glass rounded-2xl px-3 py-2 flex flex-wrap items-center justify-between gap-2">
+        <!-- Left: Animated Mini Avatar + Level Info -->
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="relative w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-800 border-2 border-purple-300 shadow-lg flex items-center justify-center shrink-0 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/25"></div>
+                <div class="flex gap-1.5 mt-0.5" id="hud-avatar-eyes">
+                    <div class="w-2.5 h-3 bg-white rounded-sm flex items-center justify-end pr-0.5">
+                        <div class="w-1.5 h-1.5 bg-slate-950 rounded-xs"></div>
+                    </div>
+                    <div class="w-2.5 h-3 bg-white rounded-sm flex items-center justify-end pr-0.5">
+                        <div class="w-1.5 h-1.5 bg-slate-950 rounded-xs"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span id="hud-level-badge" class="bg-gradient-to-r from-purple-600 to-indigo-600 border border-purple-400/50 text-[11px] font-extrabold px-2 py-0.5 rounded-md text-white mono-font tracking-wider shadow-sm">
+                        POZIOM 1/20
+                    </span>
+                    <h1 id="hud-level-name" class="text-sm sm:text-base font-bold text-white tracking-wide truncate">
+                        1. Sielankowe Wzgórza
+                    </h1>
+                </div>
+                <p id="hud-level-hint" class="text-[11px] sm:text-xs text-purple-200/80 truncate max-w-[260px] sm:max-w-[420px]">
+                    Skacz przez przepaście... ale uważaj na niewidzialny blok!
+                </p>
+            </div>
+        </div>
+
+        <!-- Right: Meters, Live Hz/FPS Badge & Controls -->
+        <div class="flex items-center gap-2 flex-wrap justify-end">
+            <!-- Segmented Dash Energy Pill -->
+            <div class="flex items-center gap-2 bg-slate-950/85 border border-cyan-500/35 px-2.5 py-1 rounded-xl shadow-inner">
+                <div class="flex flex-col">
+                    <div class="flex items-center justify-between gap-1.5">
+                        <span class="text-[10px] font-extrabold text-cyan-300 tracking-wider mono-font">⚡ DASH</span>
+                        <span id="dash-status-text" class="text-[9px] font-extrabold text-emerald-400 mono-font">GOTOWY</span>
+                    </div>
+                    <div class="w-20 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-700/80 p-[1px] mt-0.5">
+                        <div id="dash-bar" class="h-full bg-gradient-to-r from-cyan-400 via-sky-400 to-purple-400 rounded-full w-full transition-all duration-75 shadow-[0_0_8px_#22d3ee]"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Death Counter Pill -->
+            <div id="death-pill" class="flex items-center gap-1.5 bg-red-950/75 border border-red-500/45 px-2.5 py-1 rounded-xl shadow-inner">
+                <span class="text-sm">💀</span>
+                <div class="flex flex-col leading-none">
+                    <span class="text-[9px] text-red-300/90 font-bold tracking-wider mono-font">ŚMIERCI</span>
+                    <span id="death-count" class="text-xs sm:text-sm font-extrabold text-red-400 mono-font">0</span>
+                </div>
+            </div>
+
+            <!-- Live High-Refresh-Rate FPS / 60Hz Physics Lock Badge -->
+            <div class="hidden md:flex items-center gap-1.5 bg-slate-950/80 border border-emerald-500/35 px-2.5 py-1 rounded-xl" title="Gra działa ze stałą prędkością fizyki 60Hz niezależnie od odświeżania monitora (60Hz / 144Hz / 240Hz)">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <div class="flex flex-col leading-none">
+                    <span id="fps-counter" class="text-[11px] font-extrabold text-emerald-300 mono-font">60 FPS</span>
+                    <span class="text-[9px] text-slate-400 font-bold mono-font">60Hz LOCK</span>
+                </div>
+            </div>
+
+            <!-- Level Select Dropdown -->
+            <select id="level-select" aria-label="Wybierz poziom" class="bg-slate-900/95 text-purple-200 text-xs font-bold border border-purple-500/45 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer hover:border-purple-400 transition">
+                <!-- Populated dynamically with all 20 levels -->
+            </select>
+
+            <!-- Action Buttons -->
+            <button id="btn-restart" title="Restart Poziomu (Klawisz R)" class="btn-arcade text-xs font-bold px-2.5 py-1.5 rounded-xl text-white flex items-center gap-1">
+                <span>↻</span> <span class="hidden sm:inline">Reset</span>
+            </button>
+            <button id="btn-hints" title="Pokaż zarysy ukrytych pułapek" class="btn-utility text-amber-300 text-xs font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1">
+                <span>👁️</span> <span id="hint-mode-text" class="hidden lg:inline">Podpowiedzi: WYŁ</span>
+            </button>
+            <button id="btn-sound" title="Włącz/Wyłącz Dźwięk" class="btn-utility text-slate-200 text-xs font-bold px-2.5 py-1.5 rounded-xl">
+                🔊
+            </button>
+        </div>
+    </header>
+
+    <!-- Center 4:3 Game Stage with Synced Side Glow -->
+    <div id="stage-container">
+        <main id="game-wrapper">
+            <!-- Left & Right Ambilight Side-Glow Strips -->
+            <div class="side-glow-bar side-glow-left"></div>
+            <div class="side-glow-bar side-glow-right"></div>
+
+            <!-- True 4:3 Internal Resolution (800 x 600) -->
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+            <!-- Boss Health Overlay (Only visible on Level 20) -->
+            <div id="boss-hud" class="hidden absolute top-3 left-1/2 -translate-x-1/2 w-[88%] max-w-[620px] bg-slate-950/90 border-2 border-red-500/90 rounded-2xl p-2.5 shadow-[0_0_30px_rgba(239,68,68,0.5)] backdrop-blur-md pointer-events-none z-20">
+                <div class="flex justify-between items-center mb-1 px-1">
+                    <span class="text-xs sm:text-sm font-extrabold text-red-400 tracking-wider flex items-center gap-2">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                        MEGA-ROBO KWADRAT MK-XX (KLIKAJ LPM W BOSSA!)
+                    </span>
+                    <span id="boss-hp-text" class="text-xs font-extrabold text-amber-300 mono-font">500 / 500 HP</span>
+                </div>
+                <div class="w-full h-3.5 bg-slate-900 rounded-full overflow-hidden border border-red-900 p-0.5">
+                    <div id="boss-hp-bar" class="h-full bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400 rounded-full transition-all duration-100 shadow-[0_0_12px_#f97316]" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- Death / Troll Overlay Banner -->
+            <div id="death-overlay" class="hidden absolute inset-0 bg-slate-950/65 backdrop-blur-[3px] flex flex-col items-center justify-center pointer-events-none z-20">
+                <div class="rage-banner bg-gradient-to-b from-red-950/95 to-slate-950/95 border-2 border-red-500 px-6 py-5 rounded-2xl shadow-[0_0_50px_rgba(239,68,68,0.65)] text-center max-w-md mx-4">
+                    <div class="text-3xl sm:text-4xl font-extrabold text-red-400 tracking-wider mb-1 drop-shadow">ZGINĄŁEŚ! 💀</div>
+                    <p id="troll-message" class="text-sm sm:text-base text-amber-200 font-medium mb-3">
+                        Klasyczny niewidzialny blok. Cat Mario przesyła pozdrowienia!
+                    </p>
+                    <div class="inline-block bg-slate-900/90 border border-red-400/40 px-4 py-1.5 rounded-xl text-xs text-slate-300 mono-font">
+                        Naciśnij <span class="text-white font-bold">[R]</span> lub <span class="text-white font-bold">[SPACJA]</span> (auto-respawn...)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Victory Modal Overlay -->
+            <div id="victory-overlay" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center z-30 p-4 text-center">
+                <div class="bg-gradient-to-b from-purple-950/95 to-slate-900/95 border-2 border-purple-400 rounded-2xl p-6 max-w-md w-full shadow-[0_0_60px_rgba(168,85,247,0.6)]">
+                    <div class="text-5xl mb-2">👑🟪💥</div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-amber-300 mb-2">
+                        NIEMOŻLIWE! PRZESZEDŁEŚ GRĘ!
+                    </h2>
+                    <p class="text-slate-300 text-xs sm:text-sm mb-4">
+                        Pokonałeś wszystkie 19 zdradzieckich poziomów wzgórz i lasu oraz rozstrzelałeś Mega-Robo Bossa w Zamku!
+                    </p>
+                    <div class="grid grid-cols-2 gap-3 mb-5 bg-slate-950/80 p-3 rounded-xl border border-purple-500/30">
+                        <div>
+                            <div class="text-[10px] text-slate-400 font-bold mono-font">ŁĄCZNE ŚMIERCI</div>
+                            <div id="final-deaths" class="text-2xl font-extrabold text-red-400 mono-font">0</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-slate-400 font-bold mono-font">RANGA RAGE-GAMERA</div>
+                            <div id="final-rank" class="text-sm sm:text-base font-extrabold text-amber-400 mt-1">Bóg Kwadratów</div>
+                        </div>
+                    </div>
+                    <button id="btn-play-again" class="btn-arcade w-full py-3 rounded-xl font-bold text-white text-sm sm:text-base cursor-pointer">
+                        ZAGRAJ OD NOWA (POZIOM 1)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile / Touch Controls -->
+            <div class="sm:hidden absolute bottom-2.5 inset-x-3 flex justify-between items-end pointer-events-none z-20">
+                <div class="flex gap-2 pointer-events-auto">
+                    <button id="touch-left" class="touch-btn w-12 h-12 rounded-xl text-white font-bold text-lg flex items-center justify-center">◀</button>
+                    <button id="touch-right" class="touch-btn w-12 h-12 rounded-xl text-white font-bold text-lg flex items-center justify-center">▶</button>
+                </div>
+                <div class="flex gap-2 pointer-events-auto">
+                    <button id="touch-dash" class="touch-btn px-3 h-12 rounded-xl text-cyan-300 font-bold text-xs flex items-center justify-center">DASH</button>
+                    <button id="touch-jump" class="touch-btn w-14 h-12 rounded-xl text-purple-200 font-bold text-sm flex items-center justify-center">SKOK</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bottom Controls Bar -->
+    <footer class="relative z-20 w-full max-w-[1040px] hud-glass rounded-xl px-3 py-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs text-slate-300">
+        <div class="flex flex-wrap items-center gap-3">
+            <span><strong class="text-purple-300">Ruch:</strong> A/D lub ◀/▶</span>
+            <span><strong class="text-purple-300">Skok / Wall-Jump:</strong> W / Spacja / ▲</span>
+            <span><strong class="text-cyan-300">Dash (Zryw):</strong> Shift / K / Z</span>
+            <span><strong class="text-red-300">Reset:</strong> R</span>
+        </div>
+        <div class="text-amber-300 font-semibold flex items-center gap-2">
+            <span>🎯 <strong>Poziom 20 (Zamek):</strong> Klikaj LPM w Bossa!</span>
+        </div>
+    </footer>
+
+<script>
+/**
+ * ============================================================================
+ * FIOLETOWY KWADRAT: RAGE EDITION (Cat Mario / Syobon Action Style)
+ * - Fixed 60Hz Timestep Accumulator (144Hz / 240Hz+ Monitor Safe)
+ * - 4:3 Aspect Ratio (800x600 Canvas) + Reactive Ambilight Side-Glow Engine
+ * - 20 Handcrafted Levels + Castle Boss Fight with Mouse Shooting
+ * ============================================================================
+ */
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// UI Elements
+const hudLevelBadge = document.getElementById('hud-level-badge');
+const hudLevelName = document.getElementById('hud-level-name');
+const hudLevelHint = document.getElementById('hud-level-hint');
+const dashBar = document.getElementById('dash-bar');
+const dashStatusText = document.getElementById('dash-status-text');
+const deathCountEl = document.getElementById('death-count');
+const deathPill = document.getElementById('death-pill');
+const fpsCounterEl = document.getElementById('fps-counter');
+const levelSelect = document.getElementById('level-select');
+const btnRestart = document.getElementById('btn-restart');
+const btnHints = document.getElementById('btn-hints');
+const hintModeText = document.getElementById('hint-mode-text');
+const btnSound = document.getElementById('btn-sound');
+const bossHud = document.getElementById('boss-hud');
+const bossHpText = document.getElementById('boss-hp-text');
+const bossHpBar = document.getElementById('boss-hp-bar');
+const deathOverlay = document.getElementById('death-overlay');
+const trollMessageEl = document.getElementById('troll-message');
+const victoryOverlay = document.getElementById('victory-overlay');
+const finalDeathsEl = document.getElementById('final-deaths');
+const finalRankEl = document.getElementById('final-rank');
+const btnPlayAgain = document.getElementById('btn-play-again');
+
+// Polish Troll Messages on Death
+const TROLL_MESSAGES = [
+    "Serio? Na tym padłeś? Przecież to było oczywiste!",
+    "Klasyczny niewidzialny blok! Cat Mario przesyła pozdrowienia.",
+    "Ta podłoga wyglądała zbyt stabilnie, żeby być prawdziwą...",
+    "Użyj DASH (Shift lub K), fioletowy kwadracie!",
+    "Pamiętaj: możesz odbijać się od ścian (Wall-Jump)!",
+    "Roboty mają mechaniczne oczy, widzą Twój każdy błąd.",
+    "Ta flaga była przynętą. Nigdy nie ufaj pierwszemu portalowi!",
+    "Kolce z sufitu? Klasyka gatunku. Patrz w górę!",
+    "Kto postawił ten blok akurat na trajektorii skoku?! (Ja).",
+    "Spokojnie, klawiatura jeszcze żyje. Spróbuj skoczyć wcześniej!",
+    "Gdyby to było łatwe, nie nazywałoby się Rage Game!",
+    "Ten robot tylko udawał powolnego. Zaskoczony?",
+    "Blisko! No dobra, wcale nie było blisko, ale próbuj dalej!",
+    "Wskazówka: Czasami lepiej zrobić Dash nad przepaścią niż skakać!"
+];
+
+// ============================================================================
+// DYNAMIC AMBILIGHT & SIDE-GLOW ENGINE
+// ============================================================================
+const THEME_PALETTES = {
+    day: {
+        left: '#0ea5e9',   // Sky Blue
+        right: '#10b981',  // Lush Emerald
+        top: '#8b5cf6'     // Soft Violet
+    },
+    forest: {
+        left: '#6366f1',   // Mystic Indigo
+        right: '#a855f7',  // Deep Purple
+        top: '#14b8a6'     // Forest Teal
+    },
+    darkforest: {
+        left: '#e11d48',   // Blood Moon Crimson
+        right: '#9333ea',  // Dark Violet
+        top: '#dc2626'     // Crimson Halo
+    },
+    castle: {
+        left: '#f97316',   // Molten Orange
+        right: '#06b6d4',  // Cyber Laser Cyan
+        top: '#ef4444'     // Boss Red
+    }
+};
+
+let ambientFlashAlpha = 0;
+let ambientFlashColor = '168, 85, 247';
+
+function applyThemeAmbilight(theme) {
+    const pal = THEME_PALETTES[theme] || THEME_PALETTES.day;
+    document.documentElement.style.setProperty('--glow-left', pal.left);
+    document.documentElement.style.setProperty('--glow-right', pal.right);
+    document.documentElement.style.setProperty('--glow-top', pal.top);
+}
+
+function triggerAmbientPulse(rgbString, intensity = 0.35) {
+    ambientFlashColor = rgbString;
+    ambientFlashAlpha = intensity;
+    document.documentElement.style.setProperty('--glow-flash', `rgba(${ambientFlashColor}, ${ambientFlashAlpha})`);
+}
+
+function updateAmbilight(theme) {
+    if (ambientFlashAlpha > 0) {
+        ambientFlashAlpha = Math.max(0, ambientFlashAlpha - 0.018);
+        document.documentElement.style.setProperty('--glow-flash', `rgba(${ambientFlashColor}, ${ambientFlashAlpha.toFixed(3)})`);
+    }
+
+    // Dynamic left/right side-glow shift based on player horizontal position & proximity to portals/boss
+    const pal = THEME_PALETTES[theme] || THEME_PALETTES.day;
+    let leftColor = pal.left;
+    let rightColor = pal.right;
+
+    if (player.dashTimer > 0) {
+        leftColor = '#22d3ee';
+        rightColor = '#22d3ee';
+    } else if (player.dead) {
+        leftColor = '#ef4444';
+        rightColor = '#ef4444';
+    } else if (realGoal && Math.abs((player.x - cameraX) - (realGoal.x - cameraX)) < 220) {
+        rightColor = '#10b981';
+    } else if (boss && boss.state === 'charge') {
+        leftColor = '#ef4444';
+        rightColor = '#f97316';
+    }
+
+    document.documentElement.style.setProperty('--glow-left', leftColor);
+    document.documentElement.style.setProperty('--glow-right', rightColor);
+}
+
+// ============================================================================
+// WEB AUDIO SYNTHESIZER (No external assets needed)
+// ============================================================================
+class SoundSystem {
+    constructor() {
+        this.ctx = null;
+        this.enabled = true;
+    }
+    init() {
+        if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    }
+    play(type) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        if (type === 'jump') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(190, now);
+            osc.frequency.exponentialRampToValueAtTime(520, now + 0.11);
+            gain.gain.setValueAtTime(0.11, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.11);
+            osc.start(now);
+            osc.stop(now + 0.11);
+        } else if (type === 'walljump') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(280, now);
+            osc.frequency.exponentialRampToValueAtTime(680, now + 0.12);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+            osc.start(now);
+            osc.stop(now + 0.12);
+        } else if (type === 'dash') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(620, now);
+            osc.frequency.exponentialRampToValueAtTime(140, now + 0.14);
+            gain.gain.setValueAtTime(0.14, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.14);
+            osc.start(now);
+            osc.stop(now + 0.14);
+        } else if (type === 'troll') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(580, now);
+            osc.frequency.setValueAtTime(740, now + 0.05);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.13);
+            osc.start(now);
+            osc.stop(now + 0.13);
+        } else if (type === 'death') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(240, now);
+            osc.frequency.linearRampToValueAtTime(60, now + 0.35);
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+            osc.start(now);
+            osc.stop(now + 0.35);
+        } else if (type === 'win') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(330, now);
+            osc.frequency.setValueAtTime(440, now + 0.08);
+            osc.frequency.setValueAtTime(554, now + 0.16);
+            osc.frequency.setValueAtTime(660, now + 0.24);
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.42);
+            osc.start(now);
+            osc.stop(now + 0.42);
+        } else if (type === 'hitboss') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.exponentialRampToValueAtTime(220, now + 0.08);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+            osc.start(now);
+            osc.stop(now + 0.08);
+        } else if (type === 'laser') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(920, now);
+            osc.frequency.exponentialRampToValueAtTime(180, now + 0.22);
+            gain.gain.setValueAtTime(0.11, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+            osc.start(now);
+            osc.stop(now + 0.22);
+        }
+    }
+}
+const sfx = new SoundSystem();
+
+// ============================================================================
+// LEVEL DESIGN: 20 HANDCRAFTED, VERIFIED BEATABLE CAT MARIO LEVELS
+// ============================================================================
+// Coordinate system: 1 unit = 40px tile.
+// 4:3 Canvas is 800x600 (20 tiles wide x 15 tiles high).
+// Floor baseline is y = 12 (480px) extending down to 600px.
+
+const LEVELS = [
+    // LEVEL 1: Wprowadzenie + Klasyczny Niewidzialny Blok
+    {
+        name: "1. Sielankowe Wzgórza",
+        hint: "Skacz przez przepaście... ale uważaj na niewidzialny blok nad pierwszą dziurą!",
+        theme: "day",
+        width: 30,
+        spawn: [2, 10],
+        goal: [27.5, 10],
+        solids: [
+            [0, 12, 8, 3], [11, 12, 8, 3], [22, 12, 8, 3],
+            [14, 9, 3, 0.6]
+        ],
+        invisBlocks: [
+            [9, 8.5],
+            [20, 8.5]
+        ],
+        fallingFloors: [
+            [23, 12, 2, 3]
+        ],
+        spikeTraps: [
+            { x: 16, y: 11.2, w: 1, dir: 'up', triggerX: 15.2 }
+        ],
+        enemies: [
+            { x: 13, y: 11.2, minX: 11.5, maxX: 18, speed: 1.8, trollJump: false }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 2: Zdradziecki Most
+    {
+        name: "2. Zdradziecka Polana",
+        hint: "Gdy ziemia się wali, użyj DASH (Shift / K) bez zatrzymywania się!",
+        theme: "day",
+        width: 32,
+        spawn: [1.5, 10],
+        goal: [29.5, 10],
+        solids: [
+            [0, 12, 6, 3], [13, 12, 6, 3], [25, 12, 7, 3],
+            [19, 9, 2, 0.6]
+        ],
+        invisBlocks: [
+            [12, 8.2], [20.5, 6.2]
+        ],
+        fallingFloors: [
+            [6, 12, 3.5, 3], [9.5, 12, 3.5, 3],
+            [22, 9, 2.5, 0.6]
+        ],
+        spikeTraps: [
+            { x: 15, y: 0, w: 1.5, dir: 'down', triggerX: 14.2 }
+        ],
+        enemies: [
+            { x: 16, y: 11.2, minX: 13.5, maxX: 18.2, speed: 2.2, trollSpeed: 5.2 }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 3: Nauka Wall-Jumpa z Niespodzianką
+    {
+        name: "3. Ściana Płaczu",
+        hint: "Skocz na ścianę i naciśnij SKOK ponownie, aby się od niej odbić (Wall-Jump)!",
+        theme: "day",
+        width: 30,
+        spawn: [1.5, 10],
+        goal: [27.5, 5],
+        solids: [
+            [0, 12, 10, 3],
+            [10, 5, 1.5, 10],
+            [14.5, 3, 1.5, 8],
+            [16, 10, 5, 5],
+            [24, 7, 6, 8]
+        ],
+        invisBlocks: [
+            [7.5, 8.5], [22, 6]
+        ],
+        fallingFloors: [
+            [21, 10, 3, 1]
+        ],
+        spikeTraps: [
+            { x: 5, y: 11.2, w: 1, dir: 'up', triggerX: 4.3 },
+            { x: 18, y: 9.2, w: 1, dir: 'up', triggerX: 17.2 }
+        ],
+        enemies: [
+            { x: 25.5, y: 6.2, minX: 24.3, maxX: 27, speed: 2.0, trollJump: true }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 4: Fałszywa Nadzieja (Fake Portal!)
+    {
+        name: "4. Fałszywa Nadzieja",
+        hint: "Czy ten portal na dole na pewno jest prawdziwy? Spójrz wyżej...",
+        theme: "day",
+        width: 32,
+        spawn: [1.5, 10],
+        goal: [28.5, 3.8],
+        solids: [
+            [0, 12, 9, 3],
+            [12, 12, 10, 3],
+            [25, 12, 7, 3],
+            [23, 5, 1.2, 6],
+            [26.5, 5.5, 4.5, 1]
+        ],
+        invisBlocks: [
+            [10, 8.5], [10.8, 8.5]
+        ],
+        fallingFloors: [
+            [9, 12, 3, 3]
+        ],
+        spikeTraps: [
+            { x: 16, y: 0, w: 2, dir: 'down', triggerX: 15 }
+        ],
+        enemies: [
+            { x: 14, y: 11.2, minX: 12.5, maxX: 21, speed: 2.5, trollSpeed: 5.5 },
+            { x: 20, y: 11.2, minX: 12.5, maxX: 21, speed: 2.0, trollJump: true }
+        ],
+        fakeGoals: [
+            [29, 10.2]
+        ]
+    },
+
+    // LEVEL 5: Deszcz Robo-Kwadratów
+    {
+        name: "5. Deszcz z Nieba",
+        hint: "Niektóre robo-kwadraty i kolce spadają prosto z chmur!",
+        theme: "day",
+        width: 34,
+        spawn: [1.5, 10],
+        goal: [31.5, 8],
+        solids: [
+            [0, 12, 7, 3],
+            [10, 11, 5, 4],
+            [18, 10, 5, 5],
+            [26, 9.8, 8, 5.2]
+        ],
+        invisBlocks: [
+            [8, 7.8], [16, 6.8], [24, 6.5]
+        ],
+        fallingFloors: [],
+        spikeTraps: [
+            { x: 12, y: 0, w: 1.5, dir: 'down', triggerX: 10.8 },
+            { x: 20, y: 0, w: 1.5, dir: 'down', triggerX: 18.8 },
+            { x: 28.5, y: 9.0, w: 1.5, dir: 'up', triggerX: 27.5 }
+        ],
+        enemies: [
+            { x: 11.5, y: 10.2, minX: 10.2, maxX: 14.3, speed: 2.3, trollJump: true },
+            { x: 19.5, y: 9.2, minX: 18.2, maxX: 22.3, speed: 2.8, trollSpeed: 6.0 }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 6: Komnata Niewidzialnego Sufitu
+    {
+        name: "6. Niewidzialny Sufit",
+        hint: "Jeśli skoczysz za wysoko, uderzysz głową w pustkę. Użyj płaskiego Dasha!",
+        theme: "day",
+        width: 34,
+        spawn: [1.5, 10],
+        goal: [31.5, 10],
+        solids: [
+            [0, 12, 6, 3],
+            [9.5, 12, 4, 3],
+            [17, 12, 4, 3],
+            [24.5, 12, 9.5, 3]
+        ],
+        invisBlocks: [
+            [6.8, 9.2], [7.8, 9.2],
+            [14.3, 9.2], [15.3, 9.2],
+            [21.8, 9.2], [22.8, 9.2]
+        ],
+        fallingFloors: [
+            [26, 12, 2.5, 3]
+        ],
+        spikeTraps: [
+            { x: 11, y: 11.2, w: 1, dir: 'up', triggerX: 10.1 },
+            { x: 18.5, y: 11.2, w: 1, dir: 'up', triggerX: 17.6 }
+        ],
+        enemies: [
+            { x: 29.5, y: 11.2, minX: 28.6, maxX: 31, speed: 3.0, trollJump: true }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 7: Bliźniacze Wieże
+    {
+        name: "7. Wzgórza Wiatru",
+        hint: "Wspinaj się między ścianami i przeskakuj nad kolcami!",
+        theme: "day",
+        width: 34,
+        spawn: [1.5, 10],
+        goal: [31.5, 10],
+        solids: [
+            [0, 12, 7, 3],
+            [7, 4, 1.2, 8],
+            [11, 2, 1.2, 8],
+            [12.2, 9, 5, 1],
+            [20, 4, 1.2, 11],
+            [24, 2, 1.2, 8.5],
+            [27, 12, 7, 3]
+        ],
+        invisBlocks: [
+            [18, 6.2], [25.8, 8.5]
+        ],
+        fallingFloors: [
+            [14, 9, 2, 1]
+        ],
+        spikeTraps: [
+            { x: 4.5, y: 11.2, w: 1, dir: 'up', triggerX: 3.8 },
+            { x: 13, y: 0, w: 1.5, dir: 'down', triggerX: 12.3 },
+            { x: 29, y: 11.2, w: 1.2, dir: 'up', triggerX: 28 }
+        ],
+        enemies: [
+            { x: 28.5, y: 11.2, minX: 27.2, maxX: 31, speed: 2.5 }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 8: Wejście do Lasu Zmierzchu
+    {
+        name: "8. Las Zmierzchu",
+        hint: "Wchodzisz w gęsty las. Roboty tutaj reagują agresywnie na Twój ruch!",
+        theme: "forest",
+        width: 36,
+        spawn: [1.5, 10],
+        goal: [33.5, 7],
+        solids: [
+            [0, 12, 8, 3],
+            [10.5, 10.5, 6, 4.5],
+            [19, 9, 6, 6],
+            [28, 8.8, 8, 6.2]
+        ],
+        invisBlocks: [
+            [8.8, 7.8], [17.2, 6.5], [26, 6]
+        ],
+        fallingFloors: [
+            [25, 9, 2.5, 1]
+        ],
+        spikeTraps: [
+            { x: 6, y: 11.2, w: 1, dir: 'up', triggerX: 5.2 },
+            { x: 21, y: 0, w: 1.5, dir: 'down', triggerX: 19.8 }
+        ],
+        enemies: [
+            { x: 12, y: 9.7, minX: 10.8, maxX: 16, speed: 2.2, trollSpeed: 5.8 },
+            { x: 20.5, y: 8.2, minX: 19.3, maxX: 24.5, speed: 2.2, trollJump: true },
+            { x: 30, y: 8.0, minX: 28.3, maxX: 33, speed: 2.6, trollSpeed: 5.8 }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 9: Zgniły Drewniany Most
+    {
+        name: "9. Zgniły Most",
+        hint: "Cały środek poziomu to zapadający się most! Biegnij, skacz i Dashuj!",
+        theme: "forest",
+        width: 36,
+        spawn: [1.5, 9],
+        goal: [33.5, 9],
+        solids: [
+            [0, 11, 5, 4],
+            [30, 11, 6, 4]
+        ],
+        invisBlocks: [
+            [11, 7.2], [18, 7.2], [25, 7.2]
+        ],
+        fallingFloors: [
+            [5, 11, 3, 0.8],
+            [9, 11, 3, 0.8],
+            [13, 10.5, 3, 0.8],
+            [17, 10.5, 3, 0.8],
+            [21, 11, 3, 0.8],
+            [25, 11, 3.5, 0.8]
+        ],
+        spikeTraps: [
+            { x: 14, y: 0, w: 1.5, dir: 'down', triggerX: 12.8 },
+            { x: 22, y: 0, w: 1.5, dir: 'down', triggerX: 20.8 },
+            { x: 31.2, y: 10.2, w: 1, dir: 'up', triggerX: 30.2 }
+        ],
+        enemies: [],
+        fakeGoals: []
+    },
+
+    // LEVEL 10: Leśny Labirynt Portalowy
+    {
+        name: "10. Dwa Portale",
+        hint: "Jeden portal to pułapka, drugi to zbawienie. Zobacz, który jest trudniejszy!",
+        theme: "forest",
+        width: 35,
+        spawn: [1.5, 10],
+        goal: [16, 3.2],
+        solids: [
+            [0, 12, 9, 3],
+            [12, 12, 10, 3],
+            [25, 12, 8, 3],
+            [24, 4.5, 1.2, 6.5],
+            [19.5, 3, 1.2, 6],
+            [14.5, 5, 4, 0.8]
+        ],
+        invisBlocks: [
+            [10, 8.8], [23, 8.8]
+        ],
+        fallingFloors: [
+            [15, 12, 3, 3]
+        ],
+        spikeTraps: [
+            { x: 19, y: 11.2, w: 1.2, dir: 'up', triggerX: 18 }
+        ],
+        enemies: [
+            { x: 13, y: 11.2, minX: 12.2, maxX: 21.5, speed: 2.8, trollJump: true },
+            { x: 27, y: 11.2, minX: 25.3, maxX: 31, speed: 2.5, trollSpeed: 5.5 }
+        ],
+        fakeGoals: [
+            [31, 10.2]
+        ]
+    },
+
+    // LEVEL 11: Fabryka Dronów w Lesie
+    {
+        name: "11. Patrol Strażników",
+        hint: "Wiele robo-kwadratów na wąskich półkach. Wykorzystaj skok i Dash nad nimi!",
+        theme: "forest",
+        width: 38,
+        spawn: [1.5, 10],
+        goal: [35.5, 8],
+        solids: [
+            [0, 12, 6, 3],
+            [8, 10.5, 6, 4.5],
+            [16, 9, 6, 6],
+            [24, 10.5, 6, 4.5],
+            [32, 9.8, 6, 5.2]
+        ],
+        invisBlocks: [
+            [6.8, 7.5], [14.8, 6], [22.8, 6.5], [30.8, 6.8]
+        ],
+        fallingFloors: [],
+        spikeTraps: [
+            { x: 4, y: 11.2, w: 1, dir: 'up', triggerX: 3.2 },
+            { x: 18.5, y: 0, w: 1.5, dir: 'down', triggerX: 17.2 },
+            { x: 33.2, y: 9.0, w: 1, dir: 'up', triggerX: 32.3 }
+        ],
+        enemies: [
+            { x: 9.5, y: 9.7, minX: 8.2, maxX: 13.5, speed: 2.6, trollJump: true },
+            { x: 17.5, y: 8.2, minX: 16.2, maxX: 21.5, speed: 3.0, trollSpeed: 6.0 },
+            { x: 25.5, y: 9.7, minX: 24.2, maxX: 29.5, speed: 2.8, trollJump: true },
+            { x: 28.5, y: 9.7, minX: 24.2, maxX: 29.5, speed: 2.2 }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 12: Komin Śmierci
+    {
+        name: "12. Komin Śmierci",
+        hint: "Wspinaczka po ścianach z pułapkami. Nie zatrzymuj się w miejscu!",
+        theme: "forest",
+        width: 32,
+        spawn: [1.5, 10],
+        goal: [29, 10],
+        solids: [
+            [0, 12, 7, 3],
+            [7, 4, 1.2, 11],
+            [11, 2, 1.2, 8.5],
+            [15, 4, 1.2, 11],
+            [19, 2, 1.2, 8.5],
+            [23, 12, 9, 3]
+        ],
+        invisBlocks: [
+            [12.8, 5], [21, 7]
+        ],
+        fallingFloors: [
+            [23, 12, 2.5, 3]
+        ],
+        spikeTraps: [
+            { x: 9, y: 0, w: 1.2, dir: 'down', triggerX: 7.5 },
+            { x: 17, y: 0, w: 1.2, dir: 'down', triggerX: 15.5 },
+            { x: 26.5, y: 11.2, w: 1.2, dir: 'up', triggerX: 25.6 }
+        ],
+        enemies: [
+            { x: 27.5, y: 11.2, minX: 25.8, maxX: 30, speed: 2.5, trollJump: true }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 13: Pechowa Trzynastka
+    {
+        name: "13. Pechowa Trzynastka",
+        hint: "Wszystko tutaj próbuje Cię oszukać. Nawet pierwszy krok!",
+        theme: "forest",
+        width: 36,
+        spawn: [2, 10],
+        goal: [33.5, 10],
+        solids: [
+            [0, 12, 4, 3],
+            [7, 12, 5, 3],
+            [15, 9.5, 4, 1],
+            [22, 12, 5, 3],
+            [30, 12, 6, 3]
+        ],
+        invisBlocks: [
+            [5, 8.5], [13, 7.5], [20, 7.5], [28, 8.5]
+        ],
+        fallingFloors: [
+            [4, 12, 3, 3],
+            [19, 9.5, 2.5, 1],
+            [27, 12, 3, 3]
+        ],
+        spikeTraps: [
+            { x: 8.5, y: 11.2, w: 1.2, dir: 'up', triggerX: 7.5 },
+            { x: 16.5, y: 0, w: 1.5, dir: 'down', triggerX: 15.2 },
+            { x: 31.2, y: 11.2, w: 1, dir: 'up', triggerX: 30.3 }
+        ],
+        enemies: [
+            { x: 9.5, y: 11.2, minX: 7.2, maxX: 11.5, speed: 2.5, trollSpeed: 5.5 },
+            { x: 23.5, y: 11.2, minX: 22.2, maxX: 26.5, speed: 2.8, trollJump: true }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 14: Skok Wiary
+    {
+        name: "14. Skok Wiary",
+        hint: "Łącz Wall-Jump z Dashem w powietrzu, aby pokonać gigantyczne przepaście!",
+        theme: "forest",
+        width: 38,
+        spawn: [1.5, 10],
+        goal: [35.5, 9],
+        solids: [
+            [0, 12, 5, 3],
+            [8, 5, 1.2, 8],
+            [15, 5, 1.2, 8],
+            [22, 11, 5, 4],
+            [30, 4, 1.2, 7],
+            [33, 10.8, 5, 4.2]
+        ],
+        invisBlocks: [
+            [11.5, 4.5], [28, 7.5]
+        ],
+        fallingFloors: [
+            [24, 11, 2.5, 4]
+        ],
+        spikeTraps: [
+            { x: 22.5, y: 10.2, w: 1, dir: 'up', triggerX: 21.6 },
+            { x: 33.8, y: 10.0, w: 1, dir: 'up', triggerX: 33.0 }
+        ],
+        enemies: [
+            { x: 34.5, y: 10.0, minX: 33.2, maxX: 37, speed: 2.4, trollJump: true }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 15: Krwawy Księżyc (Mroczny Las)
+    {
+        name: "15. Krwawy Księżyc",
+        hint: "Zbliżasz się do Zamku Bossa. Noc zapadła, a pułapki są jeszcze gęstsze!",
+        theme: "darkforest",
+        width: 38,
+        spawn: [1.5, 10],
+        goal: [35.5, 10],
+        solids: [
+            [0, 12, 6, 3],
+            [9, 10.5, 5, 4.5],
+            [17, 9, 5, 6],
+            [25, 10.5, 5, 4.5],
+            [33, 12, 5, 3]
+        ],
+        invisBlocks: [
+            [7, 8.2], [15, 6.8], [23, 7.2], [31, 8.2]
+        ],
+        fallingFloors: [
+            [11, 10.5, 2.5, 1],
+            [27, 10.5, 2.5, 1]
+        ],
+        spikeTraps: [
+            { x: 4, y: 11.2, w: 1, dir: 'up', triggerX: 3.1 },
+            { x: 18.5, y: 0, w: 2, dir: 'down', triggerX: 17.2 },
+            { x: 33.8, y: 11.2, w: 1, dir: 'up', triggerX: 32.9 }
+        ],
+        enemies: [
+            { x: 10, y: 9.7, minX: 9.2, maxX: 13.5, speed: 3.0, trollSpeed: 6.2 },
+            { x: 18, y: 8.2, minX: 17.2, maxX: 21.5, speed: 3.0, trollJump: true },
+            { x: 26, y: 9.7, minX: 25.2, maxX: 29.5, speed: 3.0, trollSpeed: 6.2 }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 16: Mechaniczna Zasadzka
+    {
+        name: "16. Mechaniczna Zasadzka",
+        hint: "Uważaj na fałszywy portal na środku mapy!",
+        theme: "darkforest",
+        width: 38,
+        spawn: [1.5, 10],
+        goal: [35.5, 6],
+        solids: [
+            [0, 12, 7, 3],
+            [10, 12, 8, 3],
+            [21, 10, 6, 5],
+            [29, 3.5, 1.2, 8],
+            [32.5, 7.8, 5.5, 7.2]
+        ],
+        invisBlocks: [
+            [8.2, 8.5], [19.2, 7.5], [31, 5.5]
+        ],
+        fallingFloors: [
+            [7, 12, 3, 3],
+            [23, 10, 2.5, 1]
+        ],
+        spikeTraps: [
+            { x: 12, y: 0, w: 1.5, dir: 'down', triggerX: 11 },
+            { x: 33.2, y: 7.0, w: 1, dir: 'up', triggerX: 32.4 }
+        ],
+        enemies: [
+            { x: 13, y: 11.2, minX: 10.3, maxX: 17.5, speed: 2.8, trollJump: true },
+            { x: 22, y: 9.2, minX: 21.2, maxX: 26.5, speed: 3.0, trollSpeed: 6.0 }
+        ],
+        fakeGoals: [
+            [16, 10.2]
+        ]
+    },
+
+    // LEVEL 17: Bieg Przez Kolce
+    {
+        name: "17. Ścieżka Cierpienia",
+        hint: "Szybkie decyzje: skok, wall-jump, dash! Nie daj się zamknąć!",
+        theme: "darkforest",
+        width: 40,
+        spawn: [1.5, 10],
+        goal: [37.5, 10],
+        solids: [
+            [0, 12, 5, 3],
+            [8, 12, 4, 3],
+            [14, 5, 1.2, 8],
+            [18, 9.5, 5, 5.5],
+            [26, 9.5, 5, 5.5],
+            [34, 12, 6, 3]
+        ],
+        invisBlocks: [
+            [6, 8.8], [16, 6.0], [24, 6.8], [32, 8.2]
+        ],
+        fallingFloors: [
+            [8, 12, 2.5, 3],
+            [20, 9.5, 2.5, 1],
+            [28, 9.5, 2.5, 1]
+        ],
+        spikeTraps: [
+            { x: 18.5, y: 8.7, w: 1, dir: 'up', triggerX: 17.6 },
+            { x: 26.5, y: 8.7, w: 1, dir: 'up', triggerX: 25.6 },
+            { x: 35, y: 0, w: 1.5, dir: 'down', triggerX: 34.0 }
+        ],
+        enemies: [
+            { x: 19.5, y: 8.7, minX: 18.2, maxX: 22.5, speed: 3.0, trollJump: true },
+            { x: 35.5, y: 11.2, minX: 34.2, maxX: 37, speed: 3.2, trollSpeed: 6.2 }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 18: Przedmurze Zamku
+    {
+        name: "18. Przedmurze Zamku",
+        hint: "Widać już mury zamczyska! Pokonaj wieże strażnicze!",
+        theme: "darkforest",
+        width: 40,
+        spawn: [1.5, 10],
+        goal: [37.5, 5],
+        solids: [
+            [0, 12, 6, 3],
+            [6, 5, 1.2, 7],
+            [9.5, 3, 1.2, 7.5],
+            [10.7, 9, 5, 1],
+            [18, 11, 6, 4],
+            [26, 4.5, 1.2, 8.5],
+            [30, 2.5, 1.2, 8],
+            [33, 6.8, 7, 8.2]
+        ],
+        invisBlocks: [
+            [16.5, 7.5], [24.5, 8], [31.8, 4.8]
+        ],
+        fallingFloors: [
+            [12.5, 9, 2.5, 1],
+            [20, 11, 2.5, 1]
+        ],
+        spikeTraps: [
+            { x: 4, y: 11.2, w: 1, dir: 'up', triggerX: 3.1 },
+            { x: 19, y: 0, w: 1.5, dir: 'down', triggerX: 18.0 },
+            { x: 34.2, y: 6.0, w: 1.2, dir: 'up', triggerX: 33.2 }
+        ],
+        enemies: [
+            { x: 19, y: 10.2, minX: 18.2, maxX: 23.5, speed: 3.2, trollJump: true },
+            { x: 35, y: 6.0, minX: 33.3, maxX: 37, speed: 3.2, trollSpeed: 6.5 }
+        ],
+        fakeGoals: []
+    },
+
+    // LEVEL 19: Most Zwodzony (Ostatni krok przed Bossem!)
+    {
+        name: "19. Brama Zamku",
+        hint: "Wejdź do bramy zamkowej! Ale nie daj się nabrać na fałszywe wejście!",
+        theme: "darkforest",
+        width: 42,
+        spawn: [1.5, 10],
+        goal: [39, 9.8],
+        solids: [
+            [0, 12, 6, 3],
+            [12, 10, 5, 5],
+            [20, 8, 5, 7],
+            [28, 11.5, 14, 3.5],
+            [34, 4, 1.2, 5.5]
+        ],
+        invisBlocks: [
+            [7.5, 8.5], [10, 7.5], [18, 6.0], [26, 6.0]
+        ],
+        fallingFloors: [
+            [6, 12, 3, 1],
+            [9, 11, 3, 1],
+            [29, 11.5, 3, 3.5]
+        ],
+        spikeTraps: [
+            { x: 14, y: 9.2, w: 1.2, dir: 'up', triggerX: 13.0 },
+            { x: 22, y: 0, w: 1.5, dir: 'down', triggerX: 20.8 },
+            { x: 36, y: 10.7, w: 1.2, dir: 'up', triggerX: 35.0 }
+        ],
+        enemies: [
+            { x: 13.5, y: 9.2, minX: 12.2, maxX: 16.5, speed: 3.0, trollJump: true },
+            { x: 21.5, y: 7.2, minX: 20.2, maxX: 24.5, speed: 3.4, trollSpeed: 6.5 },
+            { x: 36.5, y: 10.7, minX: 32.5, maxX: 38.2, speed: 3.4, trollJump: true }
+        ],
+        fakeGoals: [
+            [32.5, 9.7]
+        ]
+    },
+
+    // LEVEL 20: FINAŁ - ZAMEK I MEGA-ROBO BOSS (Fitted to 20-tile 800x600 4:3 Arena!)
+    {
+        name: "20. ZAMEK: MEGA-ROBO BOSS",
+        hint: "UNIKAJ ATAKÓW (WSAD + Shift) I KLIKAJ MYSZKĄ (LPM) BEZPOŚREDNIO W BOSSA ABY GO ZNISZCZYĆ!",
+        theme: "castle",
+        width: 20, // Exact 800px single-screen 4:3 arena so mouse aiming is 100% locked!
+        spawn: [2.5, 10],
+        goal: null, // Spawns when Boss dies!
+        solids: [
+            [0, 12.5, 20, 2.5],  // Castle Stone Floor (500..600px)
+            [0, 0, 1, 15],       // Left Castle Wall (Wall-jumpable!)
+            [19, 0, 1, 15],      // Right Castle Wall (Wall-jumpable!)
+            [2.6, 9.0, 3.6, 0.6],// Left Arena Platform
+            [13.8, 9.0, 3.6, 0.6],// Right Arena Platform
+            [8.2, 6.2, 3.6, 0.6] // Top Center Platform
+        ],
+        invisBlocks: [],
+        fallingFloors: [],
+        spikeTraps: [],
+        enemies: [],
+        fakeGoals: [],
+        isBossLevel: true
+    }
+];
+
+// Populate Level Selector Dropdown
+LEVELS.forEach((lvl, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = lvl.name;
+    levelSelect.appendChild(opt);
+});
+
+// ============================================================================
+// GAME STATE & ENTITIES
+// ============================================================================
+const TILE = 40;
+let currentLevelIdx = 0;
+let deathCount = 0;
+let showHints = false;
+let screenShake = 0;
+let cameraX = 0;
+let tickCount = 0; // Increments at locked 60Hz for deterministic animations
+
+// Ambient background floating particles (fireflies, embers, pollen)
+const bgMotes = Array.from({ length: 32 }, () => ({
+    x: Math.random() * 800,
+    y: Math.random() * 540,
+    r: Math.random() * 2.5 + 1,
+    vx: (Math.random() - 0.5) * 0.4,
+    vy: -Math.random() * 0.45 - 0.15,
+    phase: Math.random() * Math.PI * 2
+}));
+
+// Input State
+const keys = {
+    left: false,
+    right: false,
+    up: false,
+    jumpPressed: false,
+    dashPressed: false
+};
+
+// Mouse state for Level 20 Boss Fight
+const mouse = {
+    x: 400,
+    y: 300,
+    clicked: false
+};
+
+// Player Object (Purple Square with 2 Expressive Eyes)
+const player = {
+    x: 80,
+    y: 400,
+    w: 30,
+    h: 30,
+    vx: 0,
+    vy: 0,
+    facing: 1,
+    onGround: false,
+    wallDir: 0,
+    dashTimer: 0,
+    dashCooldown: 0,
+    wallJumpLock: 0,
+    dead: false,
+    deathTimer: 0,
+    trail: []
+};
+
+// Active Level Runtime Objects
+let solids = [];
+let invisBlocks = [];
+let fallingFloors = [];
+let spikeTraps = [];
+let enemies = [];
+let fakeGoals = [];
+let realGoal = null;
+let particles = [];
+let floatingTexts = [];
+let projectiles = [];
+let boss = null;
+
+// ============================================================================
+// LEVEL INITIALIZATION
+// ============================================================================
+function loadLevel(idx) {
+    currentLevelIdx = Math.max(0, Math.min(LEVELS.length - 1, idx));
+    const lvl = LEVELS[currentLevelIdx];
+
+    levelSelect.value = currentLevelIdx;
+    hudLevelBadge.textContent = `POZIOM ${currentLevelIdx + 1}/20`;
+    hudLevelName.textContent = lvl.name;
+    hudLevelHint.textContent = lvl.hint;
+
+    applyThemeAmbilight(lvl.theme);
+
+    if (lvl.isBossLevel) {
+        bossHud.classList.remove('hidden');
+        canvas.classList.add('boss-cursor');
+    } else {
+        bossHud.classList.add('hidden');
+        canvas.classList.remove('boss-cursor');
+    }
+
+    deathOverlay.classList.add('hidden');
+    victoryOverlay.classList.add('hidden');
+
+    // Reset Player
+    player.x = lvl.spawn[0] * TILE;
+    player.y = lvl.spawn[1] * TILE;
+    player.vx = 0;
+    player.vy = 0;
+    player.facing = 1;
+    player.onGround = false;
+    player.wallDir = 0;
+    player.dashTimer = 0;
+    player.dashCooldown = 0;
+    player.wallJumpLock = 0;
+    player.dead = false;
+    player.deathTimer = 0;
+    player.trail = [];
+
+    // Build Solids
+    solids = lvl.solids.map(s => ({
+        x: s[0] * TILE,
+        y: s[1] * TILE,
+        w: s[2] * TILE,
+        h: s[3] * TILE,
+        isPlatform: s[3] <= 0.8
+    }));
+
+    // Build Invisible Troll Blocks
+    invisBlocks = lvl.invisBlocks.map(b => ({
+        x: b[0] * TILE,
+        y: b[1] * TILE,
+        w: TILE,
+        h: TILE,
+        revealed: false,
+        bumpY: 0
+    }));
+
+    // Build Falling Floors
+    fallingFloors = lvl.fallingFloors.map(f => ({
+        x: f[0] * TILE,
+        y: f[1] * TILE,
+        origY: f[1] * TILE,
+        w: f[2] * TILE,
+        h: f[3] * TILE,
+        triggered: false,
+        timer: 0,
+        vy: 0
+    }));
+
+    // Build Spike Traps
+    spikeTraps = lvl.spikeTraps.map(t => ({
+        x: t.x * TILE,
+        y: t.y * TILE,
+        origY: t.y * TILE,
+        w: t.w * TILE,
+        h: 32,
+        dir: t.dir,
+        triggerX: t.triggerX * TILE,
+        triggered: false,
+        vy: 0
+    }));
+
+    // Build Robotic Square Enemies
+    enemies = lvl.enemies.map(e => ({
+        x: e.x * TILE,
+        y: e.y * TILE,
+        w: 32,
+        h: 32,
+        vx: e.speed || 2,
+        vy: 0,
+        minX: e.minX * TILE,
+        maxX: e.maxX * TILE,
+        baseSpeed: e.speed || 2,
+        trollSpeed: e.trollSpeed || null,
+        trollJump: e.trollJump || false,
+        jumped: false,
+        turboActive: false,
+        eyeColor: e.trollSpeed ? '#ff0055' : (e.trollJump ? '#00f2fe' : '#ef4444')
+    }));
+
+    // Build Fake & Real Goals
+    fakeGoals = (lvl.fakeGoals || []).map(fg => ({
+        x: fg[0] * TILE,
+        y: fg[1] * TILE,
+        w: 38,
+        h: 68,
+        triggered: false
+    }));
+
+    realGoal = lvl.goal ? {
+        x: lvl.goal[0] * TILE,
+        y: lvl.goal[1] * TILE,
+        w: 40,
+        h: 72
+    } : null;
+
+    particles = [];
+    floatingTexts = [];
+    projectiles = [];
+
+    // Initialize Boss if Level 20 (Fitted for 800x600 4:3 Castle Arena)
+    if (lvl.isBossLevel) {
+        boss = {
+            x: 560,
+            y: 360,
+            w: 108,
+            h: 108,
+            vx: -2.4,
+            vy: 0,
+            hp: 500,
+            maxHp: 500,
+            state: 'patrol',
+            stateTimer: 90,
+            flashTimer: 0,
+            clickCooldown: 0,
+            facing: -1,
+            shockwaves: []
+        };
+        updateBossHUD();
+    } else {
+        boss = null;
+    }
+
+    cameraX = Math.max(0, Math.min(lvl.width * TILE - canvas.width, player.x - canvas.width * 0.35));
+}
+
+function updateBossHUD() {
+    if (!boss) return;
+    const hp = Math.max(0, Math.ceil(boss.hp));
+    bossHpText.textContent = `${hp} / ${boss.maxHp} HP`;
+    bossHpBar.style.width = `${(hp / boss.maxHp) * 100}%`;
+}
+
+// ============================================================================
+// PARTICLE & FLOATING TEXT EFFECTS
+// ============================================================================
+function spawnParticles(x, y, color, count = 12, speed = 5) {
+    for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = (Math.random() * 0.7 + 0.3) * speed;
+        particles.push({
+            x,
+            y,
+            vx: Math.cos(angle) * spd,
+            vy: Math.sin(angle) * spd - 1,
+            size: Math.random() * 5 + 3,
+            color,
+            alpha: 1,
+            decay: Math.random() * 0.025 + 0.02
+        });
+    }
+}
+
+function spawnFloatingText(x, y, text, color = '#fbbf24') {
+    floatingTexts.push({
+        x,
+        y,
+        text,
+        color,
+        vy: -1.8,
+        alpha: 1
+    });
+}
+
+// ============================================================================
+// PLAYER DEATH & LEVEL CLEAR
+// ============================================================================
+function killPlayer(customReason) {
+    if (player.dead) return;
+    player.dead = true;
+    player.deathTimer = 65; // 65 fixed 60Hz ticks (~1.08s)
+    deathCount++;
+    deathCountEl.textContent = deathCount;
+
+    // Bump animation on HUD pill
+    deathPill.classList.remove('bump-anim');
+    void deathPill.offsetWidth;
+    deathPill.classList.add('bump-anim');
+
+    screenShake = 15;
+    sfx.play('death');
+    triggerAmbientPulse('239, 68, 68', 0.48);
+
+    spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#a855f7', 28, 7);
+    spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#f43f5e', 16, 5);
+
+    const msg = customReason || TROLL_MESSAGES[Math.floor(Math.random() * TROLL_MESSAGES.length)];
+    trollMessageEl.textContent = msg;
+    deathOverlay.classList.remove('hidden');
+}
+
+function completeLevel() {
+    sfx.play('win');
+    triggerAmbientPulse('16, 185, 129', 0.45);
+    spawnParticles(player.x + 15, player.y + 15, '#34d399', 32, 6);
+    if (currentLevelIdx < LEVELS.length - 1) {
+        loadLevel(currentLevelIdx + 1);
+    } else {
+        finalDeathsEl.textContent = deathCount;
+        let rank = "Bóg Kwadratów 🏆";
+        if (deathCount > 150) rank = "Niezniszczalny Masochista 💀";
+        else if (deathCount > 75) rank = "Weteran Cat Mario 🔥";
+        else if (deathCount > 30) rank = "Łowca Pułapek ⚡";
+        finalRankEl.textContent = rank;
+        victoryOverlay.classList.remove('hidden');
+    }
+}
+
+// ============================================================================
+// AABB COLLISION HELPER
+// ============================================================================
+function rectOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+    return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+}
+
+// ============================================================================
+// FIXED 60HZ PHYSICS & LOGIC UPDATE STEP
+// ============================================================================
+function update() {
+    tickCount++;
+    const lvl = LEVELS[currentLevelIdx];
+
+    // Update Ambilight Glow
+    updateAmbilight(lvl.theme);
+
+    // Update Ambient Floating Motes
+    for (const m of bgMotes) {
+        m.x += m.vx;
+        m.y += m.vy;
+        if (m.y < -10) { m.y = 580; m.x = Math.random() * 800; }
+        if (m.x < -10) m.x = 810;
+        if (m.x > 810) m.x = -10;
+    }
+
+    // Update Screen Shake
+    if (screenShake > 0) screenShake *= 0.85;
+    if (screenShake < 0.4) screenShake = 0;
+
+    // Update Particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.18;
+        p.alpha -= p.decay;
+        if (p.alpha <= 0) particles.splice(i, 1);
+    }
+
+    // Update Floating Texts
+    for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y += ft.vy;
+        ft.alpha -= 0.022;
+        if (ft.alpha <= 0) floatingTexts.splice(i, 1);
+    }
+
+    // Update Player Dash Trail Afterimages
+    for (let i = player.trail.length - 1; i >= 0; i--) {
+        player.trail[i].alpha -= 0.08;
+        if (player.trail[i].alpha <= 0) player.trail.splice(i, 1);
+    }
+
+    // Handle Player Death State
+    if (player.dead) {
+        player.deathTimer--;
+        if (player.deathTimer <= 0 || keys.jumpPressed) {
+            keys.jumpPressed = false;
+            loadLevel(currentLevelIdx);
+        }
+        return;
+    }
+
+    // Dash Cooldown UI
+    if (player.dashCooldown > 0) player.dashCooldown--;
+    const dashPct = Math.max(0, Math.min(100, ((36 - player.dashCooldown) / 36) * 100));
+    dashBar.style.width = `${dashPct}%`;
+    if (player.dashCooldown === 0) {
+        dashStatusText.textContent = "GOTOWY";
+        dashStatusText.className = "text-[9px] font-extrabold text-emerald-400 mono-font";
+    } else {
+        dashStatusText.textContent = `${Math.ceil((player.dashCooldown / 60) * 10) / 10}s`;
+        dashStatusText.className = "text-[9px] font-extrabold text-cyan-300/70 mono-font";
+    }
+
+    // Trigger Dash
+    if (keys.dashPressed && player.dashCooldown <= 0 && player.dashTimer <= 0) {
+        keys.dashPressed = false;
+        player.dashTimer = 9;
+        player.dashCooldown = 36;
+        const dir = keys.left ? -1 : (keys.right ? 1 : player.facing);
+        player.facing = dir;
+        player.vx = dir * 13.2;
+        player.vy = 0;
+        sfx.play('dash');
+        triggerAmbientPulse('34, 211, 238', 0.28);
+        spawnParticles(player.x + player.w / 2, player.y + player.h / 2, '#22d3ee', 12, 4.5);
+    }
+    keys.dashPressed = false;
+
+    // Horizontal Movement
+    if (player.dashTimer > 0) {
+        player.dashTimer--;
+        player.trail.push({
+            x: player.x,
+            y: player.y,
+            alpha: 0.65
+        });
+        particles.push({
+            x: player.x + Math.random() * player.w,
+            y: player.y + Math.random() * player.h,
+            vx: -player.vx * 0.1,
+            vy: (Math.random() - 0.5),
+            size: 6,
+            color: '#22d3ee',
+            alpha: 0.75,
+            decay: 0.08
+        });
+    } else {
+        if (player.wallJumpLock > 0) {
+            player.wallJumpLock--;
+        } else {
+            const accel = player.onGround ? 1.15 : 0.75;
+            const maxSpd = 4.7;
+            if (keys.left) {
+                player.vx = Math.max(player.vx - accel, -maxSpd);
+                player.facing = -1;
+            } else if (keys.right) {
+                player.vx = Math.min(player.vx + accel, maxSpd);
+                player.facing = 1;
+            } else {
+                player.vx *= player.onGround ? 0.72 : 0.88;
+                if (Math.abs(player.vx) < 0.1) player.vx = 0;
+            }
+        }
+        // Gravity
+        player.vy += 0.58;
+        if (player.vy > 14) player.vy = 14;
+    }
+
+    // Combine Solid Colliders
+    const activeColliders = [...solids];
+    for (const ib of invisBlocks) {
+        if (ib.revealed) activeColliders.push(ib);
+        if (ib.bumpY < 0) ib.bumpY += 1;
+    }
+    for (const ff of fallingFloors) {
+        activeColliders.push(ff);
+    }
+
+    // Move Horizontally & Check X Collisions
+    player.x += player.vx;
+    if (player.x < 0) {
+        player.x = 0;
+        player.vx = 0;
+    }
+    const maxWorldW = lvl.width * TILE;
+    if (player.x + player.w > maxWorldW) {
+        player.x = maxWorldW - player.w;
+        player.vx = 0;
+    }
+
+    player.wallDir = 0;
+    for (const c of activeColliders) {
+        if (rectOverlap(player.x, player.y, player.w, player.h, c.x, c.y, c.w, c.h)) {
+            if (player.vx > 0) {
+                player.x = c.x - player.w;
+                player.vx = 0;
+                if (!c.isPlatform && c.h >= TILE * 1.5) player.wallDir = 1;
+            } else if (player.vx < 0) {
+                player.x = c.x + c.w;
+                player.vx = 0;
+                if (!c.isPlatform && c.h >= TILE * 1.5) player.wallDir = -1;
+            }
+        }
+    }
+
+    // Forgiving Wall-Jump proximity check
+    if (!player.onGround && player.wallDir === 0) {
+        for (const c of solids) {
+            if (c.isPlatform || c.h < TILE * 1.5) continue;
+            if (rectOverlap(player.x - 3, player.y + 4, player.w + 6, player.h - 8, c.x, c.y, c.w, c.h)) {
+                player.wallDir = (player.x + player.w / 2 < c.x + c.w / 2) ? 1 : -1;
+            }
+        }
+    }
+
+    // Wall Slide friction
+    if (!player.onGround && player.wallDir !== 0 && player.vy > 2.1 && ((player.wallDir === 1 && keys.right) || (player.wallDir === -1 && keys.left))) {
+        player.vy = 2.1;
+        if (Math.random() < 0.45) {
+            particles.push({
+                x: player.wallDir === 1 ? player.x + player.w : player.x,
+                y: player.y + player.h - 4,
+                vx: -player.wallDir * 1.1,
+                vy: -0.6,
+                size: 4,
+                color: '#e9d5ff',
+                alpha: 0.8,
+                decay: 0.06
+            });
+        }
+    }
+
+    // Move Vertically & Check Y Collisions
+    const prevY = player.y;
+    player.y += player.vy;
+    player.onGround = false;
+
+    // 1. Check Invisible Troll Blocks when moving UP
+    if (player.vy < 0) {
+        for (const ib of invisBlocks) {
+            if (!ib.revealed && prevY >= ib.y + ib.h - 6 && rectOverlap(player.x + 2, player.y, player.w - 4, player.h, ib.x, ib.y, ib.w, ib.h)) {
+                ib.revealed = true;
+                ib.bumpY = -6;
+                player.y = ib.y + ib.h;
+                player.vy = 2.5;
+                player.dashTimer = 0;
+                sfx.play('troll');
+                triggerAmbientPulse('251, 191, 36', 0.32);
+                spawnParticles(ib.x + TILE / 2, ib.y + TILE, '#fbbf24', 12, 4);
+                spawnFloatingText(ib.x + 20, ib.y - 4, "BĘC! TROLL!", "#facc15");
+            }
+        }
+    }
+
+    // 2. Check Standard & Falling Floor Y Collisions
+    for (const c of activeColliders) {
+        if (rectOverlap(player.x, player.y, player.w, player.h, c.x, c.y, c.w, c.h)) {
+            if (player.vy > 0) {
+                player.y = c.y - player.h;
+                player.vy = 0;
+                player.onGround = true;
+                player.dashCooldown = Math.min(player.dashCooldown, 6);
+
+                if (c.triggered !== undefined && !c.triggered) {
+                    c.triggered = true;
+                    c.timer = 7;
+                    sfx.play('troll');
+                    triggerAmbientPulse('251, 146, 60', 0.25);
+                }
+            } else if (player.vy < 0) {
+                player.y = c.y + c.h;
+                player.vy = 0;
+            }
+        }
+    }
+
+    // Handle Jump & Wall-Jump
+    if (keys.jumpPressed) {
+        if (player.onGround) {
+            player.vy = -12.3;
+            player.onGround = false;
+            keys.jumpPressed = false;
+            sfx.play('jump');
+            spawnParticles(player.x + player.w / 2, player.y + player.h, '#e2e8f0', 7, 2.5);
+        } else if (player.wallDir !== 0) {
+            player.vy = -11.8;
+            player.vx = -player.wallDir * 7.8;
+            player.facing = -player.wallDir;
+            player.wallJumpLock = 9;
+            player.dashCooldown = 0;
+            keys.jumpPressed = false;
+            sfx.play('walljump');
+            spawnParticles(player.wallDir === 1 ? player.x + player.w : player.x, player.y + player.h / 2, '#c084fc', 12, 4);
+        }
+    }
+    keys.jumpPressed = false;
+
+    // Pit Death Check (Below 600px 4:3 canvas)
+    if (player.y > canvas.height + 24) {
+        killPlayer("Grawitacja zawsze wygrywa. Wpadłeś w przepaść!");
+        return;
+    }
+
+    // Update Falling Floors
+    for (const ff of fallingFloors) {
+        if (ff.triggered) {
+            if (ff.timer > 0) {
+                ff.timer--;
+            } else {
+                ff.vy += 0.75;
+                ff.y += ff.vy;
+            }
+        }
+    }
+
+    // Update & Check Spike Traps
+    for (const st of spikeTraps) {
+        if (!st.triggered && player.x + player.w >= st.triggerX) {
+            st.triggered = true;
+            sfx.play('troll');
+        }
+        if (st.triggered && st.dir === 'down') {
+            st.vy += 0.75;
+            st.y += st.vy;
+        }
+        const spikeActive = st.dir === 'up' ? st.triggered : true;
+        if (spikeActive) {
+            const hitX = st.x + 5;
+            const hitY = st.dir === 'up' ? st.y + 6 : st.y;
+            const hitW = st.w - 10;
+            const hitH = st.h - 8;
+            if (rectOverlap(player.x + 3, player.y + 3, player.w - 6, player.h - 6, hitX, hitY, hitW, hitH)) {
+                killPlayer(st.dir === 'up' ? "Zaskoczony kolcami z podłogi? Klasyk!" : "Patrz w górę! Spadające kolce!");
+                return;
+            }
+        }
+    }
+
+    // Update & Check Robotic Square Enemies
+    for (const e of enemies) {
+        const distToPlayer = Math.abs((player.x + player.w / 2) - (e.x + e.w / 2));
+
+        let currentSpeed = e.baseSpeed;
+        e.turboActive = false;
+        if (e.trollSpeed && distToPlayer < 170) {
+            currentSpeed = e.trollSpeed;
+            e.turboActive = true;
+        }
+        if (e.trollJump && !e.jumped && distToPlayer < 140 && player.y < e.y + 20) {
+            e.vy = -10.5;
+            e.jumped = true;
+            sfx.play('jump');
+        }
+
+        e.x += Math.sign(e.vx) * currentSpeed;
+        if (e.x <= e.minX) {
+            e.x = e.minX;
+            e.vx = Math.abs(e.vx);
+        } else if (e.x + e.w >= e.maxX) {
+            e.x = e.maxX - e.w;
+            e.vx = -Math.abs(e.vx);
+        }
+
+        if (e.jumped) {
+            e.vy += 0.55;
+            e.y += e.vy;
+            for (const s of solids) {
+                if (rectOverlap(e.x, e.y, e.w, e.h, s.x, s.y, s.w, s.h) && e.vy > 0) {
+                    e.y = s.y - e.h;
+                    e.vy = 0;
+                    e.jumped = false;
+                }
+            }
+        }
+
+        if (rectOverlap(player.x + 3, player.y + 3, player.w - 6, player.h - 6, e.x + 3, e.y + 3, e.w - 6, e.h - 6)) {
+            killPlayer("Zostałeś zezłomowany przez Robo-Kwadrat z mechanicznym okiem!");
+            return;
+        }
+    }
+
+    // Check Fake Goals
+    for (const fg of fakeGoals) {
+        if (!fg.triggered && rectOverlap(player.x, player.y, player.w, player.h, fg.x, fg.y, fg.w, fg.h)) {
+            fg.triggered = true;
+            killPlayer("HAHA! Ten portal był FAŁSZYWY! Prawdziwe wyjście jest wyżej lub dalej!");
+            return;
+        }
+    }
+
+    // Check Real Goal
+    if (realGoal && rectOverlap(player.x, player.y, player.w, player.h, realGoal.x, realGoal.y, realGoal.w, realGoal.h)) {
+        completeLevel();
+        return;
+    }
+
+    // Update Boss (Level 20)
+    if (boss) {
+        updateBoss();
+    }
+
+    // Update Projectiles (Level 20)
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+        const p = projectiles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > 800 || p.y < 0 || p.y > 600) {
+            projectiles.splice(i, 1);
+            continue;
+        }
+        if (rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, p.x - p.r, p.y - p.r, p.r * 2, p.r * 2)) {
+            killPlayer("Trafił Cię laserowy pocisk Mega-Robo Bossa!");
+            return;
+        }
+    }
+
+    // Smooth Horizontal Camera Follow (for 800px 4:3 viewport)
+    const targetCamX = player.x - canvas.width * 0.36;
+    const maxCamX = Math.max(0, lvl.width * TILE - canvas.width);
+    cameraX += (Math.max(0, Math.min(maxCamX, targetCamX)) - cameraX) * 0.14;
+}
+
+// ============================================================================
+// LEVEL 20: MEGA-ROBO BOSS AI & MOUSE CLICK SHOOTING MECHANIC (800x600 Arena)
+// ============================================================================
+function updateBoss() {
+    if (boss.flashTimer > 0) boss.flashTimer--;
+    if (boss.clickCooldown > 0) boss.clickCooldown--;
+
+    // Check Mouse Click directly on Boss
+    if (mouse.clicked) {
+        mouse.clicked = false;
+        const worldMouseX = mouse.x + cameraX;
+        const worldMouseY = mouse.y;
+
+        spawnParticles(worldMouseX, worldMouseY, '#38bdf8', 6, 3.5);
+
+        if (rectOverlap(worldMouseX - 10, worldMouseY - 10, 20, 20, boss.x - 12, boss.y - 12, boss.w + 24, boss.h + 24)) {
+            if (boss.clickCooldown <= 0) {
+                const isCrit = Math.random() < 0.22;
+                const dmg = isCrit ? 15 : 10;
+                boss.hp -= dmg;
+                boss.flashTimer = 5;
+                boss.clickCooldown = 4;
+                screenShake = 5;
+                sfx.play('hitboss');
+                triggerAmbientPulse(isCrit ? '244, 63, 94' : '56, 189, 248', 0.28);
+                updateBossHUD();
+
+                spawnParticles(worldMouseX, worldMouseY, '#fbbf24', 14, 6);
+                spawnFloatingText(worldMouseX, worldMouseY - 12, isCrit ? `KRYTYK -${dmg}!` : `-${dmg}`, isCrit ? '#f43f5e' : '#38bdf8');
+
+                if (boss.hp <= 0) {
+                    sfx.play('win');
+                    screenShake = 26;
+                    triggerAmbientPulse('16, 185, 129', 0.55);
+                    spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#f97316', 65, 10);
+                    spawnParticles(boss.x + boss.w / 2, boss.y + boss.h / 2, '#38bdf8', 45, 8);
+                    spawnFloatingText(boss.x + 54, boss.y + 30, "MEGA-ROBO ZNISZCZONY!", "#4ade80");
+                    realGoal = { x: 380, y: 428, w: 42, h: 72 };
+                    projectiles = [];
+                    enemies = [];
+                    bossHud.classList.add('hidden');
+                    boss = null;
+                    return;
+                }
+            }
+        }
+    }
+
+    boss.facing = (player.x < boss.x + boss.w / 2) ? -1 : 1;
+    boss.stateTimer--;
+
+    const minArenaX = 46;
+    const maxArenaX = 754;
+    const floorY = 12.5 * TILE - boss.h; // 500 - 108 = 392
+
+    if (boss.state === 'patrol') {
+        boss.x += boss.vx;
+        if (boss.x <= minArenaX) { boss.x = minArenaX; boss.vx = Math.abs(boss.vx); }
+        if (boss.x + boss.w >= maxArenaX) { boss.x = maxArenaX - boss.w; boss.vx = -Math.abs(boss.vx); }
+
+        if (boss.stateTimer % 48 === 0) {
+            const eyeX = boss.x + boss.w / 2 + boss.facing * 20;
+            const eyeY = boss.y + 42;
+            const angle = Math.atan2((player.y + 15) - eyeY, (player.x + 15) - eyeX);
+            projectiles.push({
+                x: eyeX,
+                y: eyeY,
+                vx: Math.cos(angle) * 5.4,
+                vy: Math.sin(angle) * 5.4,
+                r: 9
+            });
+            sfx.play('laser');
+        }
+
+        if (boss.stateTimer <= 0) {
+            const rand = Math.random();
+            if (rand < 0.45) {
+                boss.state = 'charge_warn';
+                boss.stateTimer = 38;
+                spawnFloatingText(boss.x + 54, boss.y - 15, "⚠️ SZARŻA!", "#ef4444");
+            } else if (rand < 0.85) {
+                boss.state = 'slam_jump';
+                boss.vy = -14.2;
+                boss.stateTimer = 60;
+                sfx.play('jump');
+                spawnFloatingText(boss.x + 54, boss.y - 15, "⚠️ WSTRZĄS!", "#f97316");
+            } else {
+                const eyeX = boss.x + boss.w / 2;
+                const eyeY = boss.y + 42;
+                for (let a = -0.35; a <= 0.35; a += 0.35) {
+                    const baseAngle = Math.atan2((player.y + 15) - eyeY, (player.x + 15) - eyeX) + a;
+                    projectiles.push({
+                        x: eyeX,
+                        y: eyeY,
+                        vx: Math.cos(baseAngle) * 6.0,
+                        vy: Math.sin(baseAngle) * 6.0,
+                        r: 8
+                    });
+                }
+                sfx.play('laser');
+                boss.stateTimer = 110;
+            }
+        }
+    } else if (boss.state === 'charge_warn') {
+        if (boss.stateTimer <= 0) {
+            boss.state = 'charge';
+            boss.vx = boss.facing * 10.8;
+            boss.stateTimer = 50;
+            sfx.play('dash');
+            triggerAmbientPulse('239, 68, 68', 0.35);
+        }
+    } else if (boss.state === 'charge') {
+        boss.x += boss.vx;
+        spawnParticles(boss.x + boss.w / 2, boss.y + boss.h - 10, '#ef4444', 2, 3);
+        if (boss.x <= minArenaX || boss.x + boss.w >= maxArenaX || boss.stateTimer <= 0) {
+            boss.x = Math.max(minArenaX, Math.min(maxArenaX - boss.w, boss.x));
+            screenShake = 10;
+            boss.vx = (boss.x < 400 ? 1 : -1) * 2.8;
+            boss.state = 'patrol';
+            boss.stateTimer = 110;
+        }
+    } else if (boss.state === 'slam_jump') {
+        boss.x += ((player.x - boss.w / 2) - boss.x) * 0.045;
+        boss.x = Math.max(minArenaX, Math.min(maxArenaX - boss.w, boss.x));
+        boss.vy += 0.55;
+        boss.y += boss.vy;
+        if (boss.vy >= 0) {
+            boss.state = 'slam_down';
+            boss.vy = 15;
+        }
+    } else if (boss.state === 'slam_down') {
+        boss.y += boss.vy;
+        if (boss.y >= floorY) {
+            boss.y = floorY;
+            boss.vy = 0;
+            screenShake = 16;
+            sfx.play('death');
+            triggerAmbientPulse('249, 115, 22', 0.4);
+            boss.shockwaves.push({ x: boss.x, y: 12.5 * TILE - 22, vx: -7.2, w: 24, h: 22 });
+            boss.shockwaves.push({ x: boss.x + boss.w - 24, y: 12.5 * TILE - 22, vx: 7.2, w: 24, h: 22 });
+            boss.state = 'patrol';
+            boss.vx = (Math.random() < 0.5 ? 1 : -1) * 3.0;
+            boss.stateTimer = 115;
+        }
+    }
+
+    // Update Boss Ground Shockwaves
+    for (let i = boss.shockwaves.length - 1; i >= 0; i--) {
+        const sw = boss.shockwaves[i];
+        sw.x += sw.vx;
+        spawnParticles(sw.x + sw.w / 2, sw.y + sw.h, '#f97316', 1, 2);
+        if (sw.x < 40 || sw.x > 760) {
+            boss.shockwaves.splice(i, 1);
+            continue;
+        }
+        if (rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, sw.x, sw.y, sw.w, sw.h)) {
+            killPlayer("Zmiotła Cię fala uderzeniowa Mega-Robo Bossa! Skacz lub wejdź na platformę!");
+            return;
+        }
+    }
+
+    // Check Direct Contact with Boss Body
+    if (rectOverlap(player.x + 5, player.y + 5, player.w - 10, player.h - 10, boss.x + 8, boss.y + 8, boss.w - 16, boss.h - 16)) {
+        killPlayer("Zostałeś zmiażdżony przez pancerz Mega-Robo Bossa!");
+        return;
+    }
+}
+
+// ============================================================================
+// ENHANCED RENDERING ENGINE (800x600 4:3 CANVAS)
+// ============================================================================
+function draw() {
+    const lvl = LEVELS[currentLevelIdx];
+    ctx.save();
+
+    if (screenShake > 0) {
+        const sx = (Math.random() - 0.5) * screenShake;
+        const sy = (Math.random() - 0.5) * screenShake;
+        ctx.translate(sx, sy);
+    }
+
+    // 1. Draw Rich Multi-Layer Parallax Background
+    drawEnvironment(lvl.theme);
+
+    ctx.save();
+    ctx.translate(-Math.floor(cameraX), 0);
+
+    // 2. Draw Solids
+    for (const s of solids) {
+        drawSolidBlock(s.x, s.y, s.w, s.h, lvl.theme, s.isPlatform, false);
+    }
+
+    // 3. Draw Falling Floors
+    for (const ff of fallingFloors) {
+        const shakeX = (ff.triggered && ff.timer > 0) ? (Math.random() - 0.5) * 6 : 0;
+        drawSolidBlock(ff.x + shakeX, ff.y, ff.w, ff.h, lvl.theme, true, true);
+        if (showHints) {
+            ctx.strokeStyle = 'rgba(251, 191, 36, 0.8)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(ff.x + 2, ff.y + 2, ff.w - 4, ff.h - 4);
+        }
+    }
+
+    // 4. Draw Invisible Troll Blocks
+    for (const ib of invisBlocks) {
+        if (ib.revealed) {
+            const by = ib.y + ib.bumpY;
+            const grad = ctx.createLinearGradient(ib.x, by, ib.x, by + ib.h);
+            grad.addColorStop(0, '#fde047');
+            grad.addColorStop(1, '#d97706');
+            ctx.fillStyle = grad;
+            ctx.fillRect(ib.x, by, ib.w, ib.h);
+
+            ctx.strokeStyle = '#78350f';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(ib.x + 1.5, by + 1.5, ib.w - 3, ib.h - 3);
+
+            // Corner rivets
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(ib.x + 4, by + 4, 3, 3);
+            ctx.fillRect(ib.x + ib.w - 7, by + 4, 3, 3);
+            ctx.fillRect(ib.x + 4, by + ib.h - 7, 3, 3);
+            ctx.fillRect(ib.x + ib.w - 7, by + ib.h - 7, 3, 3);
+
+            ctx.fillStyle = '#451a03';
+            ctx.font = 'bold 18px Fredoka';
+            ctx.textAlign = 'center';
+            ctx.fillText('>:)', ib.x + ib.w / 2, by + 26);
+        } else if (showHints) {
+            ctx.strokeStyle = 'rgba(250, 204, 21, 0.45)';
+            ctx.setLineDash([4, 4]);
+            ctx.strokeRect(ib.x + 2, ib.y + 2, ib.w - 4, ib.h - 4);
+            ctx.setLineDash([]);
+        }
+    }
+
+    // 5. Draw Spike Traps
+    for (const st of spikeTraps) {
+        if (st.dir === 'down' || st.triggered || showHints) {
+            ctx.globalAlpha = (!st.triggered && st.dir === 'up' && showHints) ? 0.35 : 1;
+            drawSpikes(st.x, st.y, st.w, st.h, st.dir);
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    // 6. Draw Fake & Real Portals
+    for (const fg of fakeGoals) {
+        drawGoalPortal(fg.x, fg.y, fg.w, fg.h, showHints ? '#f43f5e' : '#a855f7', showHints ? 'FAŁSZ!' : 'META');
+    }
+    if (realGoal) {
+        drawGoalPortal(realGoal.x, realGoal.y, realGoal.w, realGoal.h, '#10b981', 'META');
+    }
+
+    // 7. Draw Robotic Square Enemies
+    for (const e of enemies) {
+        drawRoboEnemy(e);
+    }
+
+    // 8. Draw Mega-Robo Boss (Level 20)
+    if (boss) {
+        drawBoss();
+    }
+
+    // 9. Draw Boss Projectiles
+    for (const p of projectiles) {
+        ctx.save();
+        ctx.shadowColor = '#f43f5e';
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff1f2';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * 0.48, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // 10. Draw Player Dash Trail & Player
+    if (!player.dead) {
+        for (const tr of player.trail) {
+            ctx.fillStyle = `rgba(34, 211, 238, ${tr.alpha * 0.45})`;
+            ctx.fillRect(tr.x, tr.y, player.w, player.h);
+        }
+        drawPlayer();
+    }
+
+    // 11. Draw Particles & Floating Texts
+    for (const p of particles) {
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+    }
+    ctx.globalAlpha = 1;
+
+    for (const ft of floatingTexts) {
+        ctx.globalAlpha = Math.max(0, ft.alpha);
+        ctx.font = '800 16px Fredoka';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#000';
+        ctx.fillText(ft.text, ft.x + 1.5, ft.y + 1.5);
+        ctx.fillStyle = ft.color;
+        ctx.fillText(ft.text, ft.x, ft.y);
+    }
+    ctx.globalAlpha = 1;
+
+    ctx.restore();
+
+    // 12. Subtle Inner Vignette & Crosshair on Level 20
+    if (lvl.isBossLevel && boss) {
+        drawCrosshair(mouse.x, mouse.y);
+    }
+
+    ctx.restore();
+}
+
+function drawEnvironment(theme) {
+    // Sky Gradient
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    if (theme === 'day') {
+        grad.addColorStop(0, '#0284c7');
+        grad.addColorStop(0.55, '#38bdf8');
+        grad.addColorStop(1, '#bae6fd');
+    } else if (theme === 'forest') {
+        grad.addColorStop(0, '#0f172a');
+        grad.addColorStop(0.5, '#1e1b4b');
+        grad.addColorStop(1, '#4c1d95');
+    } else if (theme === 'darkforest') {
+        grad.addColorStop(0, '#05050a');
+        grad.addColorStop(0.55, '#2e1065');
+        grad.addColorStop(1, '#450a0a');
+    } else {
+        grad.addColorStop(0, '#05070e');
+        grad.addColorStop(0.6, '#111827');
+        grad.addColorStop(1, '#1f122b');
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Sun / Blood Moon with Halo
+    if (theme === 'day') {
+        const sunGlow = ctx.createRadialGradient(660, 95, 10, 660, 95, 95);
+        sunGlow.addColorStop(0, 'rgba(254, 240, 138, 0.95)');
+        sunGlow.addColorStop(0.4, 'rgba(253, 224, 71, 0.35)');
+        sunGlow.addColorStop(1, 'rgba(253, 224, 71, 0)');
+        ctx.fillStyle = sunGlow;
+        ctx.beginPath();
+        ctx.arc(660, 95, 95, 0, Math.PI * 2);
+        ctx.fill();
+    } else if (theme === 'forest' || theme === 'darkforest') {
+        const isBlood = theme === 'darkforest';
+        const moonGlow = ctx.createRadialGradient(650, 105, 15, 650, 105, 110);
+        moonGlow.addColorStop(0, isBlood ? 'rgba(239, 68, 68, 0.65)' : 'rgba(199, 210, 254, 0.45)');
+        moonGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = moonGlow;
+        ctx.beginPath();
+        ctx.arc(650, 105, 110, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = isBlood ? '#ef4444' : '#e0e7ff';
+        ctx.beginPath();
+        ctx.arc(650, 105, 42, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    if (theme === 'castle') {
+        // Castle Stone Pillars & Flickering Torches
+        const flicker = Math.sin(tickCount * 0.2) * 6;
+        for (let x = 70; x < 800; x += 170) {
+            ctx.fillStyle = '#0f1420';
+            ctx.fillRect(x, 0, 52, 600);
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, 0, 52, 600);
+
+            // Torch bracket
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(x + 20, 215, 12, 22);
+
+            // Torch Glow
+            const glow = ctx.createRadialGradient(x + 26, 208, 4, x + 26, 208, 72 + flicker);
+            glow.addColorStop(0, 'rgba(251, 191, 36, 0.75)');
+            glow.addColorStop(0.45, 'rgba(249, 115, 22, 0.32)');
+            glow.addColorStop(1, 'rgba(249, 115, 22, 0)');
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(x + 26, 208, 72 + flicker, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    } else {
+        // Parallax Distant Mountain Peaks
+        const mountOffset = -(cameraX * 0.15) % 400;
+        ctx.fillStyle = theme === 'day' ? 'rgba(56, 189, 248, 0.45)' : (theme === 'forest' ? '#1e1b4b' : '#180926');
+        for (let mx = mountOffset - 200; mx < 1000; mx += 400) {
+            ctx.beginPath();
+            ctx.moveTo(mx, 600);
+            ctx.lineTo(mx + 200, 220);
+            ctx.lineTo(mx + 400, 600);
+            ctx.fill();
+        }
+
+        // Parallax Troll Clouds (with cheeky Cat Mario eyes)
+        const cloudOffset = -(cameraX * 0.22) % 320;
+        for (let cx = cloudOffset - 100; cx < 960; cx += 320) {
+            ctx.fillStyle = theme === 'day' ? 'rgba(255,255,255,0.9)' : 'rgba(148, 163, 184, 0.22)';
+            ctx.beginPath();
+            ctx.arc(cx, 95, 26, 0, Math.PI * 2);
+            ctx.arc(cx + 25, 85, 32, 0, Math.PI * 2);
+            ctx.arc(cx + 52, 95, 24, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = theme === 'day' ? '#1e293b' : '#cbd5e1';
+            ctx.fillRect(cx + 15, 80, 4, 9);
+            ctx.fillRect(cx + 34, 80, 4, 9);
+        }
+
+        // Parallax Rolling Hills
+        const hillOffset = -(cameraX * 0.35) % 360;
+        ctx.fillStyle = theme === 'day' ? '#4ade80' : (theme === 'forest' ? '#1e293b' : '#111827');
+        for (let hx = hillOffset - 180; hx < 1000; hx += 360) {
+            ctx.beginPath();
+            ctx.arc(hx + 180, 600, 230, Math.PI, 0);
+            ctx.fill();
+        }
+
+        // Foreground Parallax Pine Trees
+        const treeOffset = -(cameraX * 0.55) % 150;
+        for (let tx = treeOffset - 80; tx < 950; tx += 150) {
+            ctx.fillStyle = theme === 'day' ? '#15803d' : (theme === 'forest' ? '#0f172a' : '#09090b');
+            ctx.beginPath();
+            ctx.moveTo(tx, 520);
+            ctx.lineTo(tx + 34, 345);
+            ctx.lineTo(tx + 68, 520);
+            ctx.fill();
+        }
+    }
+
+    // Draw Ambient Floating Motes (Pollen / Fireflies / Blood Embers)
+    for (const m of bgMotes) {
+        const pulse = 0.45 + Math.sin(tickCount * 0.06 + m.phase) * 0.35;
+        ctx.globalAlpha = pulse;
+        ctx.fillStyle = theme === 'day' ? '#fef9c3' : (theme === 'forest' ? '#a5f3fc' : '#fca5a5');
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+}
+
+function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling) {
+    if (theme === 'castle') {
+        const grad = ctx.createLinearGradient(x, y, x, y + h);
+        grad.addColorStop(0, isPlatform ? '#475569' : '#1e293b');
+        grad.addColorStop(1, '#0f172a');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, w, h);
+
+        // Top highlight bevel
+        ctx.fillStyle = isPlatform ? '#94a3b8' : '#334155';
+        ctx.fillRect(x, y, w, 4);
+
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+        return;
+    }
+
+    // Rich Earth / Wood Gradient Body
+    const bodyGrad = ctx.createLinearGradient(x, y, x, y + h);
+    if (theme === 'day') {
+        bodyGrad.addColorStop(0, '#92400e');
+        bodyGrad.addColorStop(1, '#451a03');
+    } else if (theme === 'forest') {
+        bodyGrad.addColorStop(0, '#451a03');
+        bodyGrad.addColorStop(1, '#1c0a00');
+    } else {
+        bodyGrad.addColorStop(0, '#27272a');
+        bodyGrad.addColorStop(1, '#09090b');
+    }
+    ctx.fillStyle = bodyGrad;
+    ctx.fillRect(x, y, w, h);
+
+    // Lush Grass Top Cap with Overhang
+    const grassH = Math.min(13, h);
+    ctx.fillStyle = theme === 'day' ? '#22c55e' : (theme === 'forest' ? '#10b981' : '#dc2626');
+    ctx.fillRect(x, y, w, grassH);
+
+    // Top bright highlight strip
+    ctx.fillStyle = theme === 'day' ? '#86efac' : (theme === 'forest' ? '#6ee7b7' : '#f87171');
+    ctx.fillRect(x, y, w, 3);
+
+    // Subtle warning cracks on falling floors
+    if (isFalling) {
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x + w * 0.3, y + grassH);
+        ctx.lineTo(x + w * 0.35, y + h * 0.65);
+        ctx.moveTo(x + w * 0.7, y + grassH);
+        ctx.lineTo(x + w * 0.65, y + h * 0.75);
+        ctx.stroke();
+    }
+
+    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+}
+
+function drawSpikes(x, y, w, h, dir) {
+    const count = Math.max(2, Math.floor(w / 14));
+    const sw = w / count;
+
+    for (let i = 0; i < count; i++) {
+        const sx = x + i * sw;
+        const grad = ctx.createLinearGradient(sx, y, sx + sw, y + h);
+        grad.addColorStop(0, '#f8fafc');
+        grad.addColorStop(1, '#64748b');
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1.5;
+
+        ctx.beginPath();
+        if (dir === 'up') {
+            ctx.moveTo(sx, y + h);
+            ctx.lineTo(sx + sw / 2, y);
+            ctx.lineTo(sx + sw, y + h);
+        } else {
+            ctx.moveTo(sx, y);
+            ctx.lineTo(sx + sw / 2, y + h);
+            ctx.lineTo(sx + sw, y);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Crimson tip accent
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        if (dir === 'up') {
+            ctx.moveTo(sx + sw * 0.35, y + 8);
+            ctx.lineTo(sx + sw / 2, y);
+            ctx.lineTo(sx + sw * 0.65, y + 8);
+        } else {
+            ctx.moveTo(sx + sw * 0.35, y + h - 8);
+            ctx.lineTo(sx + sw / 2, y + h);
+            ctx.lineTo(sx + sw * 0.65, y + h - 8);
+        }
+        ctx.fill();
+    }
+}
+
+function drawGoalPortal(x, y, w, h, color, label) {
+    ctx.save();
+    const pulse = Math.sin(tickCount * 0.08) * 4;
+
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 18;
+
+    // Outer Energy Halo
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.25 + Math.sin(tickCount * 0.08) * 0.1;
+    ctx.fillRect(x - 5, y - 5, w + 10, h + 5);
+
+    // Inner Vortex Core
+    ctx.globalAlpha = 0.55;
+    ctx.fillRect(x + 4, y + 4, w - 8, h - 4);
+    ctx.globalAlpha = 1;
+
+    // Portal Frame
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(x, y, w, h);
+
+    // Inner bright energy line
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x + 5, y + 5 + pulse * 0.3, w - 10, h - 10);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x + w / 2, y - 8);
+    ctx.restore();
+}
+
+// ============================================================================
+// DRAW PLAYER (PURPLE SQUARE WITH 2 EXPRESSIVE EYES)
+// ============================================================================
+function drawPlayer() {
+    ctx.save();
+    const cx = player.x + player.w / 2;
+    const cy = player.y + player.h / 2;
+    ctx.translate(cx, cy);
+
+    const stretchX = player.dashTimer > 0 ? 1.24 : (1 - Math.abs(player.vy) * 0.012);
+    const stretchY = player.dashTimer > 0 ? 0.80 : (1 + Math.abs(player.vy) * 0.012);
+    ctx.scale(stretchX, stretchY);
+
+    if (player.dashTimer > 0) {
+        ctx.shadowColor = '#22d3ee';
+        ctx.shadowBlur = 18;
+    } else {
+        ctx.shadowColor = '#9333ea';
+        ctx.shadowBlur = 10;
+    }
+
+    // Gradient Purple Square Body
+    const bodyGrad = ctx.createLinearGradient(-player.w / 2, -player.h / 2, player.w / 2, player.h / 2);
+    bodyGrad.addColorStop(0, '#a855f7');
+    bodyGrad.addColorStop(1, '#6b21a8');
+    ctx.fillStyle = bodyGrad;
+    ctx.fillRect(-player.w / 2, -player.h / 2, player.w, player.h);
+
+    // Glossy Bevel Highlight
+    ctx.strokeStyle = player.dashTimer > 0 ? '#67e8f9' : '#e9d5ff';
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(-player.w / 2 + 1, -player.h / 2 + 1, player.w - 2, player.h - 2);
+
+    // Two Expressive Eyes
+    const lookX = player.facing * 3.2;
+    const lookY = Math.max(-3, Math.min(3, player.vy * 0.25));
+    const eyeH = player.dashTimer > 0 ? 5 : 8;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-10 + lookX * 0.5, -6 + lookY * 0.4, 7, eyeH);
+    ctx.fillRect(2 + lookX * 0.5, -6 + lookY * 0.4, 7, eyeH);
+
+    // Pupils
+    ctx.fillStyle = '#090d16';
+    ctx.fillRect(-8 + lookX, -4 + lookY, 3.5, Math.min(4, eyeH - 1));
+    ctx.fillRect(4 + lookX, -4 + lookY, 3.5, Math.min(4, eyeH - 1));
+
+    ctx.restore();
+}
+
+// ============================================================================
+// DRAW ROBOTIC ENEMY SQUARE (WITH MECHANICAL VISOR & THRUSTERS)
+// ============================================================================
+function drawRoboEnemy(e) {
+    ctx.save();
+    ctx.translate(e.x + e.w / 2, e.y + e.h / 2);
+
+    // Thruster flame when troll-jumping or turbo-charging
+    if (e.jumped || e.turboActive) {
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.moveTo(-8, e.h / 2);
+        ctx.lineTo(0, e.h / 2 + 10 + Math.random() * 5);
+        ctx.lineTo(8, e.h / 2);
+        ctx.fill();
+    }
+
+    // Antenna on top
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, -e.h / 2);
+    ctx.lineTo(0, -e.h / 2 - 7);
+    ctx.stroke();
+
+    ctx.fillStyle = e.eyeColor;
+    ctx.beginPath();
+    ctx.arc(0, -e.h / 2 - 8, 3.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Metallic Robot Square Body
+    const rGrad = ctx.createLinearGradient(-e.w / 2, -e.h / 2, e.w / 2, e.h / 2);
+    rGrad.addColorStop(0, '#475569');
+    rGrad.addColorStop(1, '#1e293b');
+    ctx.fillStyle = rGrad;
+    ctx.fillRect(-e.w / 2, -e.h / 2, e.w, e.h);
+
+    ctx.strokeStyle = e.turboActive ? '#f43f5e' : '#94a3b8';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-e.w / 2 + 1, -e.h / 2 + 1, e.w - 2, e.h - 2);
+
+    // Dark Visor Slot
+    ctx.fillStyle = '#090d16';
+    ctx.fillRect(-e.w / 2 + 3, -6, e.w - 6, 10);
+
+    // Two Glowing Mechanical Eyes inside Visor
+    const dir = Math.sign(e.vx) || 1;
+    ctx.fillStyle = e.eyeColor;
+    ctx.fillRect(-9 + dir * 2, -4, 6, 6);
+    ctx.fillRect(3 + dir * 2, -4, 6, 6);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-7 + dir * 2, -2, 2, 2);
+    ctx.fillRect(5 + dir * 2, -2, 2, 2);
+
+    ctx.restore();
+}
+
+// ============================================================================
+// DRAW MEGA-ROBO BOSS (LEVEL 20)
+// ============================================================================
+function drawBoss() {
+    ctx.save();
+
+    for (const sw of boss.shockwaves) {
+        ctx.fillStyle = '#f97316';
+        ctx.fillRect(sw.x, sw.y, sw.w, sw.h);
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(sw.x + 4, sw.y + 4, sw.w - 8, sw.h - 8);
+    }
+
+    const shakeX = boss.state === 'charge_warn' ? (Math.random() - 0.5) * 10 : 0;
+    ctx.translate(boss.x + boss.w / 2 + shakeX, boss.y + boss.h / 2);
+
+    // Boss Main Armor Body
+    ctx.fillStyle = boss.flashTimer > 0 ? '#ffffff' : '#1e293b';
+    ctx.fillRect(-boss.w / 2, -boss.h / 2, boss.w, boss.h);
+
+    // Heavy Steel Frame
+    ctx.strokeStyle = boss.state === 'charge_warn' ? '#ef4444' : '#94a3b8';
+    ctx.lineWidth = 5;
+    ctx.strokeRect(-boss.w / 2 + 2, -boss.h / 2 + 2, boss.w - 4, boss.h - 4);
+
+    // Dual Giant Mechanical Eyes
+    const lookX = boss.facing * 6;
+    ctx.fillStyle = '#090d16';
+    ctx.fillRect(-boss.w / 2 + 12, -24, boss.w - 24, 30);
+
+    const eyeGlow = boss.hp < 200 ? '#ef4444' : '#f97316';
+    ctx.fillStyle = boss.flashTimer > 0 ? '#38bdf8' : eyeGlow;
+    ctx.fillRect(-34 + lookX, -18, 22, 18);
+    ctx.fillRect(12 + lookX, -18, 22, 18);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-26 + lookX, -12, 6, 6);
+    ctx.fillRect(20 + lookX, -12, 6, 6);
+
+    // Angry Mechanical Grille Mouth
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(-28, 18, 56, 16);
+    ctx.fillStyle = '#64748b';
+    for (let gx = -22; gx <= 22; gx += 11) {
+        ctx.fillRect(gx, 20, 5, 12);
+    }
+
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.font = 'bold 11px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('🎯 KLIKAJ LPM!', 0, -boss.h / 2 - 10);
+
+    ctx.restore();
+}
+
+function drawCrosshair(mx, my) {
+    ctx.save();
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(mx, my, 14, 0, Math.PI * 2);
+    ctx.moveTo(mx - 20, my);
+    ctx.lineTo(mx + 20, my);
+    ctx.moveTo(mx, my - 20);
+    ctx.lineTo(mx, my + 20);
+    ctx.stroke();
+    ctx.restore();
+}
+
+// ============================================================================
+// INPUT LISTENERS
+// ============================================================================
+window.addEventListener('keydown', (e) => {
+    const code = e.code;
+    if (code === 'KeyA' || code === 'ArrowLeft') keys.left = true;
+    if (code === 'KeyD' || code === 'ArrowRight') keys.right = true;
+    if (code === 'KeyW' || code === 'Space' || code === 'ArrowUp') {
+        if (!keys.up) keys.jumpPressed = true;
+        keys.up = true;
+        e.preventDefault();
+    }
+    if (code === 'ShiftLeft' || code === 'ShiftRight' || code === 'KeyK' || code === 'KeyZ') {
+        keys.dashPressed = true;
+        e.preventDefault();
+    }
+    if (code === 'KeyR') {
+        loadLevel(currentLevelIdx);
+    }
+});
+
+window.addEventListener('keyup', (e) => {
+    const code = e.code;
+    if (code === 'KeyA' || code === 'ArrowLeft') keys.left = false;
+    if (code === 'KeyD' || code === 'ArrowRight') keys.right = false;
+    if (code === 'KeyW' || code === 'Space' || code === 'ArrowUp') keys.up = false;
+});
+
+function updateMousePos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    mouse.x = (e.clientX - rect.left) * scaleX;
+    mouse.y = (e.clientY - rect.top) * scaleY;
+}
+
+canvas.addEventListener('mousemove', updateMousePos);
+canvas.addEventListener('mousedown', (e) => {
+    if (e.button === 0) {
+        updateMousePos(e);
+        mouse.clicked = true;
+    }
+});
+
+// UI Controls
+levelSelect.addEventListener('change', (e) => {
+    loadLevel(parseInt(e.target.value, 10));
+    levelSelect.blur();
+});
+
+btnRestart.addEventListener('click', () => {
+    loadLevel(currentLevelIdx);
+    btnRestart.blur();
+});
+
+btnHints.addEventListener('click', () => {
+    showHints = !showHints;
+    hintModeText.textContent = showHints ? "Podpowiedzi: WŁ" : "Podpowiedzi: WYŁ";
+    btnHints.blur();
+});
+
+btnSound.addEventListener('click', () => {
+    sfx.enabled = !sfx.enabled;
+    btnSound.textContent = sfx.enabled ? '🔊' : '🔇';
+    btnSound.blur();
+});
+
+btnPlayAgain.addEventListener('click', () => {
+    deathCount = 0;
+    deathCountEl.textContent = '0';
+    loadLevel(0);
+});
+
+// Mobile Touch Buttons
+const bindTouch = (id, onDown, onUp) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('touchstart', (e) => { e.preventDefault(); onDown(); });
+    el.addEventListener('touchend', (e) => { e.preventDefault(); if (onUp) onUp(); });
+};
+bindTouch('touch-left', () => keys.left = true, () => keys.left = false);
+bindTouch('touch-right', () => keys.right = true, () => keys.right = false);
+bindTouch('touch-jump', () => { keys.jumpPressed = true; keys.up = true; }, () => keys.up = false);
+bindTouch('touch-dash', () => { keys.dashPressed = true; });
+
+// ============================================================================
+// FIXED-TIMESTEP 60HZ GAME LOOP (144Hz / 240Hz+ REFRESH RATE SAFE)
+// ============================================================================
+const FIXED_DT = 1000 / 60; // Exact 16.6667ms per physics step (60Hz lock)
+let lastFrameTime = performance.now();
+let accumulator = 0;
+
+// Live FPS Monitor
+let frameCounter = 0;
+let fpsLastCheck = performance.now();
+
+function gameLoop(timestamp) {
+    let deltaTime = timestamp - lastFrameTime;
+    lastFrameTime = timestamp;
+
+    // Prevent spiral of death if user switches browser tabs
+    if (deltaTime > 100) deltaTime = 100;
+
+    accumulator += deltaTime;
+
+    // Run physics updates at a locked 60Hz rate regardless of 60Hz/144Hz/240Hz monitor
+    while (accumulator >= FIXED_DT) {
+        update();
+        accumulator -= FIXED_DT;
+    }
+
+    // Render every display refresh frame
+    draw();
+
+    // Update live monitor FPS counter in HUD
+    frameCounter++;
+    if (timestamp - fpsLastCheck >= 500) {
+        const currentFps = Math.round((frameCounter * 1000) / (timestamp - fpsLastCheck));
+        if (fpsCounterEl) fpsCounterEl.textContent = `${currentFps} FPS`;
+        frameCounter = 0;
+        fpsLastCheck = timestamp;
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+
+window.onload = function () {
+    loadLevel(0);
+    lastFrameTime = performance.now();
+    requestAnimationFrame(gameLoop);
+};
+</script>
+</body>
+</html>
