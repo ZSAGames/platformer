@@ -6,7 +6,6 @@
     <title>PRZYGODA DAVE'A</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="PDicon.ico">
     <style>
         :root {
             --glow-left: #0284c7;
@@ -58,23 +57,27 @@
         }
 
         /* ==========================================================================
-           GAME STAGE: 4:3 ON DESKTOP, FULLSCREEN WIDESCREEN ON MOBILE LANDSCAPE
+           GAME STAGE: 4:3 ON DESKTOP, SAFE FITTED SCREEN ON iOS / MOBILE
            ========================================================================== */
         #stage-container {
-            position: relative;
+            position: fixed;
+            inset: 0;
             z-index: 10;
-            width: 100vw;
-            height: 100dvh;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 4px;
+            padding: max(4px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
         }
         #game-wrapper {
             position: relative;
             aspect-ratio: 4 / 3;
-            width: min(98vw, calc(97dvh * (4 / 3)));
-            height: min(97dvh, calc(98vw * 0.75));
+            width: min(98vw, calc(96dvh * (4 / 3)));
+            height: min(96dvh, calc(98vw * 0.75));
+            max-width: 100%;
+            max-height: 100%;
+            margin: auto;
             border-radius: 14px;
             background: #090d16;
             border: 3px solid rgba(255, 255, 255, 0.16);
@@ -85,18 +88,18 @@
             overflow: hidden;
         }
 
-        /* Mobile Portrait & Landscape: Expand cleanly with zero wasted space */
+        /* Mobile / iOS Portrait & Landscape: Centered, non-overflowing container */
         @media (max-width: 920px), (max-height: 580px) {
             #stage-container {
-                padding: 0;
+                padding: max(4px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
             }
             #game-wrapper {
-                width: 100vw;
-                height: 100dvh;
+                width: min(96vw, 960px);
+                height: min(94dvh, 620px);
                 aspect-ratio: auto;
-                border-radius: 0;
-                border: none;
-                box-shadow: none;
+                border-radius: 12px;
+                border: 2px solid rgba(255, 255, 255, 0.18);
+                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85);
             }
         }
 
@@ -210,8 +213,8 @@
             animation: maniaLogoBob 2.4s ease-in-out infinite;
         }
         @keyframes maniaLogoBob {
-            0%, 100% { transform: translateY(0) rotate(-0.1deg); }
-            50% { transform: translateY(-1px) rotate(0.15deg); }
+            0%, 100% { transform: translateY(0) rotate(-1deg); }
+            50% { transform: translateY(-4px) rotate(0.5deg); }
         }
         .mania-ribbon-bar {
             transform: skewX(-18deg);
@@ -290,35 +293,46 @@
         #touch-controls.touch-force-on {
             display: flex !important;
         }
-        #touch-controls.touch-force-off {
+        #touch-controls.touch-force-off,
+        #touch-controls.touch-state-hidden {
             display: none !important;
         }
 
-        /* Compact Mobile & Landscape Menu Scaling (Prevents overflowing on phones!) */
+        /* Compact Mobile & Landscape Menu & Cutscene Scaling */
         @media (max-height: 520px), (max-width: 640px) {
             #in-game-hud {
-                padding: 3px 8px;
+                padding: 2px 6px;
                 top: 4px;
             }
             .menu-panel-inner {
-                padding: 10px 14px !important;
-                gap: 6px !important;
+                padding: 8px 12px !important;
+                gap: 5px !important;
             }
             .menu-btn-compact {
-                padding-top: 7px !important;
-                padding-bottom: 7px !important;
+                padding-top: 6px !important;
+                padding-bottom: 6px !important;
                 font-size: 11px !important;
             }
             .menu-title-compact {
-                font-size: 13px !important;
+                font-size: 12px !important;
             }
             .menu-desc-compact {
-                font-size: 11px !important;
-                line-height: 1.25 !important;
+                font-size: 10px !important;
+                line-height: 1.2 !important;
             }
             #cutscene-box {
-                padding: 8px 10px !important;
-                bottom: 6px !important;
+                padding: 6px 8px !important;
+                gap: 8px !important;
+                max-width: 94% !important;
+            }
+            #cutscene-portrait-wrap {
+                width: 44px !important;
+                height: 44px !important;
+            }
+            #cutscene-text {
+                font-size: 11px !important;
+                min-height: 1.8rem !important;
+                line-height: 1.25 !important;
             }
         }
 
@@ -338,80 +352,80 @@
 
     <!-- Responsive Game Stage -->
     <div id="stage-container">
-        <main id="game-wrapper">
-            <!-- Dynamic Resolution Canvas (800x600 on 4:3, expands up to 1280x600 in Mobile Landscape) -->
+        <main id="game-wrapper" tabindex="0" class="outline-none">
+            <!-- Dynamic Resolution Canvas (800x600 on 4:3, scales cleanly on Mobile) -->
             <canvas id="gameCanvas" width="800" height="600"></canvas>
 
             <!-- ==============================================================
                  SONIC MANIA-STYLE ZONE TITLE CARD BANNER (Non-blocking)
                  ============================================================== -->
-            <div style ="visibility: hidden;" id="chapter-banner" class="hidden absolute top-13 sm:top-15 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-                <div id="chapter-card-inner" class="relative bg-slate-950/95 border-3 border-yellow-400 px-5 py-2 rounded-lg shadow-[6px_6px_0_#090d16] text-center overflow-hidden">
+            <div style="visibility: hidden;" id="chapter-banner" class="hidden absolute top-11 sm:top-13 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                <div id="chapter-card-inner" class="relative bg-slate-950/95 border-2 border-yellow-400 px-4 py-1.5 rounded-lg shadow-[5px_5px_0_#090d16] text-center overflow-hidden">
                     <!-- Diagonal Sonic Mania Color Stripes -->
-                    <div class="absolute top-0 left-0 w-3 h-full bg-cyan-400"></div>
-                    <div class="absolute top-0 left-3 w-2 h-full bg-pink-500"></div>
+                    <div class="absolute top-0 left-0 w-2.5 h-full bg-cyan-400"></div>
+                    <div class="absolute top-0 left-2.5 w-1.5 h-full bg-pink-500"></div>
                     <div class="absolute bottom-0 right-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-yellow-400 to-pink-500"></div>
-                    <div style ="visibility: hidden;" class="pl-3">
-                        <div style ="visibility: hidden;" class="flex items-center justify-center gap-2">
-                            <span style ="visibility: hidden;" id="chapter-subtitle" class="text-[9px] text-cyan-300 font-extrabold mono-font tracking-widest uppercase">STREFA CUBELON</span>
-                            <span style ="visibility: hidden;" id="chapter-act-badge" class="bg-yellow-400 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-sm mono-font">AKT 1</span>
+                    <div class="pl-3">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <span id="chapter-subtitle" class="text-[8px] text-cyan-300 font-extrabold mono-font tracking-widest uppercase">STREFA CUBELON</span>
+                            <span id="chapter-act-badge" class="bg-yellow-400 text-slate-950 text-[8px] font-black px-1.5 py-0.2 rounded-sm mono-font">AKT 1</span>
                         </div>
-                        <div style ="visibility: hidden;" id="chapter-title" class="retro-font text-xs sm:text-sm text-white mt-0.5 drop-shadow-[2px_2px_0_#9333ea]">SIELANKOWE WZGÓRZA</div>
+                        <div id="chapter-title" class="retro-font text-[10px] sm:text-xs text-white mt-0.5 drop-shadow-[2px_2px_0_#9333ea]">SIELANKOWE WZGÓRZA</div>
                     </div>
                 </div>
             </div>
 
             <!-- ==============================================================
-                 COMPACT IN-FRAME TOP HUD (Visible during Gameplay)
+                 COMPACT CENTERED IN-FRAME TOP HUD (Visible during Gameplay)
                  ============================================================== -->
-            <header id="in-game-hud" class="hidden absolute top-2 inset-x-2.5 z-20 flex items-center justify-between gap-1.5 bg-slate-950/85 border-2 border-yellow-400/50 rounded-xl px-2.5 py-1.5 backdrop-blur-md shadow-[0_6px_0_rgba(9,13,22,0.85)] pointer-events-auto">
+            <header id="in-game-hud" class="hidden absolute top-1.5 left-1/2 -translate-x-1/2 w-[92%] max-w-[620px] z-20 flex items-center justify-between gap-1.5 bg-slate-950/85 border border-yellow-400/50 rounded-xl px-2.5 py-1 backdrop-blur-md shadow-[0_4px_0_rgba(9,13,22,0.85)] pointer-events-auto">
                 <!-- Left: Animated Blinking Dave Icon + Level Title -->
-                <div class="flex items-center gap-2 min-w-0">
-                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-purple-600 border-2 border-yellow-300 shadow-[2px_2px_0_#090d16] flex items-center justify-center shrink-0">
+                <div class="flex items-center gap-1.5 min-w-0">
+                    <div class="w-5 h-5 sm:w-6 sm:h-6 rounded bg-purple-600 border border-yellow-300 shadow-[1px_1px_0_#090d16] flex items-center justify-center shrink-0">
                         <div class="flex gap-0.5 dave-eye-blink">
-                            <div class="w-1.5 h-2 bg-white flex items-center justify-end"><div class="w-1 h-1 bg-slate-950"></div></div>
-                            <div class="w-1.5 h-2 bg-white flex items-center justify-end"><div class="w-1 h-1 bg-slate-950"></div></div>
+                            <div class="w-1 h-1.5 bg-white flex items-center justify-end"><div class="w-0.5 h-1 bg-slate-950"></div></div>
+                            <div class="w-1 h-1.5 bg-white flex items-center justify-end"><div class="w-0.5 h-1 bg-slate-950"></div></div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1.5 min-w-0">
-                        <span id="hud-level-badge" class="hud-pill-skew bg-gradient-to-r from-pink-600 to-purple-700 border border-yellow-300/70 text-[10px] font-extrabold px-1.5 py-0.5 rounded text-yellow-200 mono-font shrink-0">
+                    <div class="flex items-center gap-1 min-w-0">
+                        <span id="hud-level-badge" class="hud-pill-skew bg-gradient-to-r from-pink-600 to-purple-700 border border-yellow-300/70 text-[9px] font-extrabold px-1.5 py-0.2 rounded text-yellow-200 mono-font shrink-0">
                             1/20
                         </span>
-                        <h1 id="hud-level-name" class="text-xs sm:text-sm font-bold text-white truncate drop-shadow-[1px_1px_0_#090d16]">
+                        <h1 id="hud-level-name" class="text-[11px] sm:text-xs font-bold text-white truncate drop-shadow-[1px_1px_0_#090d16]">
                             1. Sielankowe Wzgórza
                         </h1>
                     </div>
                 </div>
 
                 <!-- Right: Speedrun Timer, Dash Bar, Deaths, Restart & Pause [P] Button -->
-                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
                     <!-- Speedrun Timer Pill (Exclusive to Speedrun Mode) -->
-                    <div id="hud-timer-pill" class="hud-pill-skew hidden items-center gap-1 bg-slate-900/95 border border-amber-400/70 px-2 py-0.5 sm:py-1 rounded-md">
-                        <span class="text-[10px] text-amber-300 font-bold">⏱️</span>
-                        <span id="hud-timer" class="text-[11px] sm:text-xs font-extrabold text-amber-300 mono-font">00:00.00</span>
+                    <div id="hud-timer-pill" class="hud-pill-skew hidden items-center gap-1 bg-slate-900/95 border border-amber-400/70 px-1.5 py-0.5 rounded">
+                        <span class="text-[9px] text-amber-300 font-bold">⏱️</span>
+                        <span id="hud-timer" class="text-[10px] font-extrabold text-amber-300 mono-font">00:00.00</span>
                     </div>
 
                     <!-- Dash Pill with GOTOWY Pulse -->
-                    <div id="hud-dash-pill" class="hud-pill-skew flex items-center gap-1.5 bg-slate-900/95 border border-cyan-400/60 px-2 py-0.5 sm:py-1 rounded-md">
-                        <span id="hud-dash-label" class="text-[9px] sm:text-[10px] font-extrabold text-cyan-300 mono-font hidden xs:inline">GOTOWY</span>
-                        <div class="w-10 sm:w-14 h-2 bg-slate-950 rounded-sm overflow-hidden border border-slate-700">
+                    <div id="hud-dash-pill" class="hud-pill-skew flex items-center gap-1 bg-slate-900/95 border border-cyan-400/60 px-1.5 py-0.5 rounded">
+                        <span id="hud-dash-label" class="text-[8px] sm:text-[9px] font-extrabold text-cyan-300 mono-font hidden xs:inline">GOTOWY</span>
+                        <div class="w-8 sm:w-12 h-1.5 bg-slate-950 rounded-sm overflow-hidden border border-slate-700">
                             <div id="dash-bar" class="h-full bg-cyan-400 w-full transition-all duration-75 dash-ready-pulse"></div>
                         </div>
                     </div>
 
                     <!-- Death Pill with Pop/Shake Animation -->
-                    <div id="hud-death-pill" class="hud-pill-skew flex items-center gap-1 bg-red-950/90 border border-red-400/70 px-2 py-0.5 sm:py-1 rounded-md">
-                        <span class="text-[11px]">💀</span>
-                        <span id="death-count" class="text-[11px] sm:text-xs font-extrabold text-red-300 mono-font">0</span>
+                    <div id="hud-death-pill" class="hud-pill-skew flex items-center gap-0.5 bg-red-950/90 border border-red-400/70 px-1.5 py-0.5 rounded">
+                        <span class="text-[10px]">💀</span>
+                        <span id="death-count" class="text-[10px] sm:text-[11px] font-extrabold text-red-300 mono-font">0</span>
                     </div>
 
                     <!-- Quick Restart Button -->
-                    <button id="btn-hud-restart" title="Restart Poziomu (R)" class="btn-retro-secondary text-xs font-bold px-2 py-0.5 sm:py-1 rounded-md text-white">
+                    <button id="btn-hud-restart" title="Restart Poziomu (R)" class="btn-retro-secondary text-[10px] font-bold px-1.5 py-0.5 rounded text-white">
                         ↻
                     </button>
 
                     <!-- Pause Button [P / OPTIONS] -->
-                    <button id="btn-hud-pause" title="Pauza (P / OPTIONS)" class="btn-retro text-xs font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-white mono-font">
+                    <button id="btn-hud-pause" title="Pauza (P / OPTIONS)" class="btn-retro text-[10px] font-bold px-2 py-0.5 rounded text-white mono-font">
                         ❚❚
                     </button>
                 </div>
@@ -420,48 +434,48 @@
             <!-- ==============================================================
                  BOSS HEALTH OVERLAY (Level 20 - 3 Phases)
                  ============================================================== -->
-            <div id="boss-hud" class="hidden absolute top-14 left-1/2 -translate-x-1/2 w-[88%] max-w-[520px] bg-slate-950/90 border-2 border-red-500 rounded-xl p-2 shadow-2xl pointer-events-none z-20">
+            <div id="boss-hud" class="hidden absolute top-11 left-1/2 -translate-x-1/2 w-[86%] max-w-[460px] bg-slate-950/90 border-2 border-red-500 rounded-xl p-1.5 shadow-2xl pointer-events-none z-20">
                 <div class="flex justify-between items-center mb-1 px-1">
-                    <span class="text-[11px] sm:text-xs font-extrabold text-red-400 tracking-wider flex items-center gap-1.5">
+                    <span class="text-[10px] sm:text-[11px] font-extrabold text-red-400 tracking-wider flex items-center gap-1.5">
                         <span class="inline-block w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
                         <span id="boss-name-label">MEGA-ROBO EVAD • FAZA 1/3</span>
                     </span>
-                    <span id="boss-hp-text" class="text-xs font-extrabold text-amber-300 mono-font">800 / 800 HP</span>
+                    <span id="boss-hp-text" class="text-[10px] sm:text-xs font-extrabold text-amber-300 mono-font">800 / 800 HP</span>
                 </div>
-                <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-red-900 p-0.5">
+                <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-red-900 p-0.5">
                     <div id="boss-hp-bar" class="h-full bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400 rounded-full transition-all duration-150" style="width: 100%;"></div>
                 </div>
             </div>
 
             <!-- ==============================================================
-                 UNDERTALE-STYLE CUTSCENE OVERLAY
+                 COMPACT LOW-PROFILE UNDERTALE-STYLE CUTSCENE OVERLAY
                  ============================================================== -->
-            <section id="cutscene-overlay" class="hidden absolute inset-0 z-30 flex flex-col justify-end p-2.5 sm:p-5 pointer-events-auto bg-gradient-to-t from-slate-950/85 via-transparent to-slate-950/35">
-                <div class="flex justify-end mb-auto">
-                    <button id="btn-cutscene-skip" class="btn-retro-secondary px-3 py-1 rounded-lg text-[10px] sm:text-xs font-bold text-slate-200 mono-font">
+            <section id="cutscene-overlay" class="hidden absolute inset-0 z-30 flex flex-col justify-between p-1.5 sm:p-3 pointer-events-auto bg-gradient-to-t from-slate-950/75 via-transparent to-transparent">
+                <div class="flex justify-end">
+                    <button id="btn-cutscene-skip" class="btn-retro-secondary px-2.5 py-1 rounded-md text-[9px] sm:text-[11px] font-bold text-slate-200 mono-font">
                         POMIŃ [ESC / ◯] ⏭
                     </button>
                 </div>
 
-                <div id="cutscene-box" class="retro-panel rounded-2xl p-3 sm:p-4 max-w-2xl w-full mx-auto flex items-center gap-3 sm:gap-4">
+                <div id="cutscene-box" class="retro-panel rounded-xl p-2 sm:p-3 max-w-xl w-[94%] mx-auto mb-0.5 flex items-center gap-2.5 sm:gap-3.5">
                     <!-- Expressive Character Portrait Canvas -->
-                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-slate-900 border-2 border-yellow-400 flex items-center justify-center shrink-0 overflow-hidden shadow-inner">
+                    <div id="cutscene-portrait-wrap" class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-slate-900 border-2 border-yellow-400 flex items-center justify-center shrink-0 overflow-hidden shadow-inner">
                         <canvas id="portraitCanvas" width="72" height="72" class="w-full h-full"></canvas>
                     </div>
 
                     <!-- Speaker Name & Typewriter Text -->
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between gap-2 mb-1">
-                            <span id="cutscene-speaker" class="retro-font text-[10px] sm:text-xs text-purple-300 tracking-wide">
+                        <div class="flex items-center justify-between gap-2 mb-0.5">
+                            <span id="cutscene-speaker" class="retro-font text-[9px] sm:text-[11px] text-purple-300 tracking-wide">
                                 DAVE
                             </span>
-                            <span id="cutscene-step-counter" class="text-[10px] text-slate-400 mono-font">1/5</span>
+                            <span id="cutscene-step-counter" class="text-[9px] text-slate-400 mono-font">1/5</span>
                         </div>
-                        <p id="cutscene-text" class="text-xs sm:text-base text-white font-semibold leading-snug min-h-[2.6rem] sm:min-h-[3.2rem]">
+                        <p id="cutscene-text" class="text-[11px] sm:text-sm text-white font-semibold leading-snug min-h-[2.0rem] sm:min-h-[2.5rem]">
                             * ...
                         </p>
-                        <div class="flex justify-end mt-1">
-                            <button id="btn-cutscene-next" class="btn-retro px-3 py-1 rounded-lg text-[10px] sm:text-xs font-extrabold text-white mono-font">
+                        <div class="flex justify-end mt-0.5">
+                            <button id="btn-cutscene-next" class="btn-retro px-2.5 py-0.5 sm:py-1 rounded-md text-[9px] sm:text-[11px] font-extrabold text-white mono-font">
                                 DALEJ [SPACJA / ✕] ▶
                             </button>
                         </div>
@@ -485,6 +499,9 @@
                     <!-- Top-Left Sonic Mania Floating Logo & Zone Ribbons -->
                     <div>
                         <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                            <span class="mania-ribbon-bar bg-yellow-400 text-slate-950 text-[9px] sm:text-[10px] font-black px-2.5 py-0.5 rounded-sm mono-font tracking-wider">
+                                ★ CUBELON ZONE • ACT 1
+                            </span>
                             <div id="gamepad-status-badge" class="mania-ribbon-bar hidden items-center gap-1 bg-cyan-400 text-slate-950 px-2 py-0.5 rounded-sm">
                                 <span class="text-[10px]">🎮</span>
                                 <span class="text-[9px] font-black mono-font">PAD AKTYWNY</span>
@@ -504,6 +521,7 @@
                                 </div>
                             </div>
                             <div>
+                                <div class="text-[9px] font-extrabold text-cyan-300 mono-font tracking-widest uppercase">RETRO-MODERN EDITION</div>
                                 <h1 class="menu-title-compact retro-font text-sm sm:text-lg text-white leading-snug tracking-tight drop-shadow-[3px_3px_0_#db2777]">
                                     PRZYGODA<br><span class="text-yellow-300">DAVE'A</span>
                                 </h1>
@@ -718,24 +736,24 @@
             </div>
 
             <!-- ==============================================================
-                 MOBILE & LANDSCAPE ON-SCREEN TOUCH CONTROLS
+                 CENTERED MOBILE & LANDSCAPE ON-SCREEN TOUCH CONTROLS
                  ============================================================== -->
-            <div id="touch-controls" class="touch-auto absolute bottom-2 inset-x-3 justify-between items-end pointer-events-none z-20">
+            <div id="touch-controls" class="touch-auto touch-state-hidden absolute bottom-2.5 left-1/2 -translate-x-1/2 w-[90%] max-w-[540px] justify-between items-end pointer-events-none z-20 px-2 sm:px-4">
                 <!-- Left / Right D-Pad -->
-                <div class="flex gap-2 pointer-events-auto">
-                    <button id="touch-left" aria-label="W lewo" class="touch-btn w-12 h-12 sm:w-14 sm:h-14 rounded-2xl text-white font-extrabold text-lg flex items-center justify-center">
+                <div class="flex gap-2.5 pointer-events-auto">
+                    <button id="touch-left" aria-label="W lewo" class="touch-btn w-12 h-12 sm:w-13 sm:h-13 rounded-2xl text-white font-extrabold text-base sm:text-lg flex items-center justify-center">
                         ◀
                     </button>
-                    <button id="touch-right" aria-label="W prawo" class="touch-btn w-12 h-12 sm:w-14 sm:h-14 rounded-2xl text-white font-extrabold text-lg flex items-center justify-center">
+                    <button id="touch-right" aria-label="W prawo" class="touch-btn w-12 h-12 sm:w-13 sm:h-13 rounded-2xl text-white font-extrabold text-base sm:text-lg flex items-center justify-center">
                         ▶
                     </button>
                 </div>
                 <!-- Dash & Jump Action Buttons -->
-                <div class="flex gap-2 pointer-events-auto">
-                    <button id="touch-dash" aria-label="Dash" class="touch-btn h-12 sm:h-14 px-3.5 sm:px-4 rounded-2xl text-cyan-300 font-extrabold text-xs sm:text-sm flex items-center justify-center mono-font">
+                <div class="flex gap-2.5 pointer-events-auto">
+                    <button id="touch-dash" aria-label="Dash" class="touch-btn h-12 sm:h-13 px-3.5 sm:px-4 rounded-2xl text-cyan-300 font-extrabold text-xs flex items-center justify-center mono-font">
                         DASH
                     </button>
-                    <button id="touch-jump" aria-label="Skok" class="touch-btn h-12 sm:h-14 px-4 sm:px-5 rounded-2xl text-purple-200 font-extrabold text-xs sm:text-sm flex items-center justify-center mono-font">
+                    <button id="touch-jump" aria-label="Skok" class="touch-btn h-12 sm:h-13 px-4 sm:px-5 rounded-2xl text-purple-200 font-extrabold text-xs flex items-center justify-center mono-font">
                         SKOK ▲
                     </button>
                 </div>
@@ -771,9 +789,9 @@ function updateViewportMetrics() {
     if (rect.width <= 0 || rect.height <= 0) return;
 
     const aspect = rect.width / rect.height;
-    // On mobile landscape or wide fullscreen viewports, expand canvas.width so zero space is wasted
+    // Keep internal aspect ratio balanced so mobile screens never over-stretch
     if (aspect > 1.38 && (window.innerWidth <= 920 || window.innerHeight <= 580)) {
-        canvas.width = Math.max(800, Math.min(1280, Math.round(600 * aspect)));
+        canvas.width = Math.max(800, Math.min(1080, Math.round(600 * aspect)));
     } else {
         canvas.width = 800;
     }
@@ -783,14 +801,23 @@ window.addEventListener('resize', updateViewportMetrics);
 window.addEventListener('orientationchange', () => setTimeout(updateViewportMetrics, 120));
 
 // ============================================================================
-// .MP3 / .WAV MUSIC MANAGER WITH iOS / MOBILE FIX & SMOOTH CROSSFADING
+// .MP3 / .WAV MUSIC MANAGER WITH DEDICATED TRACKS FOR MENUS, PAUSE & CUTSCENES
 // ============================================================================
+// Podmień poniższe nazwy plików na swoje własne pliki .mp3 lub .wav!
 const MUSIC_TRACK_PATHS = {
-    menu:  'menu_music.mp3',
-    hills: 'hills_forest.mp3',
-    night: 'night_castle.mp3',
-    boss:  'boss_battle.mp3'
+    menu:           'menu_music.mp3',      // Menu Główne
+    level_select:   'level_select.mp3',    // Ekran Wyboru Poziomów (1-20)
+    settings:       'settings_music.mp3',  // Ekran Ustawień / Opcji
+    pause:          'pause_music.mp3',     // Menu Pauzy podczas gry
+    cutscene_intro: 'cutscene_intro.mp3',  // Cutscenka początkowa (Dave i Angela)
+    cutscene_outro: 'cutscene_outro.mp3',  // Cutscenka końcowa w zamku (John)
+    hills:          'hills_forest.mp3',    // Poziomy 1-14: Wzgórza i Las
+    night:          'night_castle.mp3',    // Poziomy 15-19: Krwawy Księżyc i Przedmurze
+    boss:           'boss_battle.mp3'      // Poziom 20: Walka z Mega-Robo Evadem
 };
+
+// Ścieżki będące zsynchronizowanymi wariantami motywu menu (grają stale w tle na vol = 0 i płynnie fadują w tym samym czasie)
+const SYNCED_MENU_STEMS = new Set(['menu', 'level_select', 'settings', 'pause']);
 
 class MusicManager {
     constructor(trackPaths) {
@@ -800,7 +827,8 @@ class MusicManager {
         this.targetVolume = 0.6;
         this.muted = false;
         this.isPaused = false;
-        this.unlocked = false;
+        // Start optimistically unlocked so browsers that allow autoplay start immediately
+        this.unlocked = true;
 
         // Detect iOS Safari / Mobile browsers where HTMLAudioElement.volume is read-only (always 1)
         this.volumeReadOnly = false;
@@ -820,55 +848,141 @@ class MusicManager {
             audio.loop = true;
             audio.preload = 'auto';
             audio.playsInline = true;
+            audio.autoplay = false;
             try { audio.volume = 0; } catch (e) {}
             this.tracks[key] = audio;
             this.virtualVol[key] = 0;
         }
 
-        setInterval(() => this.updateFade(), 50);
+        setInterval(() => this.updateFade(), 35);
+    }
+
+    isMenuStem(key) {
+        return SYNCED_MENU_STEMS.has(key);
+    }
+
+    // Utrzymuje warianty menu (menu, level_select, settings, pause) włączone na głośności 0 i zsynchronizowane w czasie
+    ensureMenuStemsPlayingAndSynced(referenceKey = null) {
+        if (!this.unlocked || this.isPaused || this.muted || this.targetVolume <= 0.001) return;
+
+        // Znajdź aktywnie grający wariant menu jako punkt odniesienia czasu (currentTime)
+        let refAudio = null;
+        if (referenceKey && this.isMenuStem(referenceKey) && this.tracks[referenceKey] && !this.tracks[referenceKey].paused) {
+            refAudio = this.tracks[referenceKey];
+        } else {
+            for (const stemKey of SYNCED_MENU_STEMS) {
+                const candidate = this.tracks[stemKey];
+                if (candidate && !candidate.paused && candidate.currentTime > 0) {
+                    refAudio = candidate;
+                    break;
+                }
+            }
+        }
+
+        for (const stemKey of SYNCED_MENU_STEMS) {
+            const stemAudio = this.tracks[stemKey];
+            if (!stemAudio) continue;
+
+            if (!this.volumeReadOnly) {
+                // Na komputerach i Androidzie wszystkie 4 warianty grają cały czas (nieaktywne mają volume = 0)
+                stemAudio.muted = false;
+                if (stemAudio.paused) {
+                    try {
+                        stemAudio.volume = this.virtualVol[stemKey] || 0;
+                        if (refAudio && refAudio !== stemAudio && refAudio.readyState >= 1) {
+                            stemAudio.currentTime = refAudio.currentTime;
+                        }
+                    } catch (e) {}
+                    const p = stemAudio.play();
+                    if (p && typeof p.catch === 'function') {
+                        p.catch(() => {});
+                    }
+                } else if (refAudio && refAudio !== stemAudio && refAudio.readyState >= 2 && stemAudio.readyState >= 2) {
+                    // Koryguj dryf czasowy, jeśli któryś wariant rozjechał się o więcej niż 0.12s
+                    const drift = Math.abs(stemAudio.currentTime - refAudio.currentTime);
+                    if (drift > 0.12 && drift < (refAudio.duration || 999) - 0.25) {
+                        try { stemAudio.currentTime = refAudio.currentTime; } catch (e) {}
+                    }
+                }
+            }
+        }
+    }
+
+    tryStartTrack(audio, key) {
+        if (!audio || this.isPaused || this.muted || this.targetVolume <= 0.001) return;
+
+        if (this.isMenuStem(key) && !this.volumeReadOnly) {
+            this.ensureMenuStemsPlayingAndSynced(key);
+            return;
+        }
+
+        audio.muted = false;
+        if (this.volumeReadOnly) {
+            this.virtualVol[key] = this.targetVolume;
+        }
+        const playPromise = audio.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(() => {
+                // If browser autoplay policy blocked unmuted start, mark locked until first natural focus/gesture
+                this.unlocked = false;
+            });
+        }
     }
 
     stopOtherTracksImmediate(activeKey) {
+        const refAudio = this.tracks[activeKey];
         for (const [key, audio] of Object.entries(this.tracks)) {
             if (key !== activeKey) {
                 this.virtualVol[key] = 0;
                 try { audio.volume = 0; } catch (e) {}
+
+                // Nie zatrzymuj i nie zeruj czasu dla wariantów menu (poza iOS, gdzie volume jest zablokowany)
+                if (this.isMenuStem(key) && !this.volumeReadOnly) {
+                    continue;
+                }
+
                 audio.muted = true;
                 if (!audio.paused) {
+                    if (this.isMenuStem(key) && this.isMenuStem(activeKey) && refAudio) {
+                        try { refAudio.currentTime = audio.currentTime; } catch (e) {}
+                    }
                     audio.pause();
                 }
-                try { audio.currentTime = 0; } catch (e) {}
+                if (!this.isMenuStem(key)) {
+                    try { audio.currentTime = 0; } catch (e) {}
+                }
             }
         }
     }
 
     unlock() {
-        if (this.unlocked) return;
         this.unlocked = true;
         this.syncImmediateState();
     }
 
     playTrack(key) {
+        const prevKey = this.currentKey;
+        const nextTrack = this.tracks[key] || this.tracks.menu;
         if (this.currentKey === key) {
             this.syncImmediateState();
             return;
         }
         this.currentKey = key;
 
-        // On iOS / mobile (or when muted/paused), immediately stop previous tracks so 2+ tracks never overlap
+        // Na urządzeniach z zablokowanym audio.volume (iOS) zsynchronizuj czas wariantu przed przełączeniem
+        if (this.volumeReadOnly && this.isMenuStem(prevKey) && this.isMenuStem(key)) {
+            const prevAudio = this.tracks[prevKey];
+            if (prevAudio && nextTrack) {
+                try { nextTrack.currentTime = prevAudio.currentTime; } catch (e) {}
+            }
+        }
+
         if (this.volumeReadOnly || this.muted || this.isPaused || this.targetVolume <= 0.001) {
             this.stopOtherTracksImmediate(key);
         }
 
-        const nextTrack = this.tracks[key];
-        if (nextTrack && this.unlocked && !this.isPaused && !this.muted && this.targetVolume > 0.001) {
-            nextTrack.muted = false;
-            if (this.volumeReadOnly) {
-                this.virtualVol[key] = this.targetVolume;
-            }
-            if (nextTrack.paused) {
-                nextTrack.play().catch(() => {});
-            }
+        if (nextTrack && !this.isPaused && !this.muted && this.targetVolume > 0.001) {
+            this.tryStartTrack(nextTrack, key);
         }
     }
 
@@ -895,9 +1009,11 @@ class MusicManager {
             for (const [key, audio] of Object.entries(this.tracks)) {
                 this.virtualVol[key] = 0;
                 try { audio.volume = 0; } catch (e) {}
-                audio.muted = true;
-                if (!audio.paused) {
-                    audio.pause();
+                if (this.volumeReadOnly || !this.isMenuStem(key)) {
+                    audio.muted = true;
+                    if (!audio.paused) {
+                        audio.pause();
+                    }
                 }
             }
             return;
@@ -905,6 +1021,8 @@ class MusicManager {
 
         if (this.volumeReadOnly) {
             this.stopOtherTracksImmediate(this.currentKey);
+        } else {
+            this.ensureMenuStemsPlayingAndSynced(this.currentKey);
         }
 
         if (this.currentKey && this.tracks[this.currentKey]) {
@@ -921,14 +1039,20 @@ class MusicManager {
 
     updateFade() {
         if (!this.unlocked) return;
-        const fadeStep = 0.05;
+        // Krok fade skalowany względem ustawionej głośności, aby crossfade trwał zawsze ~450ms
+        const fadeStep = Math.max(0.015, this.targetVolume * 0.075);
+
+        if (!this.volumeReadOnly && !this.isPaused && !this.muted && this.targetVolume > 0.001) {
+            this.ensureMenuStemsPlayingAndSynced(this.currentKey);
+        }
 
         for (const [key, audio] of Object.entries(this.tracks)) {
             const isTarget = (key === this.currentKey) && !this.isPaused && !this.muted && (this.targetVolume > 0.001);
             const desiredVol = isTarget ? this.targetVolume : 0;
+            const isStem = this.isMenuStem(key);
 
             if (this.volumeReadOnly) {
-                // iOS Safari / Mobile: volume is read-only, so switch cleanly without stuck fade loops
+                // iOS Safari / Mobile: volume is read-only
                 this.virtualVol[key] = desiredVol;
                 if (isTarget) {
                     audio.muted = false;
@@ -939,14 +1063,16 @@ class MusicManager {
                     audio.muted = true;
                     if (!audio.paused) {
                         audio.pause();
-                        try { audio.currentTime = 0; } catch (e) {}
+                        if (!isStem) {
+                            try { audio.currentTime = 0; } catch (e) {}
+                        }
                     }
                 }
                 continue;
             }
 
             const currentVol = this.virtualVol[key] || 0;
-            if (Math.abs(currentVol - desiredVol) > 0.01) {
+            if (Math.abs(currentVol - desiredVol) > 0.008) {
                 if (currentVol < desiredVol) {
                     audio.muted = false;
                     if (audio.paused) {
@@ -961,10 +1087,16 @@ class MusicManager {
                 this.virtualVol[key] = desiredVol;
                 try { audio.volume = desiredVol; } catch (e) {}
                 if (desiredVol <= 0.001) {
-                    audio.muted = true;
-                    if (!audio.paused) {
-                        audio.pause();
-                        try { audio.currentTime = 0; } catch (e) {}
+                    if (isStem) {
+                        // Warianty menu (menu, level_select, settings, pause) NIE są zatrzymywane — grają dalej na głośności 0!
+                        audio.muted = false;
+                        try { audio.volume = 0; } catch (e) {}
+                    } else {
+                        audio.muted = true;
+                        if (!audio.paused) {
+                            audio.pause();
+                            try { audio.currentTime = 0; } catch (e) {}
+                        }
                     }
                 } else {
                     audio.muted = false;
@@ -1276,9 +1408,21 @@ const THEME_PALETTES = {
     castle:     { left: '#ea580c', right: '#0891b2', top: '#dc2626' }
 };
 
-function hexToRgb(hex) {
-    const clean = hex.replace('#', '');
+function hexToRgb(colorStr) {
+    if (!colorStr) return [0, 0, 0];
+    const str = String(colorStr).trim();
+    if (str.startsWith('rgb')) {
+        const parts = str.match(/\d+(\.\d+)?/g);
+        if (parts && parts.length >= 3) {
+            return [Math.round(Number(parts[0])), Math.round(Number(parts[1])), Math.round(Number(parts[2]))];
+        }
+    }
+    let clean = str.replace('#', '');
+    if (clean.length === 3) {
+        clean = clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2];
+    }
     const num = parseInt(clean, 16);
+    if (isNaN(num)) return [0, 0, 0];
     return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
 }
 
@@ -1289,7 +1433,8 @@ function lerpColor(hexA, hexB, t) {
     const r = Math.round(r1 + (r2 - r1) * clamped);
     const g = Math.round(g1 + (g2 - g1) * clamped);
     const b = Math.round(b1 + (b2 - b1) * clamped);
-    return `rgb(${r}, ${g}, ${b})`;
+    const toHex = (n) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0');
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
 function applyThemeAmbilight(theme, nextTheme = null, blend = 0) {
@@ -2121,6 +2266,8 @@ let screenShake = 0;
 let cameraX = 0;
 let tickCount = 0;
 let introSeen = false;
+let isGamepadConnected = false;
+let levelTransitionAlpha = 0;
 
 // Cutscene State
 let activeCutsceneKey = null;
@@ -2128,6 +2275,29 @@ let cutsceneIndex = 0;
 let cutsceneCharIndex = 0;
 let cutsceneTick = 0;
 let cutsceneOnFinish = null;
+
+// ============================================================================
+// DYNAMIC TOUCH CONTROLS VISIBILITY (HIDDEN IN MENUS, CUTSCENES & ON GAMEPAD)
+// ============================================================================
+function updateTouchControlsVisibility() {
+    if (!touchControls) return;
+
+    const anyOverlayOpen =
+        gameState !== 'PLAYING' ||
+        !mainMenuOverlay.classList.contains('hidden') ||
+        !pauseMenuOverlay.classList.contains('hidden') ||
+        !settingsModal.classList.contains('hidden') ||
+        !levelsModal.classList.contains('hidden') ||
+        !cutsceneOverlay.classList.contains('hidden') ||
+        !victoryOverlay.classList.contains('hidden');
+
+    // Hide touch buttons during cutscenes, menus, pause menu, or when a controller is connected
+    if (anyOverlayOpen || isGamepadConnected || touchMode === 'OFF') {
+        touchControls.classList.add('touch-state-hidden');
+    } else {
+        touchControls.classList.remove('touch-state-hidden');
+    }
+}
 
 // Cinematic Main Menu Showcase Cycling State
 const MENU_SHOWCASE_LEVELS = [0, 7, 14, 18];
@@ -2213,6 +2383,8 @@ function startCutscene(key, onFinishCallback) {
     pauseMenuOverlay.classList.add('hidden');
     cutsceneOverlay.classList.remove('hidden');
 
+    updateTouchControlsVisibility();
+    syncMusicForState();
     syncCutsceneSlideUI();
 }
 
@@ -2269,6 +2441,8 @@ function finishCutscene() {
     activeCutsceneKey = null;
     cutsceneOnFinish = null;
     if (cb) cb();
+    updateTouchControlsVisibility();
+    syncMusicForState();
 }
 
 // Reusable Angela Renderer (Cute Pink Square with Bow, Blush, Pupils & Eyelashes)
@@ -2434,20 +2608,26 @@ let activeMenuContext = null;
 let activeMenuIndex = 0;
 
 window.addEventListener('gamepadconnected', () => {
+    isGamepadConnected = true;
     if (gamepadStatusBadge) {
         gamepadStatusBadge.classList.remove('hidden');
         gamepadStatusBadge.classList.add('inline-flex');
     }
+    updateTouchControlsVisibility();
 });
 
 window.addEventListener('gamepaddisconnected', () => {
     const pads = navigator.getGamepads ? Array.from(navigator.getGamepads()).filter(Boolean) : [];
-    if (pads.length === 0 && gamepadStatusBadge) {
-        gamepadStatusBadge.classList.add('hidden');
-        gamepadStatusBadge.classList.remove('inline-flex');
+    if (pads.length === 0) {
+        isGamepadConnected = false;
+        if (gamepadStatusBadge) {
+            gamepadStatusBadge.classList.add('hidden');
+            gamepadStatusBadge.classList.remove('inline-flex');
+        }
     }
     gamepadInput.left = false;
     gamepadInput.right = false;
+    updateTouchControlsVisibility();
 });
 
 function getActiveMenuInfo() {
@@ -2553,6 +2733,10 @@ function pollGamepad(timestamp) {
         return;
     }
 
+    if (!isGamepadConnected) {
+        isGamepadConnected = true;
+        updateTouchControlsVisibility();
+    }
     if (gamepadStatusBadge && gamepadStatusBadge.classList.contains('hidden')) {
         gamepadStatusBadge.classList.remove('hidden');
         gamepadStatusBadge.classList.add('inline-flex');
@@ -2605,12 +2789,18 @@ function pollGamepad(timestamp) {
         if (!settingsModal.classList.contains('hidden')) {
             sfx.play('ui_back');
             settingsModal.classList.add('hidden');
+            updateTouchControlsVisibility();
+            syncMusicForState();
         } else if (!levelsModal.classList.contains('hidden')) {
             sfx.play('ui_back');
             levelsModal.classList.add('hidden');
+            updateTouchControlsVisibility();
+            syncMusicForState();
         } else if (gameState === 'MENU') {
             sfx.play('ui_select');
             settingsModal.classList.remove('hidden');
+            updateTouchControlsVisibility();
+            syncMusicForState();
         } else if (gameState === 'PLAYING' || gameState === 'PAUSED') {
             togglePause();
         }
@@ -2707,9 +2897,13 @@ function pollGamepad(timestamp) {
             if (!settingsModal.classList.contains('hidden')) {
                 sfx.play('ui_back');
                 settingsModal.classList.add('hidden');
+                updateTouchControlsVisibility();
+                syncMusicForState();
             } else if (!levelsModal.classList.contains('hidden')) {
                 sfx.play('ui_back');
                 levelsModal.classList.add('hidden');
+                updateTouchControlsVisibility();
+                syncMusicForState();
             } else if (gameState === 'PAUSED') {
                 togglePause();
             }
@@ -2755,19 +2949,44 @@ function pollGamepad(timestamp) {
 }
 
 // ============================================================================
-// MUSIC SELECTION HELPER
+// MUSIC SELECTION HELPER (SUPPORTS SETTINGS, LEVEL SELECT, PAUSE & CUTSCENES)
 // ============================================================================
 function syncMusicForState() {
+    music.setPaused(false);
+
+    // 1. Sub-modals have their own distinct background tracks
+    if (!settingsModal.classList.contains('hidden')) {
+        music.playTrack('settings');
+        return;
+    }
+    if (!levelsModal.classList.contains('hidden')) {
+        music.playTrack('level_select');
+        return;
+    }
+
+    // 2. Cutscene tracks
+    if (gameState === 'CUTSCENE') {
+        if (activeCutsceneKey === 'outro') {
+            music.playTrack('cutscene_outro');
+        } else {
+            music.playTrack('cutscene_intro');
+        }
+        return;
+    }
+
+    // 3. Pause Menu has its own dedicated track
+    if (gameState === 'PAUSED') {
+        music.playTrack('pause');
+        return;
+    }
+
+    // 4. Main Menu track
     if (gameState === 'MENU') {
-        music.setPaused(false);
         music.playTrack('menu');
         return;
     }
-    if (gameState === 'PAUSED') {
-        music.setPaused(true);
-        return;
-    }
-    music.setPaused(false);
+
+    // 5. Gameplay level tracks
     const lvl = LEVELS[currentLevelIdx];
     if (lvl.isBossLevel) {
         music.playTrack('boss');
@@ -2786,6 +3005,7 @@ function loadLevel(idx, isMenuPreview = false) {
     const lvl = LEVELS[currentLevelIdx];
 
     if (!isMenuPreview) {
+        levelTransitionAlpha = 0.85; // Smooth visual fade-in on level start/transition
         savedPlayerLevelIdx = currentLevelIdx;
         document.getElementById('menu-continue-badge').textContent = `POZ. ${savedPlayerLevelIdx + 1}`;
         try {
@@ -3019,6 +3239,7 @@ function showVictorySummaryModal() {
     gameState = 'VICTORY';
     inGameHud.classList.add('hidden');
     bossHud.classList.add('hidden');
+    updateTouchControlsVisibility();
 
     finalDeathsEl.textContent = deathCount;
 
@@ -3098,6 +3319,10 @@ function rectOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
 function update() {
     tickCount++;
     const lvl = LEVELS[currentLevelIdx];
+
+    if (levelTransitionAlpha > 0) {
+        levelTransitionAlpha = Math.max(0, levelTransitionAlpha - 0.045);
+    }
 
     keys.left = kbTouchInput.left || gamepadInput.left;
     keys.right = kbTouchInput.right || gamepadInput.right;
@@ -3215,8 +3440,8 @@ function update() {
     if (lvl.transitionToTheme) {
         const maxCam = Math.max(1, lvl.width * TILE - canvas.width);
         const rawProgress = Math.max(0, Math.min(1, cameraX / maxCam));
-        const blend = Math.max(0, Math.min(1, (rawProgress - 0.25) / 0.75));
-        if (tickCount % 6 === 0) {
+        const blend = rawProgress * rawProgress * (3 - 2 * rawProgress);
+        if (tickCount % 4 === 0) {
             applyThemeAmbilight(lvl.theme, lvl.transitionToTheme, blend);
         }
     }
@@ -3792,12 +4017,13 @@ function draw() {
         return;
     }
 
-    // Calculate Progressive Biome Blending for Level 7 (day->forest) & Level 14 (forest->darkforest)
+    // Smooth Progressive Biome Blending for Level 7 (day->forest) & Level 14 (forest->darkforest)
     let blend = 0;
     if (lvl.transitionToTheme) {
         const maxCam = Math.max(1, lvl.width * TILE - canvas.width);
         const rawProgress = Math.max(0, Math.min(1, cameraX / maxCam));
-        blend = Math.max(0, Math.min(1, (rawProgress - 0.25) / 0.75));
+        // Smoothstep easing across the entire level so colors transition gradually from 0% to 100%
+        blend = rawProgress * rawProgress * (3 - 2 * rawProgress);
     }
 
     // 1. Draw Background Environment
@@ -3905,28 +4131,40 @@ function draw() {
     if (gameState === 'MENU' && menuFadeAlpha > 0) {
         ctx.fillStyle = `rgba(6, 8, 17, ${menuFadeAlpha})`;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else if (gameState === 'PLAYING' && levelTransitionAlpha > 0) {
+        ctx.fillStyle = `rgba(6, 8, 17, ${levelTransitionAlpha})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
     ctx.restore();
 }
 
 // ============================================================================
-// ENVIRONMENT & BIOME BLENDING RENDERER
+// ENVIRONMENT & SMOOTH BIOME BLENDING RENDERER (GROUNDED TREES & SOFT SHADOWS)
 // ============================================================================
 const ENV_COLORS = {
     day: {
         skyTop: '#0284c7', skyMid: '#38bdf8', skyBot: '#bae6fd',
-        mount: '#38bdf8', hill: '#4ade80', tree: '#15803d',
+        mount: '#38bdf8', mountCap: '#ffffff',
+        cloud: '#ffffff', cloudEye: '#1e293b',
+        hill: '#4ade80', horizon: '#16a34a',
+        tree: '#15803d', treeLight: '#22c55e', trunk: '#5c2d0c',
         dirt: '#854d0e', grass: '#22c55e'
     },
     forest: {
         skyTop: '#0f172a', skyMid: '#1e1b4b', skyBot: '#4c1d95',
-        mount: '#1e1b4b', hill: '#1e293b', tree: '#0f172a',
+        mount: '#1e1b4b', mountCap: '#cbd5e1',
+        cloud: '#64748b', cloudEye: '#cbd5e1',
+        hill: '#1e293b', horizon: '#0f172a',
+        tree: '#0f172a', treeLight: '#1e293b', trunk: '#271712',
         dirt: '#451a03', grass: '#10b981'
     },
     darkforest: {
         skyTop: '#05050a', skyMid: '#2e1065', skyBot: '#450a0a',
-        mount: '#180926', hill: '#111827', tree: '#09090b',
+        mount: '#180926', mountCap: '#f87171',
+        cloud: '#475569', cloudEye: '#fca5a5',
+        hill: '#111827', horizon: '#07070c',
+        tree: '#09090b', treeLight: '#18181b', trunk: '#1c100d',
         dirt: '#27272a', grass: '#dc2626'
     }
 };
@@ -3957,8 +4195,11 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
             }
         }
 
-        // Castle Pillars & Flickering Wall Torches
+        // Castle Pillars with Soft Side Drop Shadows & Flickering Wall Torches
         for (let x = 50; x < canvas.width; x += 170) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+            ctx.fillRect(x + 54, 0, 12, 600);
+
             ctx.fillStyle = '#0f1420';
             ctx.fillRect(x, 0, 54, 600);
             ctx.fillStyle = '#1e293b';
@@ -4001,12 +4242,19 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
     const cA = ENV_COLORS[theme] || ENV_COLORS.day;
     const cB = (nextTheme && ENV_COLORS[nextTheme]) ? ENV_COLORS[nextTheme] : cA;
 
-    const skyTop = blend > 0 ? lerpColor(cA.skyTop, cB.skyTop, blend) : cA.skyTop;
-    const skyMid = blend > 0 ? lerpColor(cA.skyMid, cB.skyMid, blend) : cA.skyMid;
-    const skyBot = blend > 0 ? lerpColor(cA.skyBot, cB.skyBot, blend) : cA.skyBot;
-    const mountCol = blend > 0 ? lerpColor(cA.mount, cB.mount, blend) : cA.mount;
-    const hillCol = blend > 0 ? lerpColor(cA.hill, cB.hill, blend) : cA.hill;
-    const treeCol = blend > 0 ? lerpColor(cA.tree, cB.tree, blend) : cA.tree;
+    // 100% Continuous Color Interpolation (No sudden snapping at 50%!)
+    const skyTop    = blend > 0 ? lerpColor(cA.skyTop, cB.skyTop, blend) : cA.skyTop;
+    const skyMid    = blend > 0 ? lerpColor(cA.skyMid, cB.skyMid, blend) : cA.skyMid;
+    const skyBot    = blend > 0 ? lerpColor(cA.skyBot, cB.skyBot, blend) : cA.skyBot;
+    const mountCol  = blend > 0 ? lerpColor(cA.mount, cB.mount, blend) : cA.mount;
+    const capBase   = blend > 0 ? lerpColor(cA.mountCap, cB.mountCap, blend) : cA.mountCap;
+    const cloudCol  = blend > 0 ? lerpColor(cA.cloud, cB.cloud, blend) : cA.cloud;
+    const eyeCol    = blend > 0 ? lerpColor(cA.cloudEye, cB.cloudEye, blend) : cA.cloudEye;
+    const hillCol   = blend > 0 ? lerpColor(cA.hill, cB.hill, blend) : cA.hill;
+    const horizCol  = blend > 0 ? lerpColor(cA.horizon, cB.horizon, blend) : cA.horizon;
+    const treeCol   = blend > 0 ? lerpColor(cA.tree, cB.tree, blend) : cA.tree;
+    const treeLight = blend > 0 ? lerpColor(cA.treeLight, cB.treeLight, blend) : cA.treeLight;
+    const trunkCol  = blend > 0 ? lerpColor(cA.trunk, cB.trunk, blend) : cA.trunk;
 
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     grad.addColorStop(0, skyTop);
@@ -4015,7 +4263,7 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Moon in Forest / Dark Forest (or rising during transition!)
+    // Moon in Forest / Dark Forest (fades & rises smoothly during transition)
     if (theme === 'forest' || theme === 'darkforest' || nextTheme === 'forest' || nextTheme === 'darkforest') {
         const moonAlpha = (theme === 'day' && nextTheme === 'forest') ? blend : 1;
         const moonY = (theme === 'day' && nextTheme === 'forest') ? (170 - blend * 70) : 100;
@@ -4029,7 +4277,6 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
         ctx.beginPath();
         ctx.arc(canvas.width - 150, moonY, 40, 0, Math.PI * 2);
         ctx.fill();
-        // Subtle moon craters
         ctx.fillStyle = 'rgba(15, 23, 42, 0.18)';
         ctx.beginPath();
         ctx.arc(canvas.width - 162, moonY - 8, 8, 0, Math.PI * 2);
@@ -4038,18 +4285,24 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
         ctx.restore();
     }
 
-    // 1. Detailed Multi-Faceted Parallax Mountains with Snow/Mist Caps & Shadowed Slopes
+    // 1. Multi-Faceted Parallax Mountains with Smoothly Blended Caps & Ambient Shadows
     const mountOffset = -(cameraX * 0.15) % 420;
-    const mountLight = lerpColor(mountCol, '#ffffff', theme === 'day' ? 0.18 : 0.08);
-    const mountDark = lerpColor(mountCol, '#020617', 0.35);
-    const capColor = (theme === 'darkforest' || (nextTheme === 'darkforest' && blend > 0.5))
-        ? 'rgba(248, 113, 113, 0.35)'
-        : 'rgba(255, 255, 255, 0.65)';
+    const mountLight = lerpColor(mountCol, '#ffffff', 0.14);
+    const mountDark = lerpColor(mountCol, '#020617', 0.36);
 
     for (let mx = mountOffset - 220; mx < canvas.width + 240; mx += 420) {
         const peakX = mx + 210;
         const peakY = 195;
-        const baseY = 560;
+        const baseY = 540;
+
+        // Soft background mountain cast shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+        ctx.beginPath();
+        ctx.moveTo(peakX + 10, peakY + 12);
+        ctx.lineTo(mx + 435, baseY);
+        ctx.lineTo(peakX, baseY);
+        ctx.closePath();
+        ctx.fill();
 
         // Left sunlit mountain face
         ctx.fillStyle = mountLight;
@@ -4069,8 +4322,10 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
         ctx.closePath();
         ctx.fill();
 
-        // Snow / Misty Peak Cap with jagged bottom
-        ctx.fillStyle = capColor;
+        // Smoothly blended Snow / Mist Peak Cap
+        ctx.save();
+        ctx.globalAlpha = 0.55;
+        ctx.fillStyle = capBase;
         ctx.beginPath();
         ctx.moveTo(peakX, peakY);
         ctx.lineTo(peakX - 52, peakY + 90);
@@ -4080,8 +4335,9 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
         ctx.lineTo(peakX + 52, peakY + 90);
         ctx.closePath();
         ctx.fill();
+        ctx.restore();
 
-        // Secondary smaller mountain peak beside it
+        // Secondary smaller mountain peak
         const subPeakX = mx + 355;
         const subPeakY = 265;
         ctx.fillStyle = mountCol;
@@ -4093,68 +4349,105 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
         ctx.fill();
     }
 
-    // 2. Parallax Troll Clouds
+    // 2. Parallax Troll Clouds with Soft Bottom Shadow & Smoothly Blended Alpha
     const cloudOffset = -(cameraX * 0.22) % 320;
+    const isDayA = theme === 'day' ? 0.88 : 0.24;
+    const isDayB = (nextTheme || theme) === 'day' ? 0.88 : 0.24;
+    const cloudAlpha = isDayA + (isDayB - isDayA) * blend;
+
     for (let cx = cloudOffset - 100; cx < canvas.width + 160; cx += 320) {
-        ctx.fillStyle = (theme === 'day' && blend < 0.5) ? `rgba(255,255,255,${0.92 - blend * 0.65})` : 'rgba(148, 163, 184, 0.22)';
+        ctx.save();
+        ctx.globalAlpha = cloudAlpha;
+        // Subtle cloud underside shadow
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.18)';
+        ctx.beginPath();
+        ctx.arc(cx, 100, 26, 0, Math.PI * 2);
+        ctx.arc(cx + 25, 90, 32, 0, Math.PI * 2);
+        ctx.arc(cx + 52, 100, 24, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = cloudCol;
         ctx.beginPath();
         ctx.arc(cx, 95, 26, 0, Math.PI * 2);
         ctx.arc(cx + 25, 85, 32, 0, Math.PI * 2);
         ctx.arc(cx + 52, 95, 24, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = (theme === 'day' && blend < 0.5) ? '#1e293b' : '#cbd5e1';
+        ctx.fillStyle = eyeCol;
         ctx.fillRect(cx + 15, 80, 4, 9);
         ctx.fillRect(cx + 34, 80, 4, 9);
+        ctx.restore();
     }
 
-    // 3. Layered Rolling Hills with Highlighted Grass Rim & Blocky Bushes
+    // 3. Layered Rolling Hills with Soft Depth Shadows
     const hillOffset = -(cameraX * 0.35) % 360;
-    const hillRim = lerpColor(hillCol, '#bbf7d0', theme === 'day' ? 0.35 : 0.12);
-    const hillShadow = lerpColor(hillCol, '#020617', 0.22);
+    const hillRim = lerpColor(hillCol, '#bbf7d0', 0.24);
+    const hillShadow = lerpColor(hillCol, '#020617', 0.28);
 
     for (let hx = hillOffset - 180; hx < canvas.width + 200; hx += 360) {
-        // Rim highlight
+        // Soft ambient shadow behind hill crest
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.beginPath();
+        ctx.arc(hx + 186, 595, 236, Math.PI, 0);
+        ctx.fill();
+
         ctx.fillStyle = hillRim;
         ctx.beginPath();
         ctx.arc(hx + 180, 600, 234, Math.PI, 0);
         ctx.fill();
 
-        // Main hill body
         ctx.fillStyle = hillCol;
         ctx.beginPath();
         ctx.arc(hx + 180, 604, 228, Math.PI, 0);
         ctx.fill();
 
-        // Decorative blocky bushes on hills
         ctx.fillStyle = hillShadow;
         ctx.fillRect(hx + 115, 392, 22, 14);
         ctx.fillRect(hx + 120, 386, 12, 8);
         ctx.fillRect(hx + 225, 405, 18, 12);
     }
 
-    // 4. Detailed Multi-Tiered Pine / Forest Trees with Trunks & Highlighted Branches
+    // 4. Grounded Forest Horizon Shelf (Prevents Trees from Ever Floating in Mid-Air!)
+    const groundGrad = ctx.createLinearGradient(0, 495, 0, 600);
+    groundGrad.addColorStop(0, horizCol);
+    groundGrad.addColorStop(1, lerpColor(horizCol, '#020617', 0.55));
+    ctx.fillStyle = groundGrad;
+    ctx.fillRect(0, 498, canvas.width, 102);
+
+    // Top rim highlight on the forest horizon ground
+    ctx.fillStyle = lerpColor(horizCol, '#bbf7d0', 0.18);
+    ctx.fillRect(0, 496, canvas.width, 3);
+
+    // 5. Firmly Grounded Multi-Tiered Pine Trees with Ground Contact Shadows
     const treeOffset = -(cameraX * 0.55) % 150;
-    const treeHighlight = lerpColor(treeCol, '#4ade80', theme === 'day' ? 0.28 : 0.1);
-    const treeShadow = lerpColor(treeCol, '#020617', 0.35);
-    const trunkCol = (theme === 'day' && blend < 0.5) ? '#5c2d0c' : '#271712';
+    const treeShadow = lerpColor(treeCol, '#020617', 0.38);
 
     for (let tx = treeOffset - 80; tx < canvas.width + 150; tx += 150) {
         const centerX = tx + 36;
-        // Wooden Trunk & Roots
-        ctx.fillStyle = trunkCol;
-        ctx.fillRect(centerX - 7, 465, 14, 65);
-        ctx.fillRect(centerX - 11, 512, 22, 10);
+        const treeGroundY = 516;
 
-        // 3-Tiered Pine Canopy (Bottom, Middle, Top tiers)
+        // Soft elliptical ground shadow under each tree so it sits firmly on the terrain
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.34)';
+        ctx.beginPath();
+        ctx.ellipse(centerX + 4, treeGroundY + 2, 28, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Wooden Trunk & Root Base planted firmly into the horizon shelf
+        ctx.fillStyle = trunkCol;
+        ctx.fillRect(centerX - 7, 456, 14, treeGroundY - 456);
+        ctx.fillRect(centerX - 12, treeGroundY - 8, 24, 9);
+        // Trunk right-side shadow for 3D depth
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+        ctx.fillRect(centerX, 456, 7, treeGroundY - 456);
+
+        // 3-Tiered Pine Canopy
         const tiers = [
-            { yTop: 395, yBot: 472, halfW: 36 },
-            { yTop: 360, yBot: 425, halfW: 29 },
-            { yTop: 325, yBot: 382, halfW: 21 }
+            { yTop: 392, yBot: 468, halfW: 36 },
+            { yTop: 356, yBot: 422, halfW: 29 },
+            { yTop: 322, yBot: 378, halfW: 21 }
         ];
         for (const t of tiers) {
-            // Left sunlit side of canopy
-            ctx.fillStyle = treeHighlight;
+            ctx.fillStyle = treeLight;
             ctx.beginPath();
             ctx.moveTo(centerX, t.yTop);
             ctx.lineTo(centerX - t.halfW, t.yBot);
@@ -4162,7 +4455,6 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
             ctx.closePath();
             ctx.fill();
 
-            // Right shaded side of canopy
             ctx.fillStyle = treeCol;
             ctx.beginPath();
             ctx.moveTo(centerX, t.yTop);
@@ -4171,19 +4463,21 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
             ctx.closePath();
             ctx.fill();
 
-            // Under-branch shadow strip
             ctx.fillStyle = treeShadow;
             ctx.fillRect(centerX - t.halfW + 4, t.yBot - 4, (t.halfW - 4) * 2, 4);
         }
     }
 
-    // Subtle Motes ONLY in Forest / DarkForest (or fading in during Level 7 transition)
+    // Subtle Motes with Smoothly Blended Color & Visibility
     const moteVisibility = theme === 'day' ? blend : 1;
-    if (moteVisibility > 0.05) {
+    if (moteVisibility > 0.02) {
+        const moteColor = (theme === 'darkforest' || nextTheme === 'darkforest')
+            ? lerpColor('#a5f3fc', '#fca5a5', theme === 'darkforest' ? 1 : blend)
+            : '#a5f3fc';
         for (const m of bgMotes) {
             const pulse = (0.4 + Math.sin(tickCount * 0.06 + m.phase) * 0.3) * moteVisibility;
             ctx.globalAlpha = pulse;
-            ctx.fillStyle = (theme === 'forest' && nextTheme !== 'darkforest') ? '#a5f3fc' : '#fca5a5';
+            ctx.fillStyle = moteColor;
             ctx.beginPath();
             ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
             ctx.fill();
@@ -4243,6 +4537,10 @@ function drawCastleGateExterior(gateX, groundY) {
 }
 
 function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling, nextTheme = null, blend = 0) {
+    // Soft ambient drop shadow behind every block and platform for depth
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.24)';
+    ctx.fillRect(x + 4, y + 5, w, h);
+
     if (theme === 'castle') {
         ctx.fillStyle = isPlatform ? '#475569' : '#1e293b';
         ctx.fillRect(x, y, w, h);
@@ -4629,22 +4927,24 @@ function drawCutsceneStage() {
     const slide = (script && script[cutsceneIndex]) ? script[cutsceneIndex] : { scenePhase: 0 };
     const phase = slide.scenePhase || 0;
     const cx = canvas.width / 2;
+    // Elevated stage floor (y=385) so characters are 100% visible above the bottom dialogue box on mobile!
+    const stageFloorY = 385;
 
     if (activeCutsceneKey === 'intro') {
         drawEnvironment('day');
 
         // Ground Hill Platform
-        drawSolidBlock(0, 440, canvas.width, 160, 'day', false, false);
+        drawSolidBlock(0, stageFloorY, canvas.width, 600 - stageFloorY, 'day', false, false);
 
         // Distant Castle Silhouette on the Right
         ctx.fillStyle = '#334155';
-        ctx.fillRect(cx + 220, 310, 90, 130);
-        ctx.fillRect(cx + 205, 290, 30, 25);
-        ctx.fillRect(cx + 295, 290, 30, 25);
+        ctx.fillRect(cx + 210, stageFloorY - 130, 90, 130);
+        ctx.fillRect(cx + 195, stageFloorY - 150, 30, 25);
+        ctx.fillRect(cx + 285, stageFloorY - 150, 30, 25);
 
         // Draw Dave (Purple Square)
         const daveX = cx - 110;
-        const daveY = 406;
+        const daveY = stageFloorY - 34;
         ctx.fillStyle = '#9333ea';
         ctx.fillRect(daveX, daveY, 34, 34);
         ctx.strokeStyle = '#e9d5ff';
@@ -4659,14 +4959,14 @@ function drawCutsceneStage() {
 
         // Draw Angela (Cute Pink Square with Bow, Eyes & Eyelashes)
         let angelaX = cx - 40;
-        let angelaY = 408;
+        let angelaY = stageFloorY - 32;
         if (phase === 1) {
             angelaY -= Math.abs(Math.sin(cutsceneTick * 0.25)) * 18;
         } else if (phase >= 2) {
-            angelaX = Math.min(cx + 240, cx - 40 + cutsceneTick * 4.5);
+            angelaX = Math.min(cx + 230, cx - 40 + cutsceneTick * 4.5);
         }
 
-        if (angelaX < cx + 230) {
+        if (angelaX < cx + 220) {
             const angelaFacing = phase >= 2 ? 1 : (phase === 1 ? 1 : -1);
             drawAngela(ctx, angelaX, angelaY, 32, 32, angelaFacing, phase >= 1);
 
@@ -4679,19 +4979,19 @@ function drawCutsceneStage() {
 
         // Patrol Robots dropping in on Phase >= 1
         if (phase >= 1) {
-            drawRoboEnemy({ x: cx + 75, y: 408, w: 32, h: 32, vx: -1, eyeColor: '#ef4444', turboActive: true });
-            drawRoboEnemy({ x: cx + 135, y: 408, w: 32, h: 32, vx: -1, eyeColor: '#ff0055', turboActive: true });
+            drawRoboEnemy({ x: cx + 75, y: stageFloorY - 32, w: 32, h: 32, vx: -1, eyeColor: '#ef4444', turboActive: true });
+            drawRoboEnemy({ x: cx + 135, y: stageFloorY - 32, w: 32, h: 32, vx: -1, eyeColor: '#ff0055', turboActive: true });
         }
     } else if (activeCutsceneKey === 'outro') {
         drawEnvironment('castle');
-        drawSolidBlock(0, 440, canvas.width, 160, 'castle', false, false);
+        drawSolidBlock(0, stageFloorY, canvas.width, 600 - stageFloorY, 'castle', false, false);
 
         // Castle Stained Glass Window in Center Background
         ctx.fillStyle = phase >= 1 ? '#090d16' : '#1e1b4b';
-        ctx.fillRect(cx - 45, 130, 90, 140);
+        ctx.fillRect(cx - 45, 95, 90, 135);
         ctx.strokeStyle = '#64748b';
         ctx.lineWidth = 4;
-        ctx.strokeRect(cx - 45, 130, 90, 140);
+        ctx.strokeRect(cx - 45, 95, 90, 135);
 
         // Flash Explosion on Phase 2
         if (phase === 2 && cutsceneTick < 25) {
@@ -4701,10 +5001,10 @@ function drawCutsceneStage() {
 
         // Draw Dave (Sent flying out the window into the lake in Phase 3!)
         let daveX = cx - 90;
-        let daveY = 406;
+        let daveY = stageFloorY - 34;
         if (phase >= 3) {
             daveX = Math.max(40, cx - 90 - cutsceneTick * 3.5);
-            daveY = Math.min(540, 350 + cutsceneTick * 2.2);
+            daveY = Math.min(480, (stageFloorY - 80) + cutsceneTick * 2.0);
         }
         ctx.fillStyle = '#9333ea';
         ctx.fillRect(daveX, daveY, 34, 34);
@@ -4718,17 +5018,16 @@ function drawCutsceneStage() {
         ctx.fillRect(daveX + 12, daveY + 10, 3, 5);
         ctx.fillRect(daveX + 24, daveY + 10, 3, 5);
 
-        // Draw Angela (With complete Eyes, Pupils, Eyelashes & Bow!)
+        // Draw Angela
         let angelaX = cx + 50;
-        let angelaY = 408;
+        let angelaY = stageFloorY - 32;
         if (phase >= 3) {
-            angelaY = Math.max(150, 360 - cutsceneTick * 2.4);
+            angelaY = Math.max(125, (stageFloorY - 60) - cutsceneTick * 2.2);
         }
 
-        // Draw Tractor Beam BEHIND Angela so her eyes are never obscured
         if (phase >= 1) {
             const johnX = cx + 46;
-            const johnY = phase >= 3 ? angelaY - 54 : 316 + Math.sin(cutsceneTick * 0.12) * 8;
+            const johnY = phase >= 3 ? angelaY - 54 : (stageFloorY - 120) + Math.sin(cutsceneTick * 0.12) * 8;
 
             if (phase >= 3) {
                 ctx.fillStyle = 'rgba(56, 189, 248, 0.22)';
@@ -4738,17 +5037,15 @@ function drawCutsceneStage() {
 
         drawAngela(ctx, angelaX, angelaY, 32, 32, -1, phase >= 1);
 
-        // Draw John with Cosmic Jetpack & Visor (Appears in Phase >= 1)
+        // Draw John with Cosmic Jetpack & Visor
         if (phase >= 1) {
             const johnX = cx + 46;
-            const johnY = phase >= 3 ? angelaY - 54 : 316 + Math.sin(cutsceneTick * 0.12) * 8;
+            const johnY = phase >= 3 ? angelaY - 54 : (stageFloorY - 120) + Math.sin(cutsceneTick * 0.12) * 8;
 
-            // Jetpack Flame
             ctx.fillStyle = '#f97316';
             ctx.fillRect(johnX - 8, johnY + 26, 8, 16 + Math.random() * 8);
             ctx.fillRect(johnX + 36, johnY + 26, 8, 16 + Math.random() * 8);
 
-            // Blast Ray in Phase 2
             if (phase === 2) {
                 ctx.strokeStyle = '#38bdf8';
                 ctx.lineWidth = 6;
@@ -4758,13 +5055,11 @@ function drawCutsceneStage() {
                 ctx.stroke();
             }
 
-            // John Body
             ctx.fillStyle = '#1e293b';
             ctx.fillRect(johnX, johnY, 36, 36);
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 2.5;
             ctx.strokeRect(johnX, johnY, 36, 36);
-            // Cosmic Visor
             ctx.fillStyle = '#67e8f9';
             ctx.fillRect(johnX + 4, johnY + 8, 28, 10);
         }
@@ -4809,6 +5104,7 @@ function startGame(levelIndex = savedPlayerLevelIdx, speedrun = false) {
         startCutscene('intro', () => {
             gameState = 'PLAYING';
             inGameHud.classList.remove('hidden');
+            updateTouchControlsVisibility();
             showChapterBanner(LEVELS[0].chapterTitle);
             syncMusicForState();
         });
@@ -4817,6 +5113,7 @@ function startGame(levelIndex = savedPlayerLevelIdx, speedrun = false) {
 
     gameState = 'PLAYING';
     inGameHud.classList.remove('hidden');
+    updateTouchControlsVisibility();
     loadLevel(levelIndex, false);
 }
 
@@ -4825,6 +5122,7 @@ function togglePause() {
         gameState = 'PAUSED';
         sfx.play('ui_pause');
         pauseMenuOverlay.classList.remove('hidden');
+        updateTouchControlsVisibility();
         syncMusicForState();
     } else if (gameState === 'PAUSED') {
         gameState = 'PLAYING';
@@ -4832,6 +5130,7 @@ function togglePause() {
         pauseMenuOverlay.classList.add('hidden');
         settingsModal.classList.add('hidden');
         clearGamepadFocusHighlights();
+        updateTouchControlsVisibility();
         syncMusicForState();
     }
 }
@@ -4852,6 +5151,7 @@ function returnToMainMenu() {
     bossHud.classList.add('hidden');
     mainMenuOverlay.classList.remove('hidden');
 
+    updateTouchControlsVisibility();
     loadLevel(MENU_SHOWCASE_LEVELS[menuShowcasePos], true);
 }
 
@@ -4906,12 +5206,16 @@ window.addEventListener('keydown', (e) => {
         if (!settingsModal.classList.contains('hidden')) {
             sfx.play('ui_back');
             settingsModal.classList.add('hidden');
+            updateTouchControlsVisibility();
+            syncMusicForState();
             e.preventDefault();
             return;
         }
         if (!levelsModal.classList.contains('hidden')) {
             sfx.play('ui_back');
             levelsModal.classList.add('hidden');
+            updateTouchControlsVisibility();
+            syncMusicForState();
             e.preventDefault();
             return;
         }
@@ -4967,11 +5271,15 @@ document.getElementById('btn-menu-levels').addEventListener('click', () => {
     music.unlock();
     sfx.play('ui_select');
     levelsModal.classList.remove('hidden');
+    updateTouchControlsVisibility();
+    syncMusicForState();
 });
 document.getElementById('btn-menu-settings').addEventListener('click', () => {
     music.unlock();
     sfx.play('ui_select');
     settingsModal.classList.remove('hidden');
+    updateTouchControlsVisibility();
+    syncMusicForState();
 });
 
 // HUD Buttons
@@ -4991,6 +5299,8 @@ document.getElementById('btn-pause-restart').addEventListener('click', () => {
 document.getElementById('btn-pause-settings').addEventListener('click', () => {
     sfx.play('ui_select');
     settingsModal.classList.remove('hidden');
+    updateTouchControlsVisibility();
+    syncMusicForState();
 });
 document.getElementById('btn-pause-mainmenu').addEventListener('click', returnToMainMenu);
 
@@ -5029,6 +5339,7 @@ btnToggleTouch.addEventListener('click', () => {
 
     sfx.play('ui_select');
     applySettingsToDOMAndAudio();
+    updateTouchControlsVisibility();
     saveUserSettings();
     if (activeMenuContext === 'SETTINGS') {
         btnToggleTouch.classList.add('gamepad-focus');
@@ -5039,21 +5350,29 @@ document.getElementById('btn-settings-close').addEventListener('click', () => {
     sfx.play('ui_back');
     saveUserSettings();
     settingsModal.classList.add('hidden');
+    updateTouchControlsVisibility();
+    syncMusicForState();
 });
 document.getElementById('btn-settings-save').addEventListener('click', () => {
     sfx.play('ui_select');
     saveUserSettings();
     settingsModal.classList.add('hidden');
+    updateTouchControlsVisibility();
+    syncMusicForState();
 });
 
 // Level Select Modal Close
 document.getElementById('btn-levels-close').addEventListener('click', () => {
     sfx.play('ui_back');
     levelsModal.classList.add('hidden');
+    updateTouchControlsVisibility();
+    syncMusicForState();
 });
 document.getElementById('btn-levels-back').addEventListener('click', () => {
     sfx.play('ui_back');
     levelsModal.classList.add('hidden');
+    updateTouchControlsVisibility();
+    syncMusicForState();
 });
 
 // Victory Modal Buttons
@@ -5092,7 +5411,7 @@ bindTouch('touch-dash', () => { keys.dashPressed = true; });
 // ============================================================================
 // FIXED-TIMESTEP 60HZ GAME LOOP (144Hz / 240Hz+ REFRESH RATE SAFE)
 // ============================================================================
-const FIXED_DT = 1000 / 60;
+const FIXED_DT = 1000 / 60; // Exact 16.6667ms per physics step (60Hz lock)
 let lastFrameTime = performance.now();
 let accumulator = 0;
 
@@ -5100,6 +5419,7 @@ function gameLoop(timestamp) {
     let deltaTime = timestamp - lastFrameTime;
     lastFrameTime = timestamp;
 
+    // Poll Gamepad state on every animation frame
     pollGamepad(timestamp);
 
     if (deltaTime > 100) deltaTime = 100;
@@ -5115,9 +5435,31 @@ function gameLoop(timestamp) {
     requestAnimationFrame(gameLoop);
 }
 
+// ============================================================================
+// NATURAL AUTO-FOCUS & INSTANT AUDIO UNLOCK ON PAGE LOAD / ANY GESTURE
+// ============================================================================
+function attemptNaturalAutoFocusAndAudio() {
+    try {
+        window.focus();
+        const wrapper = document.getElementById('game-wrapper');
+        if (wrapper) wrapper.focus({ preventScroll: true });
+    } catch (e) {}
+    music.unlock();
+    sfx.init();
+}
+
+['pointerdown', 'mousedown', 'touchstart', 'keydown', 'wheel', 'focus'].forEach((evtName) => {
+    window.addEventListener(evtName, () => {
+        music.unlock();
+        sfx.init();
+    }, { passive: true });
+});
+
 window.onload = function () {
     updateViewportMetrics();
+    updateTouchControlsVisibility();
     loadLevel(MENU_SHOWCASE_LEVELS[0], true);
+    attemptNaturalAutoFocusAndAudio();
     lastFrameTime = performance.now();
     requestAnimationFrame(gameLoop);
 };
