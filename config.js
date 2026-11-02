@@ -2,8 +2,6 @@
 // MODUŁ 1: STAŁE, KONFIGURACJA KOLORÓW I ZARZĄDZANIE EKRANEM (ZOPTYMALIZOWANY)
 // ============================================================================
 const canvas = document.getElementById('gameCanvas');
-// { alpha: false } wyłącza kosztowny blending przezroczystości płótna z DOM,
-// a { desynchronized: true } zmniejsza input lag na starszych urządzeniach mobilnych
 const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true }) || canvas.getContext('2d');
 const portraitCanvas = document.getElementById('portraitCanvas');
 const pCtx = portraitCanvas ? portraitCanvas.getContext('2d') : null;
@@ -24,7 +22,6 @@ const THEME_PALETTES = {
     john_base:           { left: '#0284c7', right: '#7c3aed', top: '#f43f5e' }
 };
 
-// Cache wymiarów płótna eliminujący reflow (getBoundingClientRect) przy mousemove
 let cachedCanvasRect = { left: 0, top: 0, width: 800, height: 600 };
 
 function refreshCanvasRectCache() {
@@ -41,8 +38,11 @@ function updateViewportMetrics() {
     const rect = wrapper.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
 
+    const isLowEnd = typeof lowEndMode !== 'undefined' && lowEndMode;
     const isMobileOrCompact = window.innerWidth <= 920 || window.innerHeight <= 580;
-    if (isMobileOrCompact && rect.width > rect.height) {
+
+    // W trybie Low-End blokujemy wewnętrzną rozdzielczość bufora na 800x600 (do 45% mniej pikseli do wypełnienia co klatkę)
+    if (!isLowEnd && isMobileOrCompact && rect.width > rect.height) {
         const aspect = rect.width / rect.height;
         const targetW = Math.max(800, Math.min(1160, Math.round(600 * aspect)));
         if (canvas.width !== targetW || canvas.height !== 600) {
@@ -55,13 +55,15 @@ function updateViewportMetrics() {
             canvas.height = 600;
         }
     }
+    if (ctx) {
+        ctx.imageSmoothingEnabled = !isLowEnd;
+    }
     refreshCanvasRectCache();
 }
 window.addEventListener('resize', updateViewportMetrics, { passive: true });
 window.addEventListener('scroll', refreshCanvasRectCache, { passive: true });
 window.addEventListener('orientationchange', () => setTimeout(updateViewportMetrics, 120), { passive: true });
 
-// Cache parsowania kolorów RGB i interpolacji (Zero-GC w pętli renderowania)
 const _rgbCache = new Map();
 const _lerpCache = new Map();
 
@@ -95,7 +97,6 @@ function lerpColor(hexA, hexB, t) {
     if (clamped <= 0.001) return hexA;
     if (clamped >= 0.999) return hexB;
 
-    // Kwantyzacja t do 1/256 pozwala na pełne wykorzystanie cache bez utraty płynności przejść
     const q = (clamped * 256) | 0;
     if (q <= 0) return hexA;
     if (q >= 256) return hexB;
@@ -122,6 +123,7 @@ let _lastGlowR = '';
 let _lastGlowT = '';
 
 function applyThemeAmbilight(theme, nextTheme = null, blend = 0) {
+    if (typeof lowEndMode !== 'undefined' && lowEndMode) return;
     const palA = THEME_PALETTES[theme] || THEME_PALETTES.day;
     let l, r, t;
     if (!nextTheme || blend <= 0.01) {

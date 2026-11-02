@@ -102,6 +102,10 @@ function allocParticle(x, y, vx, vy, size, color, alpha, decay) {
 }
 
 function spawnParticles(x, y, color, count = 10, speed = 4.5) {
+    if (typeof lowEndMode !== 'undefined' && lowEndMode) {
+        if (particles.length >= 24) return;
+        count = Math.max(2, (count * 0.35) | 0);
+    }
     for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const spd = (Math.random() * 0.7 + 0.3) * speed;
@@ -384,9 +388,11 @@ function loadLevel(idx, isMenuPreview = false) {
         h: 72
     } : null;
 
-    particles = [];
+    while (particles.length) _particlePool.push(particles.pop());
     floatingTexts = [];
     projectiles = [];
+    _lastDashCooldown = -1;
+    _lastDashReadyState = null;
 
     if (lvl.isBossLevel) {
         boss = {
@@ -590,7 +596,7 @@ function completeLevel() {
     }
 }
 
-const _spearPoints = [
+const spearPoints = [
     { x: 0, y: 0, r: 13 },
     { x: 0, y: 0, r: 15 },
     { x: 0, y: 0, r: 17 }
@@ -612,6 +618,7 @@ function updateWeaponAndAdvancedBots() {
 
     if (gameState !== 'PLAYING' || player.dead) return;
 
+    // Prawy joystick pada (axes[2], axes[3]) do celowania 360°
     if (hasWep && isGamepadConnected && navigator.getGamepads) {
         const pads = navigator.getGamepads();
         for (let i = 0; i < pads.length; i++) {
@@ -619,7 +626,7 @@ function updateWeaponAndAdvancedBots() {
             if (pad && pad.connected && pad.axes && pad.axes.length >= 4) {
                 const rx = pad.axes[2] || 0;
                 const ry = pad.axes[3] || 0;
-                if (rx * rx + ry * ry > 0.0576) { // 0.24^2 bez Math.hypot
+                if (rx * rx + ry * ry > 0.0576) {
                     weapon.targetAngle = Math.atan2(ry, rx);
                     weapon.angle = weapon.targetAngle;
                 }
@@ -638,28 +645,28 @@ function updateWeaponAndAdvancedBots() {
     const cosA = Math.cos(weapon.angle);
     const sinA = Math.sin(weapon.angle);
 
-    _spearPoints[0].x = px + cosA * (totalLen * 0.55);
-    _spearPoints[0].y = py + sinA * (totalLen * 0.55);
-    _spearPoints[1].x = px + cosA * (totalLen * 0.82);
-    _spearPoints[1].y = py + sinA * (totalLen * 0.82);
-    _spearPoints[2].x = px + cosA * (totalLen * 1.06);
-    _spearPoints[2].y = py + sinA * (totalLen * 1.06);
+    spearPoints[0].x = px + cosA * (totalLen * 0.55);
+    spearPoints[0].y = py + sinA * (totalLen * 0.55);
+    spearPoints[1].x = px + cosA * (totalLen * 0.82);
+    spearPoints[1].y = py + sinA * (totalLen * 0.82);
+    spearPoints[2].x = px + cosA * (totalLen * 1.06);
+    spearPoints[2].y = py + sinA * (totalLen * 1.06);
 
     for (let i = enemies.length - 1; i >= 0; i--) {
         const e = enemies[i];
         if (e.type !== 'jetpack_rammer' && e.type !== 'raygun_drone') continue;
 
         e.vy = 0;
-        const ex = e.x + e.w * 0.5;
-        const ey = e.y + e.h * 0.5;
+        const ex = e.x + e.w / 2;
+        const ey = e.y + e.h / 2;
         const dx = px - ex;
         const dy = py - ey;
         const dist = Math.hypot(dx, dy);
 
+        // Dziabnięcie bota Ostrzem Rdzeniowym 360°
         if (hasWep) {
             let poked = false;
-            for (let s = 0; s < 3; s++) {
-                const sp = _spearPoints[s];
+            for (const sp of spearPoints) {
                 if (rectOverlap(sp.x - sp.r, sp.y - sp.r, sp.r * 2, sp.r * 2, e.x - 2, e.y - 2, e.w + 4, e.h + 4)) {
                     poked = true;
                     break;
@@ -737,19 +744,17 @@ function updateWeaponAndAdvancedBots() {
                 e.fireTimer = 78;
                 const aimAngle = Math.atan2(dy, dx);
                 const boltSpeed = 6.2;
-                const cosAim = Math.cos(aimAngle);
-                const sinAim = Math.sin(aimAngle);
                 projectiles.push({
-                    x: ex + cosAim * 18,
-                    y: ey + sinAim * 18,
-                    vx: cosAim * boltSpeed,
-                    vy: sinAim * boltSpeed,
+                    x: ex + Math.cos(aimAngle) * 18,
+                    y: ey + Math.sin(aimAngle) * 18,
+                    vx: Math.cos(aimAngle) * boltSpeed,
+                    vy: Math.sin(aimAngle) * boltSpeed,
                     r: 7,
                     isRaygun: true,
                     deflected: false
                 });
                 sfx.play('laser');
-                spawnParticles(ex + cosAim * 18, ey + sinAim * 18, '#4ade80', 6, 3);
+                spawnParticles(ex + Math.cos(aimAngle) * 18, ey + Math.sin(aimAngle) * 18, '#4ade80', 6, 3);
             }
 
             if (rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, e.x + 4, e.y + 4, e.w - 8, e.h - 8)) {
@@ -759,13 +764,13 @@ function updateWeaponAndAdvancedBots() {
         }
     }
 
+    // Odbijanie pocisków Ostrzem Rdzeniowym i trafianie odbitymi pociskami w boty
     if (hasWep) {
         for (let i = projectiles.length - 1; i >= 0; i--) {
             const p = projectiles[i];
             if (!p.deflected) {
                 let hitSpear = false;
-                for (let s = 0; s < 3; s++) {
-                    const sp = _spearPoints[s];
+                for (const sp of spearPoints) {
                     if (Math.hypot(p.x - sp.x, p.y - sp.y) <= p.r + sp.r + 5) {
                         hitSpear = true;
                         break;
@@ -778,10 +783,9 @@ function updateWeaponAndAdvancedBots() {
 
                     let deflectAngle = weapon.angle;
                     let bestDist = 520;
-                    for (let j = 0; j < enemies.length; j++) {
-                        const e = enemies[j];
-                        const ex = e.x + e.w * 0.5;
-                        const ey = e.y + e.h * 0.5;
+                    for (const e of enemies) {
+                        const ex = e.x + e.w / 2;
+                        const ey = e.y + e.h / 2;
                         const angToEnemy = Math.atan2(ey - p.y, ex - p.x);
                         const angleDiff = Math.abs(Math.atan2(Math.sin(angToEnemy - weapon.angle), Math.cos(angToEnemy - weapon.angle)));
                         const d = Math.hypot(ex - p.x, ey - p.y);
@@ -802,8 +806,8 @@ function updateWeaponAndAdvancedBots() {
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     const e = enemies[j];
                     if (rectOverlap(p.x - p.r - 4, p.y - p.r - 4, (p.r + 4) * 2, (p.r + 4) * 2, e.x, e.y, e.w, e.h)) {
-                        const ex = e.x + e.w * 0.5;
-                        const ey = e.y + e.h * 0.5;
+                        const ex = e.x + e.w / 2;
+                        const ey = e.y + e.h / 2;
                         screenShake = 10;
                         sfx.play('boss_hit');
                         spawnParticles(ex, ey, '#4ade80', 22, 6);
@@ -1076,40 +1080,10 @@ function updateBoss() {
     }
 }
 
-const _activeColliders = [];
+const activeColliders = [];
 let _cachedDashLabel = null;
 let _lastDashCooldown = -1;
 let _lastDashReadyState = null;
-
-function applyEnemyVerticalPhysics(e, triggerMimicHangOnLand = false) {
-    const wasJumping = e.jumped;
-    e.vy += 0.55;
-    if (e.vy > 12) e.vy = 12;
-    e.y += e.vy;
-    e.onGround = false;
-
-    for (let i = 0, len = _activeColliders.length; i < len; i++) {
-        const c = _activeColliders[i];
-        if (rectOverlap(e.x, e.y, e.w, e.h, c.x, c.y, c.w, c.h)) {
-            if (e.vy >= 0 && e.y + e.h - e.vy <= c.y + 14) {
-                e.y = c.y - e.h;
-                e.vy = 0;
-                e.onGround = true;
-                e.jumped = false;
-                if (triggerMimicHangOnLand && wasJumping) {
-                    e.hungTimer = e.maxHungTimer;
-                    e.chasingPlayer = false;
-                    sfx.play('boss_glitch');
-                    spawnParticles(e.x + e.w * 0.5, e.y + e.h * 0.5, '#22d3ee', 12, 4);
-                    spawnFloatingText(e.x + e.w * 0.5, e.y - 8, "⚡ ZAWIESZONY!", "#22d3ee");
-                }
-            } else if (e.vy < 0 && e.y - e.vy >= c.y + c.h - 14) {
-                e.y = c.y + c.h;
-                e.vy = 0;
-            }
-        }
-    }
-}
 
 function update() {
     tickCount++;
@@ -1118,9 +1092,8 @@ function update() {
     keys.left = kbTouchInput.left || gamepadInput.left;
     keys.right = kbTouchInput.right || gamepadInput.right;
 
-    if (lvl.theme !== 'day' || lvl.transitionToTheme) {
-        for (let i = 0; i < bgMotes.length; i++) {
-            const m = bgMotes[i];
+    if (!lowEndMode && (lvl.theme !== 'day' || lvl.transitionToTheme)) {
+        for (const m of bgMotes) {
             m.x += m.vx;
             m.y += m.vy;
             if (m.y < -10) { m.y = 580; m.x = Math.random() * canvas.width; }
@@ -1138,11 +1111,11 @@ function update() {
         const script = CUTSCENE_SCRIPTS[activeCutsceneKey];
         if (script && script[cutsceneIndex]) {
             const slide = script[cutsceneIndex];
-            if (cutsceneCharIndex < slide.text.length && (tickCount & 1) === 0) {
+            if (cutsceneCharIndex < slide.text.length && tickCount % 2 === 0) {
                 cutsceneCharIndex++;
                 cutsceneTextEl.textContent = slide.text.slice(0, cutsceneCharIndex);
                 const ch = slide.text[cutsceneCharIndex - 1];
-                if (ch && ch !== ' ' && ch !== '*' && (cutsceneCharIndex & 1) === 0) {
+                if (ch && ch !== ' ' && ch !== '*' && cutsceneCharIndex % 2 === 0) {
                     sfx.play('talk', slide.pitch || 360);
                 }
             }
@@ -1161,8 +1134,7 @@ function update() {
             menuCamDir = 1;
         }
 
-        for (let i = 0; i < enemies.length; i++) {
-            const e = enemies[i];
+        for (const e of enemies) {
             e.x += Math.sign(e.vx) * e.baseSpeed;
             if (e.x <= e.minX) { e.x = e.minX; e.vx = Math.abs(e.vx); }
             else if (e.x + e.w >= e.maxX) { e.x = e.maxX - e.w; e.vx = -Math.abs(e.vx); }
@@ -1209,7 +1181,6 @@ function update() {
     if (screenShake > 0) screenShake *= 0.85;
     if (screenShake < 0.4) screenShake = 0;
 
-    // Usuwanie cząsteczek Swap-and-Pop w czasie O(1) ze zwrotem do puli (_particlePool)
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx;
@@ -1254,8 +1225,6 @@ function update() {
     }
 
     if (player.dashCooldown > 0) player.dashCooldown--;
-
-    // Dirty-flag dla paska Dasha: aktualizuj DOM wyłącznie przy zmianie stanu!
     if (player.dashCooldown !== _lastDashCooldown) {
         _lastDashCooldown = player.dashCooldown;
         const dashPct = Math.max(0, Math.min(100, ((36 - player.dashCooldown) / 36) * 100));
@@ -1298,7 +1267,7 @@ function update() {
 
     if (player.dashTimer > 0) {
         player.dashTimer--;
-        particles.push(allocParticle(
+        if (!lowEndMode || (tickCount & 1) === 0) particles.push(allocParticle(
             player.x + player.w * 0.5,
             player.y + player.h * 0.5,
             -player.vx * 0.08,
@@ -1334,15 +1303,16 @@ function update() {
         }
     }
 
-    // Reużywana prealokowana tablica koliderów (Zero alokacji tablicy co klatkę)
-    _activeColliders.length = 0;
-    for (let i = 0; i < solids.length; i++) _activeColliders.push(solids[i]);
+    activeColliders.length = 0;
+    for (let i = 0; i < solids.length; i++) activeColliders.push(solids[i]);
     for (let i = 0; i < invisBlocks.length; i++) {
         const ib = invisBlocks[i];
-        if (ib.revealed) _activeColliders.push(ib);
+        if (ib.revealed) activeColliders.push(ib);
         if (ib.bumpY < 0) ib.bumpY += 1;
     }
-    for (let i = 0; i < fallingFloors.length; i++) _activeColliders.push(fallingFloors[i]);
+    for (let i = 0; i < fallingFloors.length; i++) {
+        activeColliders.push(fallingFloors[i]);
+    }
 
     player.x += player.vx;
     if (player.x < 0) { player.x = 0; player.vx = 0; }
@@ -1350,8 +1320,7 @@ function update() {
     if (player.x + player.w > maxWorldW) { player.x = maxWorldW - player.w; player.vx = 0; }
 
     player.wallDir = 0;
-    for (let i = 0; i < _activeColliders.length; i++) {
-        const c = _activeColliders[i];
+    for (const c of activeColliders) {
         if (rectOverlap(player.x, player.y, player.w, player.h, c.x, c.y, c.w, c.h)) {
             if (player.vx > 0) {
                 player.x = c.x - player.w;
@@ -1366,11 +1335,10 @@ function update() {
     }
 
     if (!player.onGround && player.wallDir === 0) {
-        for (let i = 0; i < solids.length; i++) {
-            const c = solids[i];
+        for (const c of solids) {
             if (c.isPlatform || c.h < TILE * 1.5) continue;
             if (rectOverlap(player.x - 3, player.y + 4, player.w + 6, player.h - 8, c.x, c.y, c.w, c.h)) {
-                player.wallDir = (player.x + player.w * 0.5 < c.x + c.w * 0.5) ? 1 : -1;
+                player.wallDir = (player.x + player.w / 2 < c.x + c.w / 2) ? 1 : -1;
             }
         }
     }
@@ -1384,8 +1352,7 @@ function update() {
     player.onGround = false;
 
     if (player.vy < 0) {
-        for (let i = 0; i < invisBlocks.length; i++) {
-            const ib = invisBlocks[i];
+        for (const ib of invisBlocks) {
             if (!ib.revealed && prevY >= ib.y + ib.h - 6 && rectOverlap(player.x + 2, player.y, player.w - 4, player.h, ib.x, ib.y, ib.w, ib.h)) {
                 ib.revealed = true;
                 ib.bumpY = -6;
@@ -1393,14 +1360,13 @@ function update() {
                 player.vy = 2.5;
                 player.dashTimer = 0;
                 sfx.play('troll');
-                spawnParticles(ib.x + TILE * 0.5, ib.y + TILE, '#fbbf24', 10, 4);
+                spawnParticles(ib.x + TILE / 2, ib.y + TILE, '#fbbf24', 10, 4);
                 spawnFloatingText(ib.x + 20, ib.y - 4, "BĘC!", "#facc15");
             }
         }
     }
 
-    for (let i = 0; i < _activeColliders.length; i++) {
-        const c = _activeColliders[i];
+    for (const c of activeColliders) {
         if (rectOverlap(player.x, player.y, player.w, player.h, c.x, c.y, c.w, c.h)) {
             if (player.vy > 0) {
                 player.y = c.y - player.h;
@@ -1443,7 +1409,7 @@ function update() {
             player.coyoteTimer = 0;
             player.jumpBufferTimer = 0;
             sfx.play('jump');
-            spawnParticles(player.x + player.w * 0.5, player.y + player.h, isUnderwater ? '#bae6fd' : '#e2e8f0', 6, 2.5);
+            spawnParticles(player.x + player.w / 2, player.y + player.h, isUnderwater ? '#bae6fd' : '#e2e8f0', 6, 2.5);
         } else if (player.wallDir !== 0) {
             player.vy = isUnderwater ? -10.2 : -11.8;
             player.vx = -player.wallDir * (isUnderwater ? 6.4 : 7.8);
@@ -1452,7 +1418,7 @@ function update() {
             player.dashCooldown = 0;
             player.jumpBufferTimer = 0;
             sfx.play('walljump');
-            spawnParticles(player.wallDir === 1 ? player.x + player.w : player.x, player.y + player.h * 0.5, '#c084fc', 10, 4);
+            spawnParticles(player.wallDir === 1 ? player.x + player.w : player.x, player.y + player.h / 2, '#c084fc', 10, 4);
         }
     }
     keys.jumpPressed = false;
@@ -1467,8 +1433,7 @@ function update() {
         }
     }
 
-    for (let i = 0; i < fallingFloors.length; i++) {
-        const ff = fallingFloors[i];
+    for (const ff of fallingFloors) {
         if (ff.triggered) {
             if (ff.timer > 0) {
                 ff.timer--;
@@ -1479,8 +1444,7 @@ function update() {
         }
     }
 
-    for (let i = 0; i < spikeTraps.length; i++) {
-        const st = spikeTraps[i];
+    for (const st of spikeTraps) {
         if (!st.triggered && player.x + player.w >= st.triggerX) {
             st.triggered = true;
             sfx.play('troll');
@@ -1502,12 +1466,14 @@ function update() {
         }
     }
 
+    // Aktualizacja Ostrza Rdzeniowego 360° oraz Jetpack-Botów i Raygun-Dronów
     updateWeaponAndAdvancedBots();
     if (player.dead) return;
 
-    for (let i = 0; i < enemies.length; i++) {
-        const e = enemies[i];
+    // Pozostali wrogowie (Robo, Mimic, Evad-Bot, Robo-Fish)
+    for (const e of enemies) {
         if (e.type === 'jetpack_rammer' || e.type === 'raygun_drone') {
+            // Ruch patrolowy w poziomie (gdy nie szarżują)
             if (e.type === 'raygun_drone' || e.ramState === 'patrol') {
                 e.x += Math.sign(e.vx) * e.baseSpeed;
                 if (e.x <= e.minX) { e.x = e.minX; e.vx = Math.abs(e.vx); }
@@ -1516,12 +1482,41 @@ function update() {
             continue;
         }
 
-        const dxToPlayer = (player.x + player.w * 0.5) - (e.x + e.w * 0.5);
+        const dxToPlayer = (player.x + player.w / 2) - (e.x + e.w / 2);
         const distX = Math.abs(dxToPlayer);
-        const distY = Math.abs((player.y + player.h * 0.5) - (e.y + e.h * 0.5));
+        const distY = Math.abs((player.y + player.h / 2) - (e.y + e.h / 2));
+
+        const applyEnemyVerticalPhysics = (triggerMimicHangOnLand = false) => {
+            const wasJumping = e.jumped;
+            e.vy += 0.55;
+            if (e.vy > 12) e.vy = 12;
+            e.y += e.vy;
+            e.onGround = false;
+
+            for (const c of activeColliders) {
+                if (rectOverlap(e.x, e.y, e.w, e.h, c.x, c.y, c.w, c.h)) {
+                    if (e.vy >= 0 && e.y + e.h - e.vy <= c.y + 14) {
+                        e.y = c.y - e.h;
+                        e.vy = 0;
+                        e.onGround = true;
+                        e.jumped = false;
+                        if (triggerMimicHangOnLand && wasJumping) {
+                            e.hungTimer = e.maxHungTimer;
+                            e.chasingPlayer = false;
+                            sfx.play('boss_glitch');
+                            spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#22d3ee', 12, 4);
+                            spawnFloatingText(e.x + e.w / 2, e.y - 8, "⚡ ZAWIESZONY!", "#22d3ee");
+                        }
+                    } else if (e.vy < 0 && e.y - e.vy >= c.y + c.h - 14) {
+                        e.y = c.y + c.h;
+                        e.vy = 0;
+                    }
+                }
+            }
+        };
 
         if (e.type === 'robo_fish') {
-            const dyToPlayer = (player.y + player.h * 0.5) - (e.y + e.h * 0.5);
+            const dyToPlayer = (player.y + player.h / 2) - (e.y + e.h / 2);
             const dist2D = Math.hypot(dxToPlayer, dyToPlayer);
             const chaseRadius = e.chasingPlayer ? 215 : 175;
 
@@ -1535,13 +1530,11 @@ function update() {
                 e.facing = dxToPlayer >= 0 ? 1 : -1;
 
                 e.x += e.vx;
-                for (let j = 0; j < _activeColliders.length; j++) {
-                    const c = _activeColliders[j];
+                for (const c of activeColliders) {
                     if (rectOverlap(e.x, e.y, e.w, e.h, c.x, c.y, c.w, c.h)) { e.x -= e.vx; break; }
                 }
                 e.y += e.vy;
-                for (let j = 0; j < _activeColliders.length; j++) {
-                    const c = _activeColliders[j];
+                for (const c of activeColliders) {
                     if (rectOverlap(e.x, e.y, e.w, e.h, c.x, c.y, c.w, c.h)) { e.y -= e.vy; break; }
                 }
             } else {
@@ -1574,7 +1567,7 @@ function update() {
                 if (tickCount % 12 === 0) {
                     spawnParticles(e.x + Math.random() * e.w, e.y + 4, '#facc15', 2, 2);
                 }
-                applyEnemyVerticalPhysics(e, false);
+                applyEnemyVerticalPhysics(false);
 
                 if (player.vy > 0 && rectOverlap(player.x + 2, player.y + 2, player.w - 4, player.h - 2, e.x + 2, e.y - 4, e.w - 4, 16)) {
                     player.y = e.y - player.h - 2;
@@ -1582,7 +1575,7 @@ function update() {
                     player.dashCooldown = 0;
                     e.hungTimer = e.maxHungTimer;
                     sfx.play('walljump');
-                    spawnParticles(e.x + e.w * 0.5, e.y, '#22d3ee', 10, 4);
+                    spawnParticles(e.x + e.w / 2, e.y, '#22d3ee', 10, 4);
                 }
                 continue;
             }
@@ -1614,8 +1607,8 @@ function update() {
                     e.hungTimer = e.maxHungTimer;
                     e.chasingPlayer = false;
                     sfx.play('boss_glitch');
-                    spawnParticles(e.x + e.w * 0.5, e.y + e.h * 0.5, '#facc15', 10, 3.5);
-                    spawnFloatingText(e.x + e.w * 0.5, e.y - 8, "⚡ ZAWIESZONY!", "#22d3ee");
+                    spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#facc15', 10, 3.5);
+                    spawnFloatingText(e.x + e.w / 2, e.y - 8, "⚡ ZAWIESZONY!", "#22d3ee");
                 }
             } else if (e.x + e.w >= e.maxX) {
                 e.x = e.maxX - e.w;
@@ -1624,12 +1617,12 @@ function update() {
                     e.hungTimer = e.maxHungTimer;
                     e.chasingPlayer = false;
                     sfx.play('boss_glitch');
-                    spawnParticles(e.x + e.w * 0.5, e.y + e.h * 0.5, '#facc15', 10, 3.5);
-                    spawnFloatingText(e.x + e.w * 0.5, e.y - 8, "⚡ ZAWIESZONY!", "#22d3ee");
+                    spawnParticles(e.x + e.w / 2, e.y + e.h / 2, '#facc15', 10, 3.5);
+                    spawnFloatingText(e.x + e.w / 2, e.y - 8, "⚡ ZAWIESZONY!", "#22d3ee");
                 }
             }
 
-            applyEnemyVerticalPhysics(e, true);
+            applyEnemyVerticalPhysics(true);
 
             if (e.hungTimer <= 0 && rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, e.x + 4, e.y + 4, e.w - 8, e.h - 8)) {
                 killPlayer("Złapał Cię Żółty Mimic! Zmuś go do skoku lub szarży tuż obok siebie, żeby się ZAWIESIŁ!");
@@ -1646,14 +1639,14 @@ function update() {
                 if (tickCount % 10 === 0) {
                     spawnParticles(e.x + Math.random() * e.w, e.y + 4, '#38bdf8', 2, 2);
                 }
-                applyEnemyVerticalPhysics(e, false);
+                applyEnemyVerticalPhysics(false);
                 if (player.vy > 0 && rectOverlap(player.x + 2, player.y + 2, player.w - 4, player.h - 2, e.x + 2, e.y - 4, e.w - 4, 16)) {
                     player.y = e.y - player.h - 2;
                     player.vy = -12.4;
                     player.dashCooldown = 0;
                     e.hungTimer = 135;
                     sfx.play('stomp');
-                    spawnParticles(e.x + e.w * 0.5, e.y, '#38bdf8', 12, 4);
+                    spawnParticles(e.x + e.w / 2, e.y, '#38bdf8', 12, 4);
                 }
                 continue;
             }
@@ -1668,14 +1661,14 @@ function update() {
                 if (e.chargeTimer === 0) {
                     const shotDir = e.facing || (dxToPlayer >= 0 ? 1 : -1);
                     projectiles.push({
-                        x: e.x + e.w * 0.5 + shotDir * 16,
+                        x: e.x + e.w / 2 + shotDir * 16,
                         y: e.y + 15,
                         vx: shotDir * 6.4,
                         vy: 0,
                         r: 6
                     });
                     sfx.play('laser');
-                    spawnParticles(e.x + e.w * 0.5 + shotDir * 16, e.y + 15, '#ef4444', 8, 3);
+                    spawnParticles(e.x + e.w / 2 + shotDir * 16, e.y + 15, '#ef4444', 8, 3);
                     e.cooldownTimer = 115;
                     e.turboActive = false;
                 }
@@ -1691,7 +1684,7 @@ function update() {
                 e.facing = Math.sign(e.vx) || 1;
             }
 
-            applyEnemyVerticalPhysics(e, false);
+            applyEnemyVerticalPhysics(false);
 
             if (player.vy > 0 && e.chargeTimer <= 0 && rectOverlap(player.x + 2, player.y + 2, player.w - 4, player.h - 2, e.x + 2, e.y - 4, e.w - 4, 15)) {
                 player.y = e.y - player.h - 2;
@@ -1699,8 +1692,8 @@ function update() {
                 player.dashCooldown = 0;
                 e.hungTimer = 135;
                 sfx.play('stomp');
-                spawnParticles(e.x + e.w * 0.5, e.y, '#ef4444', 12, 4);
-                spawnFloatingText(e.x + e.w * 0.5, e.y - 8, "⚡ OGŁUSZONY!", "#38bdf8");
+                spawnParticles(e.x + e.w / 2, e.y, '#ef4444', 12, 4);
+                spawnFloatingText(e.x + e.w / 2, e.y - 8, "⚡ OGŁUSZONY!", "#38bdf8");
                 continue;
             }
 
@@ -1728,7 +1721,7 @@ function update() {
         if (e.x <= e.minX) { e.x = e.minX; e.vx = Math.abs(e.vx); }
         else if (e.x + e.w >= e.maxX) { e.x = e.maxX - e.w; e.vx = -Math.abs(e.vx); }
 
-        applyEnemyVerticalPhysics(e, false);
+        applyEnemyVerticalPhysics(false);
 
         if (rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, e.x + 4, e.y + 4, e.w - 8, e.h - 8)) {
             killPlayer("Zostałeś zezłomowany przez Robo-Kwadrat!");
@@ -1736,8 +1729,7 @@ function update() {
         }
     }
 
-    for (let i = 0; i < fakeGoals.length; i++) {
-        const fg = fakeGoals[i];
+    for (const fg of fakeGoals) {
         if (!fg.triggered && rectOverlap(player.x, player.y, player.w, player.h, fg.x, fg.y, fg.w, fg.h)) {
             fg.triggered = true;
             killPlayer("HAHA! Ten portal był FAŁSZYWY! Prawdziwe wyjście jest wyżej lub dalej!");

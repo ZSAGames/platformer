@@ -36,7 +36,6 @@ class MusicManager {
     constructor(trackPaths) {
         this.tracks = {};
         this.virtualVol = {};
-        this.appliedVol = {};
         this.currentKey = 'menu';
         this.targetVolume = 0.6;
         this.muted = false;
@@ -48,8 +47,6 @@ class MusicManager {
             const audio = new Audio();
             audio.src = src;
             audio.loop = true;
-            // Lazy preload: ładuj od razu tylko ścieżki menu, resztę jako metadata,
-            // aby nie dławić procesora i sieci na starszych telefonach podczas intra
             audio.preload = SYNCED_MENU_STEMS.has(key) ? 'auto' : 'metadata';
             audio.playsInline = true;
             audio.setAttribute('playsinline', '');
@@ -74,6 +71,7 @@ class MusicManager {
             }
             this.tracks[key] = audio;
             this.virtualVol[key] = 0;
+            this.appliedVol = this.appliedVol || {};
             this.appliedVol[key] = 0;
         }
 
@@ -121,7 +119,6 @@ class MusicManager {
                 const isTarget = (stemKey === this.currentKey);
                 const startVol = isTarget ? this.targetVolume : 0;
                 this.virtualVol[stemKey] = startVol;
-                this.appliedVol[stemKey] = startVol;
                 try { stemAudio.volume = startVol; } catch (e) {}
                 stemAudio.muted = false;
             }
@@ -140,7 +137,6 @@ class MusicManager {
         for (const [k, a] of Object.entries(this.tracks)) {
             if (k !== this.currentKey && !SYNCED_MENU_STEMS.has(k)) {
                 this.virtualVol[k] = 0;
-                this.appliedVol[k] = 0;
                 if (!a.paused) a.pause();
             }
         }
@@ -148,10 +144,7 @@ class MusicManager {
         active.muted = false;
         this.virtualVol[this.currentKey] = this.targetVolume;
         if (!this.volumeReadOnly) {
-            try {
-                active.volume = this.targetVolume;
-                this.appliedVol[this.currentKey] = this.targetVolume;
-            } catch (e) {}
+            try { active.volume = this.targetVolume; } catch (e) {}
         }
 
         if (active.paused) {
@@ -171,20 +164,20 @@ class MusicManager {
     }
 
     playTrack(key) {
-        const nextTrack = this.tracks[key];
-        if (nextTrack && nextTrack.preload !== 'auto') {
-            nextTrack.preload = 'auto';
+        if (this.tracks[key] && this.tracks[key].preload !== 'auto') {
+            this.tracks[key].preload = 'auto';
         }
-
         if (this.currentKey === key && this.unlocked) {
-            if (nextTrack && nextTrack.paused && !this.isPaused && !this.muted) {
-                nextTrack.play().catch(() => {});
+            const currentAudio = this.tracks[key];
+            if (currentAudio && currentAudio.paused && !this.isPaused && !this.muted) {
+                currentAudio.play().catch(() => {});
             }
             return;
         }
 
         const prevKey = this.currentKey;
         this.currentKey = key;
+        const nextTrack = this.tracks[key];
 
         if (this.volumeReadOnly) {
             for (const [k, a] of Object.entries(this.tracks)) {
@@ -198,10 +191,7 @@ class MusicManager {
             for (const [k, a] of Object.entries(this.tracks)) {
                 if (k !== key && !SYNCED_MENU_STEMS.has(k)) {
                     this.virtualVol[k] = 0;
-                    if (this.appliedVol[k] !== 0) {
-                        this.appliedVol[k] = 0;
-                        try { a.volume = 0; } catch (e) {}
-                    }
+                    try { a.volume = 0; } catch (e) {}
                     if (!a.paused) a.pause();
                     try { a.currentTime = 0; } catch (e) {}
                 }
@@ -216,9 +206,7 @@ class MusicManager {
                 if (this.volumeReadOnly) {
                     this.virtualVol[key] = this.targetVolume;
                 } else {
-                    const v = this.virtualVol[key] || 0;
-                    this.appliedVol[key] = v;
-                    try { nextTrack.volume = v; } catch (e) {}
+                    try { nextTrack.volume = this.virtualVol[key] || 0; } catch (e) {}
                 }
                 if (nextTrack.paused) {
                     nextTrack.play().then(() => {
@@ -252,8 +240,7 @@ class MusicManager {
         if (this.targetVolume <= 0.005) {
             for (const [k, a] of Object.entries(this.tracks)) {
                 this.virtualVol[k] = 0;
-                if (!this.volumeReadOnly && this.appliedVol[k] !== 0) {
-                    this.appliedVol[k] = 0;
+                if (!this.volumeReadOnly) {
                     try { a.volume = 0; } catch (e) {}
                 }
                 if (!SYNCED_MENU_STEMS.has(k) && !a.paused) {
@@ -268,8 +255,7 @@ class MusicManager {
         if (muted) {
             for (const [k, a] of Object.entries(this.tracks)) {
                 this.virtualVol[k] = 0;
-                if (!this.volumeReadOnly && this.appliedVol[k] !== 0) {
-                    this.appliedVol[k] = 0;
+                if (!this.volumeReadOnly) {
                     try { a.volume = 0; } catch (e) {}
                 }
                 if (this.volumeReadOnly || !SYNCED_MENU_STEMS.has(k)) {
@@ -283,7 +269,6 @@ class MusicManager {
                 active.muted = false;
                 this.virtualVol[this.currentKey] = this.targetVolume;
                 if (!this.volumeReadOnly) {
-                    this.appliedVol[this.currentKey] = this.targetVolume;
                     try { active.volume = this.targetVolume; } catch (e) {}
                 }
                 if (active.paused) {
@@ -313,6 +298,8 @@ class MusicManager {
                     if (audio.paused) audio.play().catch(() => {});
                 } else {
                     this.virtualVol[key] = 0;
+            this.appliedVol = this.appliedVol || {};
+            this.appliedVol[key] = 0;
                     audio.muted = true;
                     if (!audio.paused) audio.pause();
                 }
@@ -333,7 +320,6 @@ class MusicManager {
             }
 
             this.virtualVol[key] = curVol;
-            // Aktualizuj właściwość DOM audio.volume tylko wtedy, gdy wartość faktycznie drgnęła
             if (Math.abs((this.appliedVol[key] ?? -1) - curVol) > 0.002) {
                 this.appliedVol[key] = curVol;
                 try { audio.volume = curVol; } catch (e) {}
@@ -341,10 +327,7 @@ class MusicManager {
 
             if (curVol <= 0.001) {
                 if (isMenuStem) {
-                    if (this.appliedVol[key] !== 0) {
-                        this.appliedVol[key] = 0;
-                        try { audio.volume = 0; } catch (e) {}
-                    }
+                    try { audio.volume = 0; } catch (e) {}
                 } else if (!audio.paused) {
                     audio.pause();
                     try { audio.currentTime = 0; } catch (e) {}
@@ -382,10 +365,7 @@ class SoundSystem {
         const gain = this.ctx.createGain();
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-
-        osc.onended = () => {
-            try { osc.disconnect(); gain.disconnect(); } catch (e) {}
-        };
+        osc.onended = () => { try { osc.disconnect(); gain.disconnect(); } catch (e) {} };
 
         if (type === 'jump') {
             osc.type = 'square';

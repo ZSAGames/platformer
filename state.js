@@ -62,6 +62,7 @@ let orientationLockMode = 'AUTO';
 let orientationReminderDismissed = false;
 
 // Ustawienia dostępności
+let lowEndMode = false;
 let screenShakeEnabled = true;
 let gameSpeedPercent = 100;
 let trapRadarEnabled = false;
@@ -97,6 +98,7 @@ function saveUserSettings() {
             sfxVol: sfxVolPercent,
             touchMode,
             orientationLockMode,
+            lowEndMode,
             screenShakeEnabled,
             gameSpeedPercent,
             trapRadarEnabled,
@@ -143,6 +145,7 @@ function loadUserSettings() {
             }
             if (['AUTO', 'ON', 'OFF'].includes(data.touchMode)) touchMode = data.touchMode;
             if (['AUTO', 'ON', 'OFF'].includes(data.orientationLockMode)) orientationLockMode = data.orientationLockMode;
+            if (typeof data.lowEndMode === 'boolean') lowEndMode = data.lowEndMode;
             if (typeof data.screenShakeEnabled === 'boolean') screenShakeEnabled = data.screenShakeEnabled;
             if ([100, 80, 65].includes(data.gameSpeedPercent)) gameSpeedPercent = data.gameSpeedPercent;
             if (typeof data.trapRadarEnabled === 'boolean') trapRadarEnabled = data.trapRadarEnabled;
@@ -240,6 +243,18 @@ function applySettingsToDOMAndAudio() {
         if (touchMode === 'AUTO') touchControls.classList.add('touch-auto');
         else if (touchMode === 'ON') touchControls.classList.add('touch-force-on');
         else touchControls.classList.add('touch-force-off');
+    }
+
+    const btnGraphics = document.getElementById('btn-toggle-graphics');
+    if (btnGraphics) {
+        btnGraphics.textContent = lowEndMode ? 'NISKA (LOW-END)' : 'WYSOKA (PEŁNA)';
+        btnGraphics.className = lowEndMode
+            ? 'btn-retro-secondary px-2.5 py-1 rounded-lg font-bold text-amber-300 border-amber-400 mono-font text-[11px] shrink-0'
+            : 'btn-retro-secondary px-2.5 py-1 rounded-lg font-bold text-emerald-300 mono-font text-[11px] shrink-0';
+    }
+    document.body.classList.toggle('low-end-mode', Boolean(lowEndMode));
+    if (typeof updateViewportMetrics === 'function') {
+        updateViewportMetrics();
     }
 
     const btnShake = document.getElementById('btn-toggle-shake');

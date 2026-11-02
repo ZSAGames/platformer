@@ -434,7 +434,6 @@ canvas {
     100% { transform: skewX(-18deg) translateX(420%); }
 }
 
-
 /* ==========================================================================
    7. OPTYMALIZACJA WYDAJNOŚCI GPU & CPU DLA STARSZYCH URZĄDZEŃ
    ========================================================================== */
@@ -455,11 +454,51 @@ canvas {
     image-rendering: auto;
 }
 
-/* Zatrzymaj wszystkie nieskończone animacje CSS wewnątrz ukrytych ekranów */
 .hidden,
 .hidden *,
 .hidden::before,
 .hidden::after {
     animation-play-state: paused !important;
     transition: none !important;
+}
+
+/* ==========================================================================
+   8. TRYB NISKI (LOW-END HARDWARE) - WYŁĄCZENIE BLURÓW, CIENI I ANIMACJI TŁA
+   ========================================================================== */
+body.low-end-mode #ambient-backdrop {
+    display: none !important;
+}
+body.low-end-mode #game-wrapper {
+    box-shadow: none !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+}
+body.low-end-mode #gameCanvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+body.low-end-mode *,
+body.low-end-mode *::before,
+body.low-end-mode *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+}
+body.low-end-mode .mania-checkerboard,
+body.low-end-mode .mania-logo-float,
+body.low-end-mode .dave-eye-blink,
+body.low-end-mode .dash-ready-pulse,
+body.low-end-mode .rage-banner,
+body.low-end-mode .mania-arrow {
+    animation: none !important;
+}
+body.low-end-mode .retro-panel,
+body.low-end-mode .btn-retro,
+body.low-end-mode .btn-retro-secondary,
+body.low-end-mode .touch-btn {
+    box-shadow: 3px 3px 0 #090d16 !important;
+    transition: none !important;
+}
+body.low-end-mode .btn-retro::before,
+body.low-end-mode .btn-retro-secondary::before {
+    display: none !important;
 }

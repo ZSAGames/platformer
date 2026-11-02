@@ -16,7 +16,95 @@ function getCachedSkyGradient(c0, c1, c2, stopMid = 0.55) {
     _skyGradCache.grad = grad;
     return grad;
 }
+function drawLowEndEnvironment(theme, nextTheme = null, blend = 0) {
+    const effTheme = theme === 'jungle_outpost' ? 'jungle' : theme;
+    const skyFlatMap = {
+        day: '#0ea5e9',
+        forest: '#1e1b4b',
+        darkforest: '#1e092b',
+        castle: '#0f172a',
+        underwater_castle: '#082f49',
+        underwater_sand: '#0369a1',
+        underwater_shallows: '#0f766e',
+        jungle: '#064e3b',
+        john_base: '#090d16'
+    };
+    const horizonFlatMap = {
+        day: '#15803d',
+        forest: '#0b1324',
+        darkforest: '#09090b',
+        castle: '#1e293b',
+        underwater_castle: '#1e293b',
+        underwater_sand: '#ca8a04',
+        underwater_shallows: '#78350f',
+        jungle: '#052e16',
+        john_base: '#020617'
+    };
+    const rimFlatMap = {
+        day: '#22c55e',
+        forest: '#1e293b',
+        darkforest: '#dc2626',
+        castle: '#334155',
+        underwater_castle: '#0284c7',
+        underwater_sand: '#facc15',
+        underwater_shallows: '#15803d',
+        jungle: '#16a34a',
+        john_base: '#0284c7'
+    };
+
+    const nextEff = nextTheme === 'jungle_outpost' ? 'jungle' : (nextTheme || effTheme);
+    const skyCol = lerpColor(skyFlatMap[effTheme] || '#0ea5e9', skyFlatMap[nextEff] || skyFlatMap[effTheme] || '#0ea5e9', blend);
+    const groundCol = lerpColor(horizonFlatMap[effTheme] || '#15803d', horizonFlatMap[nextEff] || horizonFlatMap[effTheme] || '#15803d', blend);
+    const rimCol = lerpColor(rimFlatMap[effTheme] || '#22c55e', rimFlatMap[nextEff] || rimFlatMap[effTheme] || '#22c55e', blend);
+
+    ctx.fillStyle = skyCol;
+    ctx.fillRect(0, 0, canvas.width, 496);
+
+    // Proste geometryczne sylwetki w tle (1 pętla prostokątów zamiast dziesiątek krzywych/gradientów)
+    if (effTheme === 'john_base') {
+        const pillarOff = -(cameraX * 0.3) % 320;
+        ctx.fillStyle = '#0f172a';
+        for (let px = pillarOff - 100; px < canvas.width + 100; px += 320) {
+            ctx.fillRect(px | 0, 0, 48, 496);
+        }
+    } else if (effTheme === 'castle' || effTheme === 'underwater_castle') {
+        ctx.fillStyle = '#090d16';
+        for (let x = 90; x < canvas.width; x += 220) {
+            ctx.fillRect(x, 0, 46, 496);
+        }
+    } else {
+        // Słońce / Księżyc jako pojedynczy czysty kwadrat bez wielowarstwowych poświat
+        ctx.fillStyle = (effTheme === 'darkforest') ? '#ef4444' : ((effTheme === 'forest') ? '#e2e8f0' : '#fde047');
+        ctx.fillRect(canvas.width - 170, 64, 56, 56);
+
+        // Uproszczone wzgórza/filary tła w jednym przebiegu
+        const mountOff = -(cameraX * 0.2) % 360;
+        ctx.fillStyle = lerpColor(skyCol, '#05070e', 0.28);
+        for (let mx = mountOff - 180; mx < canvas.width + 180; mx += 360) {
+            ctx.fillRect((mx + 40) | 0, 340, 220, 156);
+            ctx.fillRect((mx + 85) | 0, 280, 130, 60);
+        }
+    }
+
+    if (theme === 'jungle_outpost') {
+        const outpostOff = -(cameraX * 0.28) % 380;
+        ctx.fillStyle = '#0f172a';
+        for (let ox = outpostOff - 190; ox < canvas.width + 220; ox += 380) {
+            ctx.fillRect((ox + 120) | 0, 360, 120, 136);
+        }
+    }
+
+    ctx.fillStyle = groundCol;
+    ctx.fillRect(0, 496, canvas.width, canvas.height - 496);
+    ctx.fillStyle = rimCol;
+    ctx.fillRect(0, 494, canvas.width, 4);
+}
+
 function drawEnvironment(theme, nextTheme = null, blend = 0) {
+    if (typeof lowEndMode !== 'undefined' && lowEndMode) {
+        drawLowEndEnvironment(theme, nextTheme, blend);
+        return;
+    }
     if (theme === 'jungle_outpost') {
         drawEnvironment('jungle', null, 0);
         // Rysuj w tle Dżungli stalowe bunkry, anteny radarowe i hologramy Johna!
@@ -767,6 +855,69 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
 }
 
 function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling, nextTheme = null, blend = 0) {
+    if (typeof lowEndMode !== 'undefined' && lowEndMode) {
+        const effTheme = theme === 'jungle_outpost' ? 'jungle' : theme;
+        if (theme === 'john_base') {
+            ctx.fillStyle = isPlatform ? '#1e293b' : '#0f172a';
+            ctx.fillRect(x, y, w, h);
+            ctx.fillStyle = isFalling ? '#f43f5e' : '#38bdf8';
+            ctx.fillRect(x, y, w, Math.min(5, h));
+            ctx.strokeStyle = '#0284c7';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+            return;
+        }
+        if (effTheme === 'castle' || (effTheme === 'underwater_castle' && blend < 0.5)) {
+            const isSunken = (effTheme === 'underwater_castle');
+            ctx.fillStyle = isPlatform ? '#475569' : (isSunken ? '#0f172a' : '#1e293b');
+            ctx.fillRect(x, y, w, h);
+            ctx.fillStyle = isSunken ? '#0d9488' : (isPlatform ? '#94a3b8' : '#334155');
+            ctx.fillRect(x, y, w, Math.min(5, h));
+            ctx.strokeStyle = isSunken ? '#0284c7' : '#64748b';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+            return;
+        }
+        if (effTheme === 'underwater_sand' || (effTheme === 'underwater_castle' && blend >= 0.5)) {
+            ctx.fillStyle = '#ca8a04';
+            ctx.fillRect(x, y, w, h);
+            ctx.fillStyle = '#facc15';
+            ctx.fillRect(x, y, w, Math.min(8, h));
+            if (isFalling) {
+                ctx.fillStyle = '#451a03';
+                ctx.fillRect(x + w * 0.32, y + 6, 3, h * 0.7);
+            }
+            ctx.strokeStyle = '#713f12';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+            return;
+        }
+        if (effTheme === 'underwater_shallows') {
+            ctx.fillStyle = '#5c3a21';
+            ctx.fillRect(x, y, w, h);
+            ctx.fillStyle = '#15803d';
+            ctx.fillRect(x, y, w, Math.min(8, h));
+            ctx.strokeStyle = '#291502';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+            return;
+        }
+        const dirtMap  = { day: '#854d0e', forest: '#451a03', darkforest: '#27272a', jungle: '#422006' };
+        const grassMap = { day: '#22c55e', forest: '#10b981', darkforest: '#dc2626', jungle: '#16a34a' };
+        const nextEff = nextTheme === 'jungle_outpost' ? 'jungle' : (nextTheme || effTheme);
+        ctx.fillStyle = lerpColor(dirtMap[effTheme] || '#854d0e', dirtMap[nextEff] || dirtMap[effTheme] || '#854d0e', blend);
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = lerpColor(grassMap[effTheme] || '#22c55e', grassMap[nextEff] || grassMap[effTheme] || '#22c55e', blend);
+        ctx.fillRect(x, y, w, Math.min(9, h));
+        if (isFalling) {
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(x + w * 0.32, y + 8, 3, h * 0.7);
+        }
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+        return;
+    }
     const visMinX = Math.max(x, Math.floor((cameraX - x) / TILE) * TILE + x);
     const visMaxX = Math.min(x + w, cameraX + canvas.width + TILE);
 
@@ -1017,13 +1168,15 @@ function drawSpikes(x, y, w, h, dir) {
         ctx.closePath();
     }
     ctx.fill();
-    ctx.stroke();
+    if (typeof lowEndMode === 'undefined' || !lowEndMode) ctx.stroke();
 }
 
 function drawGoalPortal(x, y, w, h, color, label) {
     ctx.save();
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 16 + Math.sin(tickCount * 0.08) * 5;
+    if (typeof lowEndMode === 'undefined' || !lowEndMode) {
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 16 + Math.sin(tickCount * 0.08) * 5;
+    }
 
     ctx.fillStyle = color;
     ctx.globalAlpha = 0.28 + Math.sin(tickCount * 0.08) * 0.1;
@@ -1156,8 +1309,10 @@ function drawPlayer() {
     ctx.fillStyle = '#facc15';
     ctx.fillRect(40 + ext * 0.8, -5, 5, 10);
 
-    ctx.shadowColor = '#22d3ee';
-    ctx.shadowBlur = 12;
+    if (typeof lowEndMode === 'undefined' || !lowEndMode) {
+        ctx.shadowColor = '#22d3ee';
+        ctx.shadowBlur = 12;
+    }
     ctx.fillStyle = '#22d3ee';
     ctx.beginPath();
     ctx.moveTo(45 + ext, -8);
@@ -1748,8 +1903,10 @@ function draw() {
         for (let i = 0; i < floatingTexts.length; i++) {
             const ft = floatingTexts[i];
             ctx.globalAlpha = Math.max(0, ft.alpha);
-            ctx.fillStyle = '#000';
-            ctx.fillText(ft.text, ft.x + 1.5, ft.y + 1.5);
+            if (typeof lowEndMode === 'undefined' || !lowEndMode) {
+                ctx.fillStyle = '#000';
+                ctx.fillText(ft.text, ft.x + 1.5, ft.y + 1.5);
+            }
             ctx.fillStyle = ft.color;
             ctx.fillText(ft.text, ft.x, ft.y);
         }

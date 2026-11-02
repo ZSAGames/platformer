@@ -171,9 +171,9 @@ let activeMenuIndex = 0;
 const _submitModalEl = document.getElementById('submit-score-modal');
 
 function getActiveMenuInfo() {
-
+    const submitModal = _submitModalEl || document.getElementById('submit-score-modal');
     if (gameState === 'PLAYING' &&
-        (!_submitModalEl || _submitModalEl.classList.contains('hidden')) &&
+        (!submitModal || submitModal.classList.contains('hidden')) &&
         settingsModal.classList.contains('hidden') &&
         levelsModal.classList.contains('hidden') &&
         pauseMenuOverlay.classList.contains('hidden') &&
@@ -181,8 +181,6 @@ function getActiveMenuInfo() {
         mainMenuOverlay.classList.contains('hidden')) {
         return null;
     }
-
-    const submitModal = document.getElementById('submit-score-modal');
     if (submitModal && !submitModal.classList.contains('hidden')) {
         return {
             id: 'SUBMIT_SCORE',
@@ -205,6 +203,7 @@ function getActiveMenuInfo() {
                 document.getElementById('slider-music-vol'),
                 document.getElementById('slider-sfx-vol'),
                 document.getElementById('btn-toggle-touch'),
+                document.getElementById('btn-toggle-graphics'),
                 document.getElementById('btn-toggle-shake'),
                 document.getElementById('btn-toggle-speed'),
                 document.getElementById('btn-toggle-radar'),
@@ -853,6 +852,12 @@ document.getElementById('btn-toggle-touch')?.addEventListener('click', () => {
     updateTouchControlsVisibility();
     saveUserSettings();
 });
+document.getElementById('btn-toggle-graphics')?.addEventListener('click', () => {
+    sfx.play('ui_select');
+    lowEndMode = !lowEndMode;
+    applySettingsToDOMAndAudio();
+    saveUserSettings();
+});
 document.getElementById('btn-toggle-shake')?.addEventListener('click', () => {
     sfx.play('ui_select');
     screenShakeEnabled = !screenShakeEnabled;
@@ -1085,16 +1090,24 @@ function gameLoop(timestamp) {
     const speedScale = (gameState === 'PLAYING' && !isSpeedrunMode) ? (gameSpeedPercent / 100) : 1.0;
     accumulator += deltaTime * speedScale;
 
-    // Limit maksymalnie 4 kroków fizyki na klatkę zapobiega zamrożeniu przeglądarki ("spiral of death")
     let steps = 0;
     while (accumulator >= FIXED_DT && steps < 4) {
-        update();
+        try {
+            update();
+        } catch (err) {
+            console.error('Update error:', err);
+        }
         accumulator -= FIXED_DT;
         steps++;
     }
     if (steps === 4) accumulator = 0;
 
-    draw();
+    try {
+        draw();
+    } catch (err) {
+        console.error('Draw error:', err);
+    }
+
     requestAnimationFrame(gameLoop);
 }
 
