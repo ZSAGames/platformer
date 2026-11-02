@@ -1,10 +1,12 @@
 // ============================================================================
-// MODUŁ 1: STAŁE, KONFIGURACJA KOLORÓW I ZARZĄDZANIE EKRANEM
+// MODUŁ 1: STAŁE, KONFIGURACJA KOLORÓW I ZARZĄDZANIE EKRANEM (ZOPTYMALIZOWANY)
 // ============================================================================
 const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+// { alpha: false } wyłącza kosztowny blending przezroczystości płótna z DOM,
+// a { desynchronized: true } zmniejsza input lag na starszych urządzeniach mobilnych
+const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true }) || canvas.getContext('2d');
 const portraitCanvas = document.getElementById('portraitCanvas');
-const pCtx = portraitCanvas.getContext('2d');
+const pCtx = portraitCanvas ? portraitCanvas.getContext('2d') : null;
 
 const TILE = 40;
 const FIXED_DT = 1000 / 60;
@@ -21,6 +23,17 @@ const THEME_PALETTES = {
     jungle_outpost:      { left: '#0d9488', right: '#0284c7', top: '#16a34a' },
     john_base:           { left: '#0284c7', right: '#7c3aed', top: '#f43f5e' }
 };
+
+// Cache wymiarów płótna eliminujący reflow (getBoundingClientRect) przy mousemove
+let cachedCanvasRect = { left: 0, top: 0, width: 800, height: 600 };
+
+function refreshCanvasRectCache() {
+    if (!canvas) return;
+    const r = canvas.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0) {
+        cachedCanvasRect = { left: r.left, top: r.top, width: r.width, height: r.height };
+    }
+}
 
 function updateViewportMetrics() {
     const wrapper = document.getElementById('game-wrapper');
@@ -42,51 +55,87 @@ function updateViewportMetrics() {
             canvas.height = 600;
         }
     }
+    refreshCanvasRectCache();
 }
-window.addEventListener('resize', updateViewportMetrics);
-window.addEventListener('orientationchange', () => setTimeout(updateViewportMetrics, 120));
+window.addEventListener('resize', updateViewportMetrics, { passive: true });
+window.addEventListener('scroll', refreshCanvasRectCache, { passive: true });
+window.addEventListener('orientationchange', () => setTimeout(updateViewportMetrics, 120), { passive: true });
+
+// Cache parsowania kolorów RGB i interpolacji (Zero-GC w pętli renderowania)
+const _rgbCache = new Map();
+const _lerpCache = new Map();
 
 function hexToRgb(colorStr) {
     if (!colorStr) return [0, 0, 0];
+    const cached = _rgbCache.get(colorStr);
+    if (cached) return cached;
+
     const str = String(colorStr).trim();
+    let res;
     if (str.startsWith('rgb')) {
         const parts = str.match(/\d+/g);
-        if (parts && parts.length >= 3) {
-            return [parseInt(parts[0], 10), parseInt(parts[1], 10), parseInt(parts[2], 10)];
+        res = (parts && parts.length >= 3)
+            ? [parseInt(parts[0], 10), parseInt(parts[1], 10), parseInt(parts[2], 10)]
+            : [0, 0, 0];
+    } else {
+        let clean = str.charCodeAt(0) === 35 ? str.slice(1) : str;
+        if (clean.length === 3) {
+            clean = clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2];
         }
+        const n = parseInt(clean, 16);
+        res = isNaN(n) ? [0, 0, 0] : [(n >> 16) & 255, (n >> 8) & 255, n & 255];
     }
-    let clean = str.replace('#', '');
-    if (clean.length === 3) {
-        clean = clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2];
-    }
-    const n = parseInt(clean, 16);
-    if (isNaN(n)) return [0, 0, 0];
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    _rgbCache.set(colorStr, res);
+    return res;
 }
 
 function lerpColor(hexA, hexB, t) {
-    const clamped = Math.max(0, Math.min(1, t || 0));
+    if (!hexB || hexA === hexB) return hexA;
+    const clamped = t <= 0 ? 0 : (t >= 1 ? 1 : (t || 0));
     if (clamped <= 0.001) return hexA;
     if (clamped >= 0.999) return hexB;
-    const [r1, g1, b1] = hexToRgb(hexA);
-    const [r2, g2, b2] = hexToRgb(hexB);
-    const r = Math.round(r1 + (r2 - r1) * clamped);
-    const g = Math.round(g1 + (g2 - g1) * clamped);
-    const b = Math.round(b1 + (b2 - b1) * clamped);
-    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+
+    // Kwantyzacja t do 1/256 pozwala na pełne wykorzystanie cache bez utraty płynności przejść
+    const q = (clamped * 256) | 0;
+    if (q <= 0) return hexA;
+    if (q >= 256) return hexB;
+
+    const cacheKey = `${hexA}|${hexB}|${q}`;
+    const cachedHex = _lerpCache.get(cacheKey);
+    if (cachedHex) return cachedHex;
+
+    const rgb1 = hexToRgb(hexA);
+    const rgb2 = hexToRgb(hexB);
+    const ratio = q / 256;
+    const r = (rgb1[0] + (rgb2[0] - rgb1[0]) * ratio + 0.5) | 0;
+    const g = (rgb1[1] + (rgb2[1] - rgb1[1]) * ratio + 0.5) | 0;
+    const b = (rgb1[2] + (rgb2[2] - rgb1[2]) * ratio + 0.5) | 0;
+    const out = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+
+    if (_lerpCache.size > 2048) _lerpCache.clear();
+    _lerpCache.set(cacheKey, out);
+    return out;
 }
+
+let _lastGlowL = '';
+let _lastGlowR = '';
+let _lastGlowT = '';
 
 function applyThemeAmbilight(theme, nextTheme = null, blend = 0) {
     const palA = THEME_PALETTES[theme] || THEME_PALETTES.day;
+    let l, r, t;
     if (!nextTheme || blend <= 0.01) {
-        document.documentElement.style.setProperty('--glow-left', palA.left);
-        document.documentElement.style.setProperty('--glow-right', palA.right);
-        document.documentElement.style.setProperty('--glow-top', palA.top);
+        l = palA.left;
+        r = palA.right;
+        t = palA.top;
     } else {
         const palB = THEME_PALETTES[nextTheme] || palA;
-        document.documentElement.style.setProperty('--glow-left', lerpColor(palA.left, palB.left, blend));
-        document.documentElement.style.setProperty('--glow-right', lerpColor(palA.right, palB.right, blend));
-        document.documentElement.style.setProperty('--glow-top', lerpColor(palA.top, palB.top, blend));
+        l = lerpColor(palA.left, palB.left, blend);
+        r = lerpColor(palA.right, palB.right, blend);
+        t = lerpColor(palA.top, palB.top, blend);
     }
+    const rootStyle = document.documentElement.style;
+    if (l !== _lastGlowL) { _lastGlowL = l; rootStyle.setProperty('--glow-left', l); }
+    if (r !== _lastGlowR) { _lastGlowR = r; rootStyle.setProperty('--glow-right', r); }
+    if (t !== _lastGlowT) { _lastGlowT = t; rootStyle.setProperty('--glow-top', t); }
 }
-

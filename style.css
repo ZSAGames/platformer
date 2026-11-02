@@ -433,3 +433,33 @@ canvas {
     50% { transform: skewX(-18deg) translateX(80%); }
     100% { transform: skewX(-18deg) translateX(420%); }
 }
+
+
+/* ==========================================================================
+   7. OPTYMALIZACJA WYDAJNOŚCI GPU & CPU DLA STARSZYCH URZĄDZEŃ
+   ========================================================================== */
+#ambient-backdrop {
+    contain: strict;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+#game-wrapper {
+    contain: layout paint;
+    transform: translateZ(0);
+}
+
+#gameCanvas {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    image-rendering: auto;
+}
+
+/* Zatrzymaj wszystkie nieskończone animacje CSS wewnątrz ukrytych ekranów */
+.hidden,
+.hidden *,
+.hidden::before,
+.hidden::after {
+    animation-play-state: paused !important;
+    transition: none !important;
+}

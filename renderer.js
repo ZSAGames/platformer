@@ -1,6 +1,21 @@
 // ============================================================================
 // MODUŁ 8: SILNIK RENDEROWANIA (ŚWIATY, POSTACIE, BROŃ 360°, BOGATE CUTSCENKI)
 // ============================================================================
+let _skyGradCache = { key: '', grad: null };
+
+function getCachedSkyGradient(c0, c1, c2, stopMid = 0.55) {
+    const key = `${canvas.height}|${stopMid}|${c0}|${c1}|${c2}`;
+    if (_skyGradCache.key === key && _skyGradCache.grad) {
+        return _skyGradCache.grad;
+    }
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, c0);
+    grad.addColorStop(stopMid, c1);
+    grad.addColorStop(1, c2);
+    _skyGradCache.key = key;
+    _skyGradCache.grad = grad;
+    return grad;
+}
 function drawEnvironment(theme, nextTheme = null, blend = 0) {
     if (theme === 'jungle_outpost') {
         drawEnvironment('jungle', null, 0);
@@ -35,22 +50,20 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
 
     if (theme === 'john_base') {
         ctx.save();
-        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        grad.addColorStop(0, '#020617');
-        grad.addColorStop(0.5, '#0f172a');
-        grad.addColorStop(1, '#1e1b4b');
-        ctx.fillStyle = grad;
+        ctx.fillStyle = getCachedSkyGradient('#020617', '#0f172a', '#1e1b4b', 0.5);
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.strokeStyle = 'rgba(56, 189, 248, 0.14)';
         ctx.lineWidth = 1;
         const gridOff = -(cameraX * 0.2) % 60;
+        ctx.beginPath();
         for (let gx = gridOff; gx < canvas.width; gx += 60) {
-            ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, 600); ctx.stroke();
+            ctx.moveTo(gx, 0); ctx.lineTo(gx, 600);
         }
         for (let gy = 0; gy < 600; gy += 60) {
-            ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(canvas.width, gy); ctx.stroke();
+            ctx.moveTo(0, gy); ctx.lineTo(canvas.width, gy);
         }
+        ctx.stroke();
 
         const pillarOff = -(cameraX * 0.35) % 260;
         for (let px = pillarOff - 130; px < canvas.width + 200; px += 260) {
@@ -90,11 +103,12 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
     const cA = skyColors[theme] || skyColors.day;
     const cB = (nextTheme && skyColors[nextTheme]) ? skyColors[nextTheme] : cA;
 
-    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, lerpColor(cA[0], cB[0], blend));
-    grad.addColorStop(0.55, lerpColor(cA[1], cB[1], blend));
-    grad.addColorStop(1, lerpColor(cA[2], cB[2], blend));
-    ctx.fillStyle = grad;
+    ctx.fillStyle = getCachedSkyGradient(
+        lerpColor(cA[0], cB[0], blend),
+        lerpColor(cA[1], cB[1], blend),
+        lerpColor(cA[2], cB[2], blend),
+        0.55
+    );
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const isUnderwaterTheme = theme.startsWith('underwater');
@@ -533,12 +547,12 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
     if (theme === 'castle') {
         ctx.strokeStyle = 'rgba(30, 41, 59, 0.45)';
         ctx.lineWidth = 1;
+        ctx.beginPath();
         for (let by = 40; by < 600; by += 40) {
-            ctx.beginPath();
             ctx.moveTo(0, by);
             ctx.lineTo(canvas.width, by);
-            ctx.stroke();
         }
+        ctx.stroke();
         for (let x = 70; x < canvas.width; x += 170) {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
             ctx.fillRect(x + 8, 0, 56, 600);
@@ -753,6 +767,9 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
 }
 
 function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling, nextTheme = null, blend = 0) {
+    const visMinX = Math.max(x, Math.floor((cameraX - x) / TILE) * TILE + x);
+    const visMaxX = Math.min(x + w, cameraX + canvas.width + TILE);
+
     ctx.fillStyle = 'rgba(0, 0, 0, 0.24)';
     ctx.fillRect(x + 4, y + 5, w, h);
 
@@ -761,12 +778,14 @@ function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling, nextTheme = nu
         ctx.fillRect(x, y, w, h);
         ctx.strokeStyle = 'rgba(56, 189, 248, 0.22)';
         ctx.lineWidth = 1;
-        for (let gx = x + TILE; gx < x + w; gx += TILE) {
-            ctx.beginPath(); ctx.moveTo(gx, y); ctx.lineTo(gx, y + h); ctx.stroke();
+        ctx.beginPath();
+        for (let gx = Math.max(x + TILE, visMinX); gx < visMaxX; gx += TILE) {
+            ctx.moveTo(gx, y); ctx.lineTo(gx, y + h);
         }
         for (let gy = y + TILE; gy < y + h; gy += TILE) {
-            ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x + w, gy); ctx.stroke();
+            ctx.moveTo(x, gy); ctx.lineTo(x + w, gy);
         }
+        ctx.stroke();
         ctx.fillStyle = isFalling ? '#f43f5e' : '#0284c7';
         ctx.fillRect(x, y, w, 6);
         ctx.fillStyle = isFalling ? '#fda4af' : '#67e8f9';
@@ -790,30 +809,28 @@ function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling, nextTheme = nu
         ctx.lineWidth = 1.5;
         const brickH = 20;
         const brickW = 40;
+        ctx.beginPath();
         for (let by = y + brickH; by < y + h; by += brickH) {
-            ctx.beginPath();
             ctx.moveTo(x, by);
             ctx.lineTo(x + w, by);
-            ctx.stroke();
         }
         for (let row = 0, by = y; by < y + h; by += brickH, row++) {
-            const offset = (row % 2) * (brickW / 2);
+            const offset = (row & 1) * (brickW * 0.5);
             for (let bx = x + offset; bx < x + w; bx += brickW) {
-                if (bx > x) {
-                    ctx.beginPath();
+                if (bx > x && bx >= visMinX - brickW && bx <= visMaxX) {
                     ctx.moveTo(bx, by);
                     ctx.lineTo(bx, Math.min(y + h, by + brickH));
-                    ctx.stroke();
                 }
             }
         }
+        ctx.stroke();
 
         ctx.fillStyle = isSunken ? '#0d9488' : (isPlatform ? '#94a3b8' : '#334155');
         ctx.fillRect(x, y, w, isSunken ? 6 : 5);
         if (isSunken) {
             ctx.fillStyle = '#eab308';
             for (let sx = x + 6; sx < x + w - 10; sx += 24) {
-                ctx.fillRect(sx, y, 10, 3);
+                if (sx >= visMinX - 24 && sx <= visMaxX) ctx.fillRect(sx, y, 10, 3);
             }
         }
         ctx.strokeStyle = isSunken ? '#0284c7' : '#64748b';
@@ -833,15 +850,17 @@ function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling, nextTheme = nu
 
         ctx.strokeStyle = 'rgba(113, 63, 18, 0.25)';
         ctx.lineWidth = 1;
-        for (let gx = x + TILE; gx < x + w; gx += TILE) {
-            ctx.beginPath(); ctx.moveTo(gx, y); ctx.lineTo(gx, y + h); ctx.stroke();
+        ctx.beginPath();
+        for (let gx = Math.max(x + TILE, visMinX); gx < visMaxX; gx += TILE) {
+            ctx.moveTo(gx, y); ctx.lineTo(gx, y + h);
         }
         for (let gy = y + TILE; gy < y + h; gy += TILE) {
-            ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x + w, gy); ctx.stroke();
+            ctx.moveTo(x, gy); ctx.lineTo(x + w, gy);
         }
+        ctx.stroke();
 
         const capH = Math.min(10, h);
-        for (let tx = x; tx < x + w - 6; tx += TILE) {
+        for (let tx = visMinX; tx < visMaxX - 6; tx += TILE) {
             for (let ty = y + capH + 4; ty < y + h - 8; ty += TILE) {
                 ctx.fillStyle = sandDark;
                 ctx.fillRect(tx + 7, ty + 8, 8, 5);
@@ -881,7 +900,7 @@ function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling, nextTheme = nu
         ctx.fillRect(x, y, w, h);
 
         const capH = Math.min(10, h);
-        for (let tx = x; tx < x + w - 6; tx += TILE) {
+        for (let tx = visMinX; tx < visMaxX - 6; tx += TILE) {
             for (let ty = y + capH + 2; ty < y + h - 8; ty += TILE) {
                 ctx.fillStyle = sandPatch;
                 ctx.fillRect(tx + 4, ty + 4, 14, 10);
@@ -895,11 +914,11 @@ function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling, nextTheme = nu
         ctx.fillRect(x, y, w, capH);
         ctx.fillStyle = '#eab308';
         for (let sx = x + 4; sx < x + w - 12; sx += 24) {
-            ctx.fillRect(sx, y + 2, 10, 4);
+            if (sx >= visMinX - 24 && sx <= visMaxX) ctx.fillRect(sx, y + 2, 10, 4);
         }
         ctx.fillStyle = '#22c55e';
         for (let gx = x + 14; gx < x + w - 8; gx += 24) {
-            ctx.fillRect(gx, y, 8, 4);
+            if (gx >= visMinX - 24 && gx <= visMaxX) ctx.fillRect(gx, y, 8, 4);
         }
 
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.42)';
@@ -923,15 +942,17 @@ function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling, nextTheme = nu
 
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.14)';
     ctx.lineWidth = 1;
-    for (let gx = x + TILE; gx < x + w; gx += TILE) {
-        ctx.beginPath(); ctx.moveTo(gx, y); ctx.lineTo(gx, y + h); ctx.stroke();
+    ctx.beginPath();
+    for (let gx = Math.max(x + TILE, visMinX); gx < visMaxX; gx += TILE) {
+        ctx.moveTo(gx, y); ctx.lineTo(gx, y + h);
     }
     for (let gy = y + TILE; gy < y + h; gy += TILE) {
-        ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x + w, gy); ctx.stroke();
+        ctx.moveTo(x, gy); ctx.lineTo(x + w, gy);
     }
+    ctx.stroke();
 
     const grassH = Math.min(11, h);
-    for (let tx = x; tx < x + w - 6; tx += TILE) {
+    for (let tx = visMinX; tx < visMaxX - 6; tx += TILE) {
         for (let ty = y + grassH + 4; ty < y + h - 8; ty += TILE) {
             ctx.fillStyle = dirtDark;
             ctx.fillRect(tx + 8, ty + 6, 7, 5);
@@ -950,6 +971,7 @@ function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling, nextTheme = nu
 
     if (h >= 18) {
         for (let gx = x + 4; gx < x + w - 6; gx += 12) {
+            if (gx < visMinX - 12 || gx > visMaxX) continue;
             const tuftH = ((Math.floor(gx) % 24 === 0) ? 5 : 3);
             ctx.fillStyle = grassColor;
             ctx.fillRect(gx, y + grassH, 6, tuftH);
@@ -980,22 +1002,22 @@ function drawSpikes(x, y, w, h, dir) {
     ctx.strokeStyle = '#334155';
     ctx.lineWidth = 1.5;
 
+    ctx.beginPath();
     for (let i = 0; i < count; i++) {
         const sx = x + i * sw;
-        ctx.beginPath();
         if (dir === 'up') {
             ctx.moveTo(sx, y + h);
-            ctx.lineTo(sx + sw / 2, y);
+            ctx.lineTo(sx + sw * 0.5, y);
             ctx.lineTo(sx + sw, y + h);
         } else {
             ctx.moveTo(sx, y);
-            ctx.lineTo(sx + sw / 2, y + h);
+            ctx.lineTo(sx + sw * 0.5, y + h);
             ctx.lineTo(sx + sw, y);
         }
         ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
     }
+    ctx.fill();
+    ctx.stroke();
 }
 
 function drawGoalPortal(x, y, w, h, color, label) {
@@ -1583,18 +1605,26 @@ function draw() {
 
     drawEnvironment(lvl.theme, lvl.transitionToTheme, blend);
 
-    ctx.save();
-    ctx.translate(-Math.floor(cameraX), 0);
+    const camFloor = Math.floor(cameraX);
+    const viewL = camFloor - 80;
+    const viewR = camFloor + canvas.width + 80;
 
-    if (lvl.hasCastleGate && realGoal) {
+    ctx.save();
+    ctx.translate(-camFloor, 0);
+
+    if (lvl.hasCastleGate && realGoal && realGoal.x + 120 >= viewL && realGoal.x - 80 <= viewR) {
         drawCastleGate(realGoal.x, realGoal.y);
     }
 
-    for (const s of solids) {
+    for (let i = 0; i < solids.length; i++) {
+        const s = solids[i];
+        if (s.x + s.w < viewL || s.x > viewR) continue;
         drawSolidBlock(s.x, s.y, s.w, s.h, lvl.theme, s.isPlatform, false, lvl.transitionToTheme, blend);
     }
 
-    for (const ff of fallingFloors) {
+    for (let i = 0; i < fallingFloors.length; i++) {
+        const ff = fallingFloors[i];
+        if (ff.x + ff.w < viewL || ff.x > viewR || ff.y > canvas.height + 60) continue;
         const shakeX = (ff.triggered && ff.timer > 0) ? (Math.random() - 0.5) * 6 : 0;
         drawSolidBlock(ff.x + shakeX, ff.y, ff.w, ff.h, lvl.theme, true, true, lvl.transitionToTheme, blend);
         if (trapRadarEnabled && !ff.triggered) {
@@ -1607,7 +1637,9 @@ function draw() {
         }
     }
 
-    for (const ib of invisBlocks) {
+    for (let i = 0; i < invisBlocks.length; i++) {
+        const ib = invisBlocks[i];
+        if (ib.x + ib.w < viewL || ib.x > viewR) continue;
         if (ib.revealed) {
             const by = ib.y + ib.bumpY;
             ctx.fillStyle = '#f59e0b';
@@ -1619,7 +1651,7 @@ function draw() {
             ctx.fillStyle = '#451a03';
             ctx.font = 'bold 18px Fredoka';
             ctx.textAlign = 'center';
-            ctx.fillText('>:)', ib.x + ib.w / 2, by + 26);
+            ctx.fillText('>:)', ib.x + ib.w * 0.5, by + 26);
         } else if (trapRadarEnabled) {
             ctx.save();
             ctx.fillStyle = 'rgba(250, 204, 21, 0.16)';
@@ -1632,12 +1664,14 @@ function draw() {
             ctx.fillStyle = '#fde047';
             ctx.font = 'bold 14px JetBrains Mono';
             ctx.textAlign = 'center';
-            ctx.fillText('?', ib.x + ib.w / 2, ib.y + 25);
+            ctx.fillText('?', ib.x + ib.w * 0.5, ib.y + 25);
             ctx.restore();
         }
     }
 
-    for (const st of spikeTraps) {
+    for (let i = 0; i < spikeTraps.length; i++) {
+        const st = spikeTraps[i];
+        if (st.x + st.w < viewL || st.x > viewR || st.y > canvas.height + 60) continue;
         if (st.dir === 'down' || st.triggered || trapRadarEnabled) {
             ctx.save();
             if (!st.triggered && st.dir === 'up' && trapRadarEnabled) {
@@ -1654,17 +1688,21 @@ function draw() {
         }
     }
 
-    for (const fg of fakeGoals) {
+    for (let i = 0; i < fakeGoals.length; i++) {
+        const fg = fakeGoals[i];
+        if (fg.x + fg.w < viewL || fg.x > viewR) continue;
         const fakeLabel = (highContrastEnabled || trapRadarEnabled) ? '✕ PUŁAPKA' : 'META';
         const fakeColor = highContrastEnabled ? '#f43f5e' : '#a855f7';
         drawGoalPortal(fg.x, fg.y, fg.w, fg.h, fakeColor, fakeLabel);
     }
-    if (realGoal) {
+    if (realGoal && realGoal.x + realGoal.w >= viewL && realGoal.x <= viewR) {
         const realLabel = highContrastEnabled ? '✓ META' : 'META';
         drawGoalPortal(realGoal.x, realGoal.y, realGoal.w, realGoal.h, '#10b981', realLabel);
     }
 
-    for (const e of enemies) {
+    for (let i = 0; i < enemies.length; i++) {
+        const e = enemies[i];
+        if (e.x + e.w < viewL - 160 || e.x > viewR + 160) continue;
         drawRoboEnemy(e);
     }
 
@@ -1672,7 +1710,8 @@ function draw() {
         drawBoss();
     }
 
-    for (const p of projectiles) {
+    for (let i = 0; i < projectiles.length; i++) {
+        const p = projectiles[i];
         if (highContrastEnabled || p.deflected) {
             ctx.strokeStyle = p.deflected ? '#22d3ee' : '#facc15';
             ctx.lineWidth = 2.5;
@@ -1694,23 +1733,28 @@ function draw() {
         drawPlayer();
     }
 
-    for (const p of particles) {
+    for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        if (p.x < viewL || p.x > viewR) continue;
         ctx.globalAlpha = Math.max(0, p.alpha);
         ctx.fillStyle = p.color;
-        ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+        ctx.fillRect(p.x - p.size * 0.5, p.y - p.size * 0.5, p.size, p.size);
     }
     ctx.globalAlpha = 1;
 
-    for (const ft of floatingTexts) {
-        ctx.globalAlpha = Math.max(0, ft.alpha);
+    if (floatingTexts.length > 0) {
         ctx.font = '800 15px Fredoka';
         ctx.textAlign = 'center';
-        ctx.fillStyle = '#000';
-        ctx.fillText(ft.text, ft.x + 1.5, ft.y + 1.5);
-        ctx.fillStyle = ft.color;
-        ctx.fillText(ft.text, ft.x, ft.y);
+        for (let i = 0; i < floatingTexts.length; i++) {
+            const ft = floatingTexts[i];
+            ctx.globalAlpha = Math.max(0, ft.alpha);
+            ctx.fillStyle = '#000';
+            ctx.fillText(ft.text, ft.x + 1.5, ft.y + 1.5);
+            ctx.fillStyle = ft.color;
+            ctx.fillText(ft.text, ft.x, ft.y);
+        }
+        ctx.globalAlpha = 1;
     }
-    ctx.globalAlpha = 1;
 
     ctx.restore();
 
@@ -1724,4 +1768,3 @@ function draw() {
 
     ctx.restore();
 }
-

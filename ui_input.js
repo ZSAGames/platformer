@@ -168,7 +168,20 @@ function returnToMainMenu() {
 let activeMenuContext = null;
 let activeMenuIndex = 0;
 
+const _submitModalEl = document.getElementById('submit-score-modal');
+
 function getActiveMenuInfo() {
+
+    if (gameState === 'PLAYING' &&
+        (!_submitModalEl || _submitModalEl.classList.contains('hidden')) &&
+        settingsModal.classList.contains('hidden') &&
+        levelsModal.classList.contains('hidden') &&
+        pauseMenuOverlay.classList.contains('hidden') &&
+        victoryOverlay.classList.contains('hidden') &&
+        mainMenuOverlay.classList.contains('hidden')) {
+        return null;
+    }
+
     const submitModal = document.getElementById('submit-score-modal');
     if (submitModal && !submitModal.classList.contains('hidden')) {
         return {
@@ -455,22 +468,21 @@ function pollGamepad(timestamp) {
 // ============================================================================
 canvas.addEventListener('mousemove', (e) => {
     if (gameState !== 'PLAYING' || !playerHasWeapon()) return;
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return;
+    if (cachedCanvasRect.width <= 0 || cachedCanvasRect.height <= 0) refreshCanvasRectCache();
 
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const canvasX = (e.clientX - rect.left) * scaleX;
-    const canvasY = (e.clientY - rect.top) * scaleY;
+    const scaleX = canvas.width / cachedCanvasRect.width;
+    const scaleY = canvas.height / cachedCanvasRect.height;
+    const canvasX = (e.clientX - cachedCanvasRect.left) * scaleX;
+    const canvasY = (e.clientY - cachedCanvasRect.top) * scaleY;
 
     const worldMouseX = canvasX + cameraX;
     const worldMouseY = canvasY;
-    const px = player.x + player.w / 2;
-    const py = player.y + player.h / 2;
+    const px = player.x + player.w * 0.5;
+    const py = player.y + player.h * 0.5;
 
     weapon.targetAngle = Math.atan2(worldMouseY - py, worldMouseX - px);
     weapon.angle = weapon.targetAngle;
-});
+}, { passive: true });
 
 canvas.addEventListener('mousedown', () => {
     if (gameState === 'PLAYING' && playerHasWeapon()) {
@@ -1065,27 +1077,24 @@ function gameLoop(timestamp) {
     let deltaTime = timestamp - lastFrameTime;
     lastFrameTime = timestamp;
 
-    pollGamepad(timestamp);
+    if (isGamepadConnected || (navigator.getGamepads && (tickCount & 15) === 0)) {
+        pollGamepad(timestamp);
+    }
 
     if (deltaTime > 100) deltaTime = 100;
     const speedScale = (gameState === 'PLAYING' && !isSpeedrunMode) ? (gameSpeedPercent / 100) : 1.0;
     accumulator += deltaTime * speedScale;
 
-    while (accumulator >= FIXED_DT) {
-        try {
-            update();
-        } catch (err) {
-            console.error('Update error:', err);
-        }
+    // Limit maksymalnie 4 kroków fizyki na klatkę zapobiega zamrożeniu przeglądarki ("spiral of death")
+    let steps = 0;
+    while (accumulator >= FIXED_DT && steps < 4) {
+        update();
         accumulator -= FIXED_DT;
+        steps++;
     }
+    if (steps === 4) accumulator = 0;
 
-    try {
-        draw();
-    } catch (err) {
-        console.error('Draw error:', err);
-    }
-
+    draw();
     requestAnimationFrame(gameLoop);
 }
 
