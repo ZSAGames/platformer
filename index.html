@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="PDicon.ico">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
@@ -420,12 +420,12 @@
                         </div>
 
                         <!-- Tryb Graficzny (Low-End Hardware) -->
-                        <div class="flex items-center justify-between bg-slate-900/90 border border-cyan-500/40 p-2.5 rounded-xl">
+                        <div id="row-toggle-graphics" onclick="if(window.toggleGraphicsMode) window.toggleGraphicsMode(event)" class="flex items-center justify-between bg-slate-900/90 border border-cyan-500/40 p-2.5 rounded-xl cursor-pointer">
                             <div>
                                 <div class="font-bold text-cyan-300">🖥️ Tryb Graficzny (Wydajność)</div>
                                 <div class="text-[10px] text-slate-400">Uproszczone renderowanie dla słabszych urządzeń (Low-End)</div>
                             </div>
-                            <button id="btn-toggle-graphics" type="button" class="btn-retro-secondary px-2.5 py-1 rounded-lg font-bold text-emerald-300 mono-font text-[11px] shrink-0">
+                            <button id="btn-toggle-graphics" type="button" onclick="if(window.toggleGraphicsMode) window.toggleGraphicsMode(event)" class="btn-retro-secondary px-2.5 py-1 rounded-lg font-bold text-emerald-300 mono-font text-[11px] shrink-0">
                                 WYSOKA (PEŁNA)
                             </button>
                         </div>
@@ -719,14 +719,14 @@
 
 
     <!-- Moduły JavaScript Gry "Przygoda Dave'a" -->
-    <script src="config.js"></script>
-    <script src="audio.js"></script>
-    <script src="levels.js"></script>
-    <script src="cutscenes.js"></script>
-    <script src="state.js"></script>
-    <script src="leaderboard.js"></script>
-    <script src="mechanics.js"></script>
-    <script src="renderer.js"></script>
-    <script src="ui_input.js"></script>
+    <script src="config.js?v=3"></script>
+    <script src="audio.js?v=3"></script>
+    <script src="levels.js?v=3"></script>
+    <script src="cutscenes.js?v=3"></script>
+    <script src="state.js?v=3"></script>
+    <script src="leaderboard.js?v=3"></script>
+    <script src="mechanics.js?v=3"></script>
+    <script src="renderer.js?v=3"></script>
+    <script src="ui_input.js?v=3"></script>
 </body>
 </html>

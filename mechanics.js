@@ -53,7 +53,10 @@ const player = {
     coyoteTimer: 0,
     jumpBufferTimer: 0,
     dead: false,
-    deathTimer: 0
+    deathTimer: 0,
+    visualFacing: 1,
+    visualScaleX: 1,
+    visualScaleY: 1
 };
 
 // Stan Ostrza Rdzeniowego 360° (Broni od Jerry'ego na Poziomach 71 - 80)
@@ -62,6 +65,8 @@ const weapon = {
     targetAngle: 0,
     length: 54,
     pokeExtension: 0,
+    visualExt: 0,
+    visualAngle: 0,
     touchActive: false,
     touchId: null
 };
@@ -102,9 +107,24 @@ function allocParticle(x, y, vx, vy, size, color, alpha, decay) {
 }
 
 function spawnParticles(x, y, color, count = 10, speed = 4.5) {
-    if (typeof lowEndMode !== 'undefined' && lowEndMode) {
-        if (particles.length >= 24) return;
-        count = Math.max(2, (count * 0.35) | 0);
+    const isLow = typeof lowEndMode !== 'undefined' && lowEndMode;
+    if (isLow) {
+        if (particles.length >= 10) return;
+        count = Math.min(3, Math.max(1, (count * 0.25) | 0));
+        for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2;
+            particles.push(allocParticle(
+                x | 0,
+                y | 0,
+                Math.cos(angle) * speed * 0.65,
+                Math.sin(angle) * speed * 0.65,
+                4,
+                color,
+                1,
+                0.08
+            ));
+        }
+        return;
     }
     for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -145,7 +165,7 @@ function showChapterBanner(title, levelNum = currentLevelIdx + 1) {
     chapterTitleEl.textContent = title;
 
     chapterBanner.classList.remove('hidden');
-    if (cardInner) {
+    if (cardInner && (typeof lowEndMode === 'undefined' || !lowEndMode)) {
         cardInner.classList.remove('zone-card-enter');
         void cardInner.offsetWidth;
         cardInner.classList.add('zone-card-enter');
@@ -299,7 +319,12 @@ function loadLevel(idx, isMenuPreview = false) {
     player.jumpBufferTimer = 0;
     player.dead = false;
     player.deathTimer = 0;
+    player.visualFacing = 1;
+    player.visualScaleX = 1;
+    player.visualScaleY = 1;
     weapon.pokeExtension = 0;
+    weapon.visualExt = 0;
+    weapon.visualAngle = weapon.angle;
 
     solids = lvl.solids.map(s => ({
         x: s[0] * TILE,
@@ -315,7 +340,8 @@ function loadLevel(idx, isMenuPreview = false) {
         w: TILE,
         h: TILE,
         revealed: false,
-        bumpY: 0
+        bumpY: 0,
+        bumpProgress: 0
     }));
 
     fallingFloors = lvl.fallingFloors.map(f => ({
@@ -338,7 +364,8 @@ function loadLevel(idx, isMenuPreview = false) {
         dir: t.dir,
         triggerX: t.triggerX * TILE,
         triggered: false,
-        vy: 0
+        vy: 0,
+        extProgress: t.dir === 'up' ? 0 : 1
     }));
 
     enemies = lvl.enemies.map(e => ({
@@ -368,6 +395,8 @@ function loadLevel(idx, isMenuPreview = false) {
         trollJump: e.trollJump || false,
         jumped: false,
         turboActive: false,
+        visualDir: Math.sign(e.speed || 1.8) || 1,
+        visualScaleY: 1,
         eyeColor: e.type === 'mimic'
             ? '#facc15'
             : (e.type === 'robo_fish' ? '#fb923c' : (e.type === 'evad_bot' ? '#ef4444' : (e.trollSpeed ? '#ff0055' : (e.trollJump ? '#00f2fe' : '#ef4444'))))
@@ -440,7 +469,7 @@ function killPlayer(customReason) {
     deathCountEl.textContent = deathCount;
 
     const deathPill = document.getElementById('hud-death-pill');
-    if (deathPill) {
+    if (deathPill && (typeof lowEndMode === 'undefined' || !lowEndMode)) {
         deathPill.classList.remove('death-pill-pop');
         void deathPill.offsetWidth;
         deathPill.classList.add('death-pill-pop');
@@ -637,6 +666,14 @@ function updateWeaponAndAdvancedBots() {
 
     if (weapon.pokeExtension > 0) {
         weapon.pokeExtension = Math.max(0, weapon.pokeExtension - 1.2);
+    }
+    if (typeof lowEndMode !== 'undefined' && lowEndMode) {
+        weapon.visualExt = weapon.pokeExtension;
+        weapon.visualAngle = weapon.angle;
+    } else {
+        weapon.visualExt += (weapon.pokeExtension - weapon.visualExt) * 0.35;
+        const diffA = Math.atan2(Math.sin(weapon.angle - (weapon.visualAngle || 0)), Math.cos(weapon.angle - (weapon.visualAngle || 0)));
+        weapon.visualAngle = (weapon.visualAngle || 0) + diffA * 0.42;
     }
 
     const px = player.x + player.w * 0.5;
@@ -1138,6 +1175,8 @@ function update() {
             e.x += Math.sign(e.vx) * e.baseSpeed;
             if (e.x <= e.minX) { e.x = e.minX; e.vx = Math.abs(e.vx); }
             else if (e.x + e.w >= e.maxX) { e.x = e.maxX - e.w; e.vx = -Math.abs(e.vx); }
+            const tDir = Math.sign(e.vx) || 1;
+            e.visualDir = lowEndMode ? tDir : ((e.visualDir ?? tDir) + (tDir - (e.visualDir ?? tDir)) * 0.18);
         }
 
         if (menuFadeState === 'NONE') {
@@ -1169,13 +1208,14 @@ function update() {
     sessionPlayTicks++;
     if (isSpeedrunMode) {
         speedrunTicks++;
-        if (tickCount % 3 === 0) {
+        const timerMod = lowEndMode ? 6 : 3;
+        if (tickCount % timerMod === 0) {
             hudTimerEl.textContent = formatSpeedrunTime(speedrunTicks);
         }
     }
 
     if (levelTransitionAlpha > 0) {
-        levelTransitionAlpha = Math.max(0, levelTransitionAlpha - 0.055);
+        levelTransitionAlpha = Math.max(0, levelTransitionAlpha - (lowEndMode ? 0.12 : 0.055));
     }
 
     if (screenShake > 0) screenShake *= 0.85;
@@ -1185,7 +1225,7 @@ function update() {
         const p = particles[i];
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.18;
+        if (!lowEndMode) p.vy += 0.18;
         p.alpha -= p.decay;
         if (p.alpha <= 0) {
             _particlePool.push(p);
@@ -1226,9 +1266,12 @@ function update() {
 
     if (player.dashCooldown > 0) player.dashCooldown--;
     if (player.dashCooldown !== _lastDashCooldown) {
-        _lastDashCooldown = player.dashCooldown;
-        const dashPct = Math.max(0, Math.min(100, ((36 - player.dashCooldown) / 36) * 100));
-        dashBar.style.width = `${dashPct}%`;
+        const shouldUpdateBar = !lowEndMode || player.dashCooldown === 0 || player.dashCooldown === 36 || (player.dashCooldown % 6 === 0);
+        if (shouldUpdateBar) {
+            _lastDashCooldown = player.dashCooldown;
+            const dashPct = Math.max(0, Math.min(100, ((36 - player.dashCooldown) / 36) * 100));
+            dashBar.style.width = `${dashPct}%`;
+        }
 
         const isReady = player.dashCooldown <= 0;
         if (isReady !== _lastDashReadyState) {
@@ -1308,7 +1351,12 @@ function update() {
     for (let i = 0; i < invisBlocks.length; i++) {
         const ib = invisBlocks[i];
         if (ib.revealed) activeColliders.push(ib);
-        if (ib.bumpY < 0) ib.bumpY += 1;
+        if (ib.bumpProgress > 0) {
+            ib.bumpProgress = Math.max(0, ib.bumpProgress - (lowEndMode ? 0.25 : 0.11));
+            ib.bumpY = lowEndMode ? (ib.bumpProgress > 0 ? -4 : 0) : (-Math.sin(ib.bumpProgress * Math.PI) * 9);
+        } else {
+            ib.bumpY = 0;
+        }
     }
     for (let i = 0; i < fallingFloors.length; i++) {
         activeColliders.push(fallingFloors[i]);
@@ -1347,6 +1395,7 @@ function update() {
         player.vy = isUnderwater ? 1.25 : 2.1;
     }
 
+    const wasPlayerOnGround = player.onGround;
     const prevY = player.y;
     player.y += player.vy;
     player.onGround = false;
@@ -1355,6 +1404,7 @@ function update() {
         for (const ib of invisBlocks) {
             if (!ib.revealed && prevY >= ib.y + ib.h - 6 && rectOverlap(player.x + 2, player.y, player.w - 4, player.h, ib.x, ib.y, ib.w, ib.h)) {
                 ib.revealed = true;
+                ib.bumpProgress = 1;
                 ib.bumpY = -6;
                 player.y = ib.y + ib.h;
                 player.vy = 2.5;
@@ -1402,12 +1452,21 @@ function update() {
     const canJumpNow = player.onGround || (jumpAssistEnabled && player.coyoteTimer > 0);
     const wantsJump = player.jumpBufferTimer > 0 || (jumpAssistEnabled && kbTouchInput.up && player.onGround);
 
+    if (!wasPlayerOnGround && player.onGround && !lowEndMode) {
+        player.visualScaleX = 1.24;
+        player.visualScaleY = 0.78;
+    }
+
     if (wantsJump) {
         if (canJumpNow) {
             player.vy = isUnderwater ? -10.8 : -12.3;
             player.onGround = false;
             player.coyoteTimer = 0;
             player.jumpBufferTimer = 0;
+            if (!lowEndMode) {
+                player.visualScaleX = 0.78;
+                player.visualScaleY = 1.26;
+            }
             sfx.play('jump');
             spawnParticles(player.x + player.w / 2, player.y + player.h, isUnderwater ? '#bae6fd' : '#e2e8f0', 6, 2.5);
         } else if (player.wallDir !== 0) {
@@ -1417,11 +1476,27 @@ function update() {
             player.wallJumpLock = 9;
             player.dashCooldown = 0;
             player.jumpBufferTimer = 0;
+            if (!lowEndMode) {
+                player.visualScaleX = 0.76;
+                player.visualScaleY = 1.28;
+            }
             sfx.play('walljump');
             spawnParticles(player.wallDir === 1 ? player.x + player.w : player.x, player.y + player.h / 2, '#c084fc', 10, 4);
         }
     }
     keys.jumpPressed = false;
+
+    if (!lowEndMode) {
+        player.visualFacing = (player.visualFacing ?? player.facing) + (player.facing - (player.visualFacing ?? player.facing)) * 0.25;
+        const targetSX = player.dashTimer > 0 ? 1.26 : (player.onGround ? 1 : (1 - Math.min(0.14, Math.abs(player.vy) * 0.01)));
+        const targetSY = player.dashTimer > 0 ? 0.78 : (player.onGround ? 1 : (1 + Math.min(0.16, Math.abs(player.vy) * 0.012)));
+        player.visualScaleX = (player.visualScaleX ?? 1) + (targetSX - (player.visualScaleX ?? 1)) * 0.24;
+        player.visualScaleY = (player.visualScaleY ?? 1) + (targetSY - (player.visualScaleY ?? 1)) * 0.24;
+    } else {
+        player.visualFacing = player.facing;
+        player.visualScaleX = 1;
+        player.visualScaleY = 1;
+    }
 
     if (player.y > canvas.height + 24) {
         if (_dbgM && _dbgG) {
@@ -1447,13 +1522,17 @@ function update() {
     for (const st of spikeTraps) {
         if (!st.triggered && player.x + player.w >= st.triggerX) {
             st.triggered = true;
+            if (st.dir === 'up') st.extProgress = lowEndMode ? 1 : 0.08;
             sfx.play('troll');
+        }
+        if (st.triggered && st.dir === 'up' && st.extProgress < 1) {
+            st.extProgress = lowEndMode ? 1 : Math.min(1, st.extProgress + 0.15);
         }
         if (st.triggered && st.dir === 'down') {
             st.vy += 0.68;
             st.y += st.vy;
         }
-        const spikeActive = st.dir === 'up' ? st.triggered : true;
+        const spikeActive = st.dir === 'up' ? (st.triggered && st.extProgress >= 0.45) : true;
         if (spikeActive) {
             const hitX = st.x + 5;
             const hitY = st.dir === 'up' ? st.y + 6 : st.y;
@@ -1726,6 +1805,18 @@ function update() {
         if (rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, e.x + 4, e.y + 4, e.w - 8, e.h - 8)) {
             killPlayer("Zostałeś zezłomowany przez Robo-Kwadrat!");
             return;
+        }
+    }
+
+    if (!lowEndMode) {
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            const rawDir = (e.type === 'evad_bot' || e.type === 'robo_fish' || e.type === 'jetpack_rammer' || e.type === 'raygun_drone')
+                ? (e.facing || Math.sign(e.vx) || 1)
+                : (Math.sign(e.vx) || 1);
+            e.visualDir = (e.visualDir ?? rawDir) + (rawDir - (e.visualDir ?? rawDir)) * 0.18;
+            const targetSY = (!e.onGround && e.vy < -1) ? 1.18 : 1;
+            e.visualScaleY = (e.visualScaleY ?? 1) + (targetSY - (e.visualScaleY ?? 1)) * 0.22;
         }
     }
 

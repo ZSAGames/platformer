@@ -248,11 +248,15 @@ function applySettingsToDOMAndAudio() {
     const btnGraphics = document.getElementById('btn-toggle-graphics');
     if (btnGraphics) {
         btnGraphics.textContent = lowEndMode ? 'NISKA (LOW-END)' : 'WYSOKA (PEŁNA)';
+        btnGraphics.setAttribute('aria-pressed', lowEndMode ? 'true' : 'false');
         btnGraphics.className = lowEndMode
             ? 'btn-retro-secondary px-2.5 py-1 rounded-lg font-bold text-amber-300 border-amber-400 mono-font text-[11px] shrink-0'
             : 'btn-retro-secondary px-2.5 py-1 rounded-lg font-bold text-emerald-300 mono-font text-[11px] shrink-0';
     }
-    document.body.classList.toggle('low-end-mode', Boolean(lowEndMode));
+    if (document.body) {
+        if (lowEndMode) document.body.classList.add('low-end-mode');
+        else document.body.classList.remove('low-end-mode');
+    }
     if (typeof updateViewportMetrics === 'function') {
         updateViewportMetrics();
     }
@@ -338,3 +342,24 @@ applySettingsToDOMAndAudio();
 refreshBestTimeBadge();
 setTimeout(checkOrientationReminder, 100);
 
+
+let _lastGraphicsToggleTime = 0;
+function toggleGraphicsMode(e) {
+    if (e) {
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    if (now - _lastGraphicsToggleTime < 160) return;
+    _lastGraphicsToggleTime = now;
+
+    lowEndMode = !lowEndMode;
+    if (lowEndMode && typeof particles !== 'undefined' && particles.length > 12) {
+        particles.length = 12;
+    }
+    applySettingsToDOMAndAudio();
+    saveUserSettings();
+    if (typeof sfx !== 'undefined' && sfx) {
+        sfx.play('ui_select');
+    }
+}
+window.toggleGraphicsMode = toggleGraphicsMode;

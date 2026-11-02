@@ -320,7 +320,7 @@ class MusicManager {
             }
 
             this.virtualVol[key] = curVol;
-            if (Math.abs((this.appliedVol[key] ?? -1) - curVol) > 0.002) {
+            if (Math.abs(((this.appliedVol[key] !== undefined ? this.appliedVol[key] : -1)) - curVol) > 0.002) {
                 this.appliedVol[key] = curVol;
                 try { audio.volume = curVol; } catch (e) {}
             }
@@ -346,15 +346,18 @@ class SoundSystem {
         this.muted = false;
     }
     init() {
-        if (!this.ctx) {
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            if (AudioCtx) this.ctx = new AudioCtx();
-        }
-        if (this.ctx && this.ctx.state === 'suspended') {
-            this.ctx.resume();
-        }
+        try {
+            if (!this.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume().catch(() => {});
+            }
+        } catch (e) {}
     }
     play(type, customFreq = 440) {
+        try {
         if (this.muted || this.volume <= 0.01) return;
         this.init();
         if (!this.ctx) return;
@@ -569,6 +572,7 @@ class SoundSystem {
             osc.start(now);
             osc.stop(now + 0.24);
         }
+        } catch (e) {}
     }
 }
 

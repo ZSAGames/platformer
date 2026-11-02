@@ -20,6 +20,7 @@ body {
     color: #f8fafc;
     font-family: 'Fredoka', sans-serif;
     overflow: hidden;
+    height: 100vh;
     height: 100dvh;
     width: 100vw;
     display: flex;
@@ -501,4 +502,19 @@ body.low-end-mode .touch-btn {
 body.low-end-mode .btn-retro::before,
 body.low-end-mode .btn-retro-secondary::before {
     display: none !important;
+}
+
+#settings-modal .btn-retro:hover,
+#settings-modal .btn-retro-secondary:hover {
+    transform: skewX(-10deg) translate(0, -1px);
+}
+#settings-modal .btn-retro:active,
+#settings-modal .btn-retro-secondary:active {
+    transform: skewX(-10deg) translate(0, 1px);
+}
+body.low-end-mode .animate-ping,
+body.low-end-mode .animate-spin,
+body.low-end-mode .death-pill-pop,
+body.low-end-mode .zone-card-enter {
+    animation: none !important;
 }

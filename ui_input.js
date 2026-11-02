@@ -852,12 +852,21 @@ document.getElementById('btn-toggle-touch')?.addEventListener('click', () => {
     updateTouchControlsVisibility();
     saveUserSettings();
 });
-document.getElementById('btn-toggle-graphics')?.addEventListener('click', () => {
-    sfx.play('ui_select');
-    lowEndMode = !lowEndMode;
-    applySettingsToDOMAndAudio();
-    saveUserSettings();
-});
+const _btnToggleGraphics = document.getElementById('btn-toggle-graphics');
+const _rowToggleGraphics = document.getElementById('row-toggle-graphics');
+if (_btnToggleGraphics) {
+    _btnToggleGraphics.addEventListener('click', (e) => {
+        if (window.toggleGraphicsMode) window.toggleGraphicsMode(e);
+    });
+    _btnToggleGraphics.addEventListener('mousedown', (e) => {
+        if (e.button === 0 && window.toggleGraphicsMode) window.toggleGraphicsMode(e);
+    });
+}
+if (_rowToggleGraphics) {
+    _rowToggleGraphics.addEventListener('click', (e) => {
+        if (window.toggleGraphicsMode) window.toggleGraphicsMode(e);
+    });
+}
 document.getElementById('btn-toggle-shake')?.addEventListener('click', () => {
     sfx.play('ui_select');
     screenShakeEnabled = !screenShakeEnabled;
