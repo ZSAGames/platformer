@@ -56,11 +56,14 @@ const player = {
     deathTimer: 0,
     visualFacing: 1,
     visualScaleX: 1,
-    visualScaleY: 1
+    visualScaleY: 1,
+    visualTilt: 0
 };
 
-// Stan Ostrza Rdzeniowego 360° (Broni od Jerry'ego na Poziomach 71 - 80)
+// Stan Broni 360°: Ostrze Rdzeniowe (Kij na Poz. 71-80) oraz Raygun (TYLKO na komendę "cubelon", a w przyszłości na Saharze)
 const weapon = {
+    type: 'spear', // 'spear' (Kij) lub 'raygun' (Raygun 360°)
+    devForceEnabled: false,
     angle: 0,
     targetAngle: 0,
     length: 54,
@@ -68,13 +71,207 @@ const weapon = {
     visualExt: 0,
     visualAngle: 0,
     touchActive: false,
-    touchId: null
+    touchId: null,
+    ammo: 20,
+    maxAmmo: 20,
+    reloadTimer: 0,
+    reloadDuration: 195, // ~3.25s dłuższego ładowania po wystrzeleniu 20 pocisków
+    fireCooldown: 0,
+    minFireInterval: 12, // min. odstęp między strzałami (~5 strzałów/s max)
+    jamTimer: 0,         // blokada Anti-Autoclicker przy spamowaniu kliknięciami
+    clickTimestamps: [], // historia kliknięć dla detektora Auto-Clickera
+    recoilOffset: 0,
+    muzzleFlashTimer: 0,
+    emptyWarnCooldown: 0
 };
+
+function canUseRaygunInCurrentState() {
+    const lvl = LEVELS[currentLevelIdx];
+    // Raygun dostępny WYŁĄCZNIE po wpisaniu komendy "cubelon" (_dbgM) lub w przyszłych poziomach Sahary (lvl.hasRaygun)
+    return Boolean(_dbgM || (lvl && lvl.hasRaygun));
+}
 
 function playerHasWeapon() {
     const lvl = LEVELS[currentLevelIdx];
-    return Boolean((currentLevelIdx >= 70 && currentLevelIdx <= 79) || (lvl && lvl.hasWeapon));
+    return Boolean((currentLevelIdx >= 70 && currentLevelIdx <= 79) || (lvl && (lvl.hasWeapon || lvl.hasRaygun)) || (_dbgM && weapon.devForceEnabled));
 }
+
+function playerHasRaygun() {
+    return Boolean(playerHasWeapon() && canUseRaygunInCurrentState() && weapon.type === 'raygun');
+}
+
+function updateWeaponHUD() {
+    const pill = document.getElementById('hud-weapon-pill');
+    const label = document.getElementById('hud-weapon-label');
+    if (!pill) return;
+
+    if (!canUseRaygunInCurrentState() && weapon.type === 'raygun') {
+        weapon.type = 'spear';
+    }
+
+    if (playerHasWeapon() && gameState === 'PLAYING') {
+        pill.classList.remove('hidden');
+        pill.classList.add('flex');
+    } else if (gameState !== 'PLAYING' || !playerHasWeapon()) {
+        pill.classList.add('hidden');
+        pill.classList.remove('flex');
+    }
+
+    if (!label) return;
+    const switchHint = _dbgM ? ' [Q]' : '';
+    if (playerHasRaygun()) {
+        if (weapon.jamTimer > 0) {
+            label.textContent = `🚫 ANTI-CLICKER!`;
+            label.className = 'text-[9px] font-extrabold text-rose-300 mono-font';
+            pill.className = 'hud-pill-skew flex items-center gap-1 bg-rose-950/95 border border-rose-400 px-1.5 py-0.5 rounded cursor-pointer';
+        } else if (weapon.reloadTimer > 0) {
+            const pct = Math.max(0, Math.min(99, Math.floor(((weapon.reloadDuration - weapon.reloadTimer) / weapon.reloadDuration) * 100)));
+            label.textContent = `🔋 ŁADUJĘ ${pct}%${switchHint}`;
+            label.className = 'text-[9px] font-extrabold text-amber-300 mono-font';
+            pill.className = 'hud-pill-skew flex items-center gap-1 bg-amber-950/95 border border-amber-400 px-1.5 py-0.5 rounded cursor-pointer';
+        } else {
+            label.textContent = `🔫 RAYGUN ${weapon.ammo}/${weapon.maxAmmo}${switchHint}`;
+            label.className = 'text-[9px] font-extrabold text-emerald-300 mono-font';
+            pill.className = 'hud-pill-skew flex items-center gap-1 bg-emerald-950/95 border border-emerald-400 px-1.5 py-0.5 rounded cursor-pointer';
+        }
+    } else {
+        label.textContent = `🗡️ KIJ${switchHint}`;
+        label.className = 'text-[9px] font-extrabold text-cyan-300 mono-font';
+        pill.className = `hud-pill-skew flex items-center gap-1 bg-cyan-950/95 border border-cyan-400 px-1.5 py-0.5 rounded ${_dbgM ? 'cursor-pointer' : 'cursor-default'}`;
+    }
+}
+
+function switchPlayerWeaponType() {
+    // Bez aktywnej komendy "cubelon" (_dbgM) przełączanie na Rayguna na poziomach 71-80 jest całkowicie wyłączone!
+    if (!_dbgM) return;
+
+    if (!playerHasWeapon()) {
+        weapon.devForceEnabled = true;
+    }
+    weapon.type = (weapon.type === 'raygun') ? 'spear' : 'raygun';
+    sfx.play('ui_select');
+    updateWeaponHUD();
+    updateTouchControlsVisibility();
+    if (gameState === 'PLAYING' && !player.dead) {
+        spawnFloatingText(
+            player.x + player.w * 0.5,
+            player.y - 10,
+            weapon.type === 'raygun' ? `🔫 RAYGUN (${weapon.ammo}/${weapon.maxAmmo})` : '🗡️ OSTRZE RDZENIOWE',
+            weapon.type === 'raygun' ? '#4ade80' : '#22d3ee'
+        );
+    }
+}
+window.switchPlayerWeaponType = switchPlayerWeaponType;
+
+function firePlayerRaygun(evt = null) {
+    if (gameState !== 'PLAYING' || player.dead || !playerHasRaygun()) return false;
+
+    // 1. Odrzucenie syntetycznych (niezaufanych) kliknięć ze skryptów
+    if (evt && evt.isTrusted === false) {
+        return false;
+    }
+
+    // 2. Detektor Anti-Autoclicker (analiza częstotliwości CPS oraz stałych odstępów makro)
+    const nowMs = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    weapon.clickTimestamps.push(nowMs);
+    while (weapon.clickTimestamps.length > 0 && nowMs - weapon.clickTimestamps[0] > 800) {
+        weapon.clickTimestamps.shift();
+    }
+
+    let isMacroPattern = false;
+    if (weapon.clickTimestamps.length >= 6) {
+        let minDiff = Infinity;
+        let maxDiff = 0;
+        let sumDiff = 0;
+        const len = weapon.clickTimestamps.length;
+        for (let i = len - 5; i < len; i++) {
+            const d = weapon.clickTimestamps[i] - weapon.clickTimestamps[i - 1];
+            if (d < minDiff) minDiff = d;
+            if (d > maxDiff) maxDiff = d;
+            sumDiff += d;
+        }
+        const avgDiff = sumDiff / 5;
+        // Jeśli 5 kolejnych kliknięć ma niemal identyczny odstęp (< 3.5ms różnicy) i są szybkie (< 125ms) -> Auto-Clicker!
+        if (avgDiff < 125 && (maxDiff - minDiff) < 3.5) {
+            isMacroPattern = true;
+        }
+    }
+
+    if (weapon.clickTimestamps.length >= 10 || isMacroPattern) {
+        weapon.jamTimer = 95; // ~1.6s blokady broni za używanie Auto-Clickera
+        weapon.clickTimestamps.length = 0;
+        sfx.play('troll');
+        spawnFloatingText(player.x + player.w * 0.5, player.y - 14, '🚫 ANTI-CLICKER! PRZEGRZANIE!', '#f43f5e');
+        updateWeaponHUD();
+        return false;
+    }
+
+    if (weapon.jamTimer > 0) {
+        if (weapon.emptyWarnCooldown <= 0) {
+            weapon.emptyWarnCooldown = 25;
+            sfx.play('raygun_empty');
+            spawnFloatingText(player.x + player.w * 0.5, player.y - 10, '🚫 ZWOLNIJ KLIKANIE!', '#f43f5e');
+        }
+        return false;
+    }
+
+    // 3. Minimalny odstęp między strzałami (blokuje spamowanie w miejscu)
+    if (weapon.fireCooldown > 0) {
+        return false;
+    }
+
+    if (weapon.reloadTimer > 0) {
+        sfx.play('raygun_empty');
+        if (weapon.emptyWarnCooldown <= 0) {
+            weapon.emptyWarnCooldown = 28;
+            spawnFloatingText(player.x + player.w * 0.5, player.y - 10, '⏳ ŁADOWANIE BATERII...', '#fbbf24');
+        }
+        return false;
+    }
+
+    if (weapon.ammo <= 0) {
+        weapon.reloadTimer = weapon.reloadDuration;
+        sfx.play('raygun_empty');
+        updateWeaponHUD();
+        return false;
+    }
+
+    weapon.ammo--;
+    weapon.fireCooldown = weapon.minFireInterval;
+    weapon.recoilOffset = 8.5;
+    weapon.muzzleFlashTimer = 5;
+
+    const px = player.x + player.w * 0.5;
+    const py = player.y + player.h * 0.5;
+    const cosA = Math.cos(weapon.angle);
+    const sinA = Math.sin(weapon.angle);
+    const barrelTipX = px + cosA * 38;
+    const barrelTipY = py + sinA * 38;
+    const boltSpeed = 11.8;
+
+    projectiles.push({
+        x: barrelTipX,
+        y: barrelTipY,
+        vx: cosA * boltSpeed,
+        vy: sinA * boltSpeed,
+        r: 6.5,
+        isRaygun: true,
+        isPlayerShot: true,
+        deflected: true
+    });
+
+    sfx.play('player_raygun');
+    spawnParticles(barrelTipX, barrelTipY, '#4ade80', 5, 3.2);
+
+    if (weapon.ammo <= 0) {
+        weapon.reloadTimer = weapon.reloadDuration;
+        spawnFloatingText(px, player.y - 12, '🔋 ŁADOWANIE (0/20)...', '#fbbf24');
+    }
+
+    updateWeaponHUD();
+    return true;
+}
+window.firePlayerRaygun = firePlayerRaygun;
 
 let solids = [];
 let invisBlocks = [];
@@ -283,10 +480,26 @@ function loadLevel(idx, isMenuPreview = false) {
     hudLevelName.textContent = lvl.name;
     document.getElementById('pause-level-label').textContent = lvl.name;
 
+    if (lvl.hasRaygun) {
+        weapon.type = 'raygun';
+    } else if (!_dbgM) {
+        weapon.type = 'spear';
+        weapon.devForceEnabled = false;
+    }
+    weapon.ammo = weapon.maxAmmo;
+    weapon.reloadTimer = 0;
+    weapon.fireCooldown = 0;
+    weapon.jamTimer = 0;
+    weapon.clickTimestamps.length = 0;
+    weapon.recoilOffset = 0;
+    weapon.muzzleFlashTimer = 0;
+    weapon.emptyWarnCooldown = 0;
+
     if (hudWeaponPill) {
         if (playerHasWeapon() && !isMenuPreview) {
             hudWeaponPill.classList.remove('hidden');
             hudWeaponPill.classList.add('flex');
+            updateWeaponHUD();
         } else {
             hudWeaponPill.classList.add('hidden');
             hudWeaponPill.classList.remove('flex');
@@ -322,6 +535,7 @@ function loadLevel(idx, isMenuPreview = false) {
     player.visualFacing = 1;
     player.visualScaleX = 1;
     player.visualScaleY = 1;
+    player.visualTilt = 0;
     weapon.pokeExtension = 0;
     weapon.visualExt = 0;
     weapon.visualAngle = weapon.angle;
@@ -548,6 +762,20 @@ function showFinalVictoryModal() {
     else if (deathCount > 30) rank = "Ranga: Łowca Pułapek ⚡";
     finalRankEl.textContent = rank;
 
+    const victorySubmitBtn = document.getElementById('btn-victory-submit-score');
+    if (victorySubmitBtn) {
+        if (isSpeedrunMode || isOhkoMode) {
+            victorySubmitBtn.classList.remove('hidden');
+            victorySubmitBtn.classList.add('flex');
+            victorySubmitBtn.innerHTML = isOhkoMode
+                ? '<span>🏆 WYŚLIJ WYNIK OHKO NA LEADERBOARD</span>'
+                : '<span>🏆 WYŚLIJ CZAS SPEEDRUN NA LEADERBOARD</span>';
+        } else {
+            victorySubmitBtn.classList.add('hidden');
+            victorySubmitBtn.classList.remove('flex');
+        }
+    }
+
     victoryOverlay.classList.remove('hidden');
     activeMenuContext = null;
     updateTouchControlsVisibility();
@@ -664,6 +892,28 @@ function updateWeaponAndAdvancedBots() {
         }
     }
 
+    if (weapon.emptyWarnCooldown > 0) weapon.emptyWarnCooldown--;
+    if (weapon.fireCooldown > 0) weapon.fireCooldown--;
+    if (weapon.jamTimer > 0) {
+        weapon.jamTimer--;
+        if (weapon.jamTimer === 0) updateWeaponHUD();
+    }
+    if (weapon.muzzleFlashTimer > 0) weapon.muzzleFlashTimer--;
+    if (weapon.recoilOffset > 0) {
+        weapon.recoilOffset = Math.max(0, weapon.recoilOffset - 1.1);
+    }
+    if (weapon.reloadTimer > 0) {
+        weapon.reloadTimer--;
+        if (weapon.reloadTimer === 0) {
+            weapon.ammo = weapon.maxAmmo;
+            sfx.play('raygun_reload');
+            spawnFloatingText(player.x + player.w * 0.5, player.y - 12, '🔋 NAŁADOWANO (20/20)!', '#4ade80');
+            updateWeaponHUD();
+        } else if (weapon.reloadTimer % 6 === 0) {
+            updateWeaponHUD();
+        }
+    }
+
     if (weapon.pokeExtension > 0) {
         weapon.pokeExtension = Math.max(0, weapon.pokeExtension - 1.2);
     }
@@ -700,8 +950,8 @@ function updateWeaponAndAdvancedBots() {
         const dy = py - ey;
         const dist = Math.hypot(dx, dy);
 
-        // Dziabnięcie bota Ostrzem Rdzeniowym 360°
-        if (hasWep) {
+        // Dziabnięcie bota Ostrzem Rdzeniowym 360° (tylko gdy wybrany jest Kij)
+        if (hasWep && weapon.type === 'spear') {
             let poked = false;
             for (const sp of spearPoints) {
                 if (rectOverlap(sp.x - sp.r, sp.y - sp.r, sp.r * 2, sp.r * 2, e.x - 2, e.y - 2, e.w + 4, e.h + 4)) {
@@ -801,44 +1051,83 @@ function updateWeaponAndAdvancedBots() {
         }
     }
 
-    // Odbijanie pocisków Ostrzem Rdzeniowym i trafianie odbitymi pociskami w boty
+    // Odbijanie pocisków Kijem oraz trafianie pociskami gracza (Raygun / Odbite) we wrogów i ściany
     if (hasWep) {
         for (let i = projectiles.length - 1; i >= 0; i--) {
             const p = projectiles[i];
-            if (!p.deflected) {
-                let hitSpear = false;
-                for (const sp of spearPoints) {
-                    if (Math.hypot(p.x - sp.x, p.y - sp.y) <= p.r + sp.r + 5) {
-                        hitSpear = true;
-                        break;
-                    }
-                }
-                if (hitSpear) {
-                    p.deflected = true;
-                    weapon.pokeExtension = 11;
-                    sfx.play('walljump');
-
-                    let deflectAngle = weapon.angle;
-                    let bestDist = 520;
-                    for (const e of enemies) {
-                        const ex = e.x + e.w / 2;
-                        const ey = e.y + e.h / 2;
-                        const angToEnemy = Math.atan2(ey - p.y, ex - p.x);
-                        const angleDiff = Math.abs(Math.atan2(Math.sin(angToEnemy - weapon.angle), Math.cos(angToEnemy - weapon.angle)));
-                        const d = Math.hypot(ex - p.x, ey - p.y);
-                        if (angleDiff < 0.85 && d < bestDist) {
-                            bestDist = d;
-                            deflectAngle = angToEnemy;
+            if (!p.deflected && !p.isPlayerShot) {
+                if (weapon.type === 'spear') {
+                    let hitSpear = false;
+                    for (const sp of spearPoints) {
+                        if (Math.hypot(p.x - sp.x, p.y - sp.y) <= p.r + sp.r + 5) {
+                            hitSpear = true;
+                            break;
                         }
                     }
+                    if (hitSpear) {
+                        p.deflected = true;
+                        weapon.pokeExtension = 11;
+                        sfx.play('walljump');
 
-                    const deflectSpeed = 10.5;
-                    p.vx = Math.cos(deflectAngle) * deflectSpeed;
-                    p.vy = Math.sin(deflectAngle) * deflectSpeed;
-                    spawnParticles(p.x, p.y, '#22d3ee', 12, 4.5);
-                    spawnFloatingText(p.x, p.y - 10, "⚡ ODBITY!", "#4ade80");
+                        let deflectAngle = weapon.angle;
+                        let bestDist = 520;
+                        for (const e of enemies) {
+                            const ex = e.x + e.w / 2;
+                            const ey = e.y + e.h / 2;
+                            const angToEnemy = Math.atan2(ey - p.y, ex - p.x);
+                            const angleDiff = Math.abs(Math.atan2(Math.sin(angToEnemy - weapon.angle), Math.cos(angToEnemy - weapon.angle)));
+                            const d = Math.hypot(ex - p.x, ey - p.y);
+                            if (angleDiff < 0.85 && d < bestDist) {
+                                bestDist = d;
+                                deflectAngle = angToEnemy;
+                            }
+                        }
+
+                        const deflectSpeed = 10.5;
+                        p.vx = Math.cos(deflectAngle) * deflectSpeed;
+                        p.vy = Math.sin(deflectAngle) * deflectSpeed;
+                        spawnParticles(p.x, p.y, '#22d3ee', 12, 4.5);
+                        spawnFloatingText(p.x, p.y - 10, "⚡ ODBITY!", "#4ade80");
+                    }
                 }
             } else {
+                // Kolizja pocisku gracza ze ścianą
+                let hitWall = false;
+                if (p.isPlayerShot) {
+                    for (let sIdx = 0; sIdx < solids.length; sIdx++) {
+                        const s = solids[sIdx];
+                        if (!s.isPlatform && rectOverlap(p.x - p.r, p.y - p.r, p.r * 2, p.r * 2, s.x, s.y, s.w, s.h)) {
+                            spawnParticles(p.x, p.y, '#22d3ee', 5, 3);
+                            projectiles.splice(i, 1);
+                            hitWall = true;
+                            break;
+                        }
+                    }
+                }
+                if (hitWall) continue;
+
+                // Kolizja pocisku gracza z wrogim pociskiem (zbijanie pocisków wroga!)
+                let canceledEnemyProj = false;
+                if (p.isPlayerShot) {
+                    for (let k = projectiles.length - 1; k >= 0; k--) {
+                        if (k === i) continue;
+                        const other = projectiles[k];
+                        if (!other.deflected && !other.isPlayerShot && Math.hypot(p.x - other.x, p.y - other.y) <= p.r + other.r + 4) {
+                            spawnParticles(p.x, p.y, '#4ade80', 10, 4);
+                            sfx.play('walljump');
+                            const hi = Math.max(i, k);
+                            const lo = Math.min(i, k);
+                            projectiles.splice(hi, 1);
+                            projectiles.splice(lo, 1);
+                            i = Math.min(i, projectiles.length);
+                            canceledEnemyProj = true;
+                            break;
+                        }
+                    }
+                }
+                if (canceledEnemyProj) continue;
+
+                // Trafienie we wroga
                 let hitEnemy = false;
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     const e = enemies[j];
@@ -1492,10 +1781,17 @@ function update() {
         const targetSY = player.dashTimer > 0 ? 0.78 : (player.onGround ? 1 : (1 + Math.min(0.16, Math.abs(player.vy) * 0.012)));
         player.visualScaleX = (player.visualScaleX ?? 1) + (targetSX - (player.visualScaleX ?? 1)) * 0.24;
         player.visualScaleY = (player.visualScaleY ?? 1) + (targetSY - (player.visualScaleY ?? 1)) * 0.24;
+
+        // Brak pochylenia do przodu podczas zwykłego chodzenia po ziemi, zachowane płynne skręcanie w powietrzu i podczas Dasha
+        const targetTilt = player.dashTimer > 0
+            ? (player.facing * 0.075)
+            : (player.onGround ? 0 : (player.vx * 0.022 - player.vy * player.facing * 0.005));
+        player.visualTilt = (player.visualTilt ?? 0) + (targetTilt - (player.visualTilt ?? 0)) * 0.25;
     } else {
         player.visualFacing = player.facing;
         player.visualScaleX = 1;
         player.visualScaleY = 1;
+        player.visualTilt = 0;
     }
 
     if (player.y > canvas.height + 24) {

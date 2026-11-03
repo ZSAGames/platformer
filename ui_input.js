@@ -23,6 +23,10 @@ function updateTouchControlsVisibility() {
     if (joyWrapEl) {
         if (playerHasWeapon() && gameState === 'PLAYING' && !anyModalOpen) {
             joyWrapEl.classList.remove('hidden');
+            const joyTextEl = joyWrapEl.querySelector('div');
+            if (joyTextEl) {
+                joyTextEl.textContent = (typeof playerHasRaygun === 'function' && playerHasRaygun()) ? 'RAYGUN' : 'KIJ';
+            }
         } else {
             joyWrapEl.classList.add('hidden');
         }
@@ -153,7 +157,9 @@ function returnToMainMenu() {
     const lbWidget = document.getElementById('leaderboard-widget');
     if (lbWidget) {
         lbWidget.classList.remove('hidden');
-        lootLocker.fetchLeaderboard(activeLeaderboardTab);
+        if (!isLeaderboardMinimized) {
+            lootLocker.fetchLeaderboard(activeLeaderboardTab);
+        }
     }
 
     activeMenuContext = null;
@@ -233,7 +239,7 @@ function getActiveMenuInfo() {
             id: 'VICTORY',
             cols: 1,
             items: [
-                document.getElementById('btn-victory-submit-score'),
+                (isSpeedrunMode || isOhkoMode) ? document.getElementById('btn-victory-submit-score') : null,
                 document.getElementById('btn-play-again'),
                 document.getElementById('btn-victory-menu')
             ].filter(Boolean)
@@ -339,6 +345,8 @@ function pollGamepad(timestamp) {
     const btnCircle   = isBtnPressed(pad.buttons[1]);
     const btnSquare   = isBtnPressed(pad.buttons[2]);
     const btnTriangle = isBtnPressed(pad.buttons[3]);
+    const btnL1       = isBtnPressed(pad.buttons[4]);
+    const btnR1       = isBtnPressed(pad.buttons[5]);
     const btnR2       = isBtnPressed(pad.buttons[7], 0.25);
     const btnShare    = isBtnPressed(pad.buttons[8]);
     const btnOptions  = isBtnPressed(pad.buttons[9]);
@@ -455,6 +463,21 @@ function pollGamepad(timestamp) {
     }
     gamepadInput.prevDash = dashNow;
 
+    if (btnL1 && !gamepadInput.prevL1) {
+        if (typeof switchPlayerWeaponType === 'function') switchPlayerWeaponType();
+    }
+    gamepadInput.prevL1 = btnL1;
+
+    if (btnR1 && !gamepadInput.prevR1) {
+        if (typeof playerHasRaygun === 'function' && playerHasRaygun()) {
+            firePlayerRaygun();
+        } else if (playerHasWeapon()) {
+            weapon.pokeExtension = 14;
+            sfx.play('dash');
+        }
+    }
+    gamepadInput.prevR1 = btnR1;
+
     if (btnShare && !gamepadInput.prevBack) {
         loadLevel(currentLevelIdx, false);
     }
@@ -483,11 +506,26 @@ canvas.addEventListener('mousemove', (e) => {
     weapon.angle = weapon.targetAngle;
 }, { passive: true });
 
-canvas.addEventListener('mousedown', () => {
-    if (gameState === 'PLAYING' && playerHasWeapon()) {
-        weapon.pokeExtension = 14;
-        sfx.play('dash');
+canvas.addEventListener('mousedown', (e) => {
+    if (gameState !== 'PLAYING' || !playerHasWeapon()) return;
+    if (e.button === 2) {
+        if (_dbgM) {
+            e.preventDefault();
+            if (typeof switchPlayerWeaponType === 'function') switchPlayerWeaponType();
+        }
+        return;
     }
+    if (e.button === 0) {
+        if (typeof playerHasRaygun === 'function' && playerHasRaygun()) {
+            firePlayerRaygun(e);
+        } else {
+            weapon.pokeExtension = 14;
+            sfx.play('dash');
+        }
+    }
+});
+canvas.addEventListener('contextmenu', (e) => {
+    if (gameState === 'PLAYING' && playerHasWeapon()) e.preventDefault();
 });
 
 const joyWrap = document.getElementById('touch-weapon-joy-wrap');
@@ -526,6 +564,9 @@ if (joyWrap) {
             weapon.touchActive = true;
             weapon.touchId = t.identifier;
             handleWeaponJoystickTouch(t);
+            if (typeof playerHasRaygun === 'function' && playerHasRaygun()) {
+                firePlayerRaygun(e);
+            }
         }
     }, { passive: false });
 
@@ -574,10 +615,25 @@ window.addEventListener('keydown', (e) => {
         if (_dbgSeq.length === _dbgTarget.length && _dbgSeq.every((v, idx) => v === _dbgTarget[idx])) {
             _dbgM = !_dbgM;
             _dbgG = _dbgM;
+            if (_dbgM) {
+                weapon.devForceEnabled = true;
+                weapon.type = 'raygun';
+                weapon.ammo = weapon.maxAmmo;
+                weapon.reloadTimer = 0;
+                weapon.jamTimer = 0;
+            } else {
+                weapon.devForceEnabled = false;
+                const lvlNow = LEVELS[currentLevelIdx];
+                if (!lvlNow || !lvlNow.hasRaygun) {
+                    weapon.type = 'spear';
+                }
+            }
+            if (typeof updateWeaponHUD === 'function') updateWeaponHUD();
+            updateTouchControlsVisibility();
             sfx.play(_dbgM ? 'win' : 'ui_back');
             if (!levelsModal.classList.contains('hidden')) renderLevelsModalStep();
             if (gameState === 'PLAYING') {
-                spawnFloatingText(player.x + 15, player.y - 12, _dbgM ? "★ TRYB DEV: WŁ" : "TRYB DEV: WYŁ", _dbgM ? "#4ade80" : "#f43f5e");
+                spawnFloatingText(player.x + 15, player.y - 12, _dbgM ? "★ TRYB DEV + RAYGUN: WŁ" : "TRYB DEV: WYŁ", _dbgM ? "#4ade80" : "#f43f5e");
             }
         }
     }
@@ -720,6 +776,22 @@ window.addEventListener('keydown', (e) => {
     }
 
     if (gameState !== 'PLAYING') return;
+
+    if (_dbgM && !e.repeat && (code === 'KeyQ' || code === 'KeyE')) {
+        if (typeof switchPlayerWeaponType === 'function') switchPlayerWeaponType();
+        e.preventDefault();
+        return;
+    }
+    if (!e.repeat && (code === 'KeyF' || code === 'KeyJ')) {
+        if (typeof playerHasRaygun === 'function' && playerHasRaygun()) {
+            firePlayerRaygun(e);
+        } else if (playerHasWeapon()) {
+            weapon.pokeExtension = 14;
+            sfx.play('dash');
+        }
+        e.preventDefault();
+        return;
+    }
 
     if (code === 'KeyA' || code === 'ArrowLeft') kbTouchInput.left = true;
     if (code === 'KeyD' || code === 'ArrowRight') kbTouchInput.right = true;
@@ -977,6 +1049,62 @@ document.getElementById('btn-save-nickname')?.addEventListener('click', async ()
         badge.className = 'text-[9px] font-extrabold text-emerald-300 mono-font bg-slate-950 px-1.5 py-0.5 rounded border border-emerald-500/40';
     }
     lootLocker.fetchLeaderboard(activeLeaderboardTab);
+});
+
+document.getElementById('hud-weapon-pill')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (typeof switchPlayerWeaponType === 'function') switchPlayerWeaponType();
+});
+
+let isLeaderboardMinimized = true;
+function setLeaderboardMinimized(minimized) {
+    isLeaderboardMinimized = Boolean(minimized);
+    const widget = document.getElementById('leaderboard-widget');
+    const body = document.getElementById('leaderboard-body');
+    const btnToggle = document.getElementById('btn-lb-toggle-minimize');
+    const btnSubmit = document.getElementById('btn-lb-open-submit');
+    const btnRefresh = document.getElementById('btn-lb-refresh');
+
+    if (body) {
+        if (isLeaderboardMinimized) {
+            body.classList.add('hidden');
+            body.classList.remove('flex');
+        } else {
+            body.classList.remove('hidden');
+            body.classList.add('flex');
+        }
+    }
+    if (btnSubmit) btnSubmit.classList.toggle('hidden', isLeaderboardMinimized);
+    if (btnRefresh) btnRefresh.classList.toggle('hidden', isLeaderboardMinimized);
+
+    if (widget) {
+        if (isLeaderboardMinimized) {
+            widget.classList.remove('w-[275px]', 'sm:w-[325px]', 'p-2.5', 'sm:p-3');
+            widget.classList.add('w-[235px]', 'sm:w-[260px]', 'p-2', 'sm:p-2.5');
+        } else {
+            widget.classList.remove('w-[235px]', 'sm:w-[260px]', 'p-2', 'sm:p-2.5');
+            widget.classList.add('w-[275px]', 'sm:w-[325px]', 'p-2.5', 'sm:p-3');
+        }
+    }
+    if (btnToggle) {
+        btnToggle.textContent = isLeaderboardMinimized ? '▲ POKAŻ' : '▼ ZWIŃ';
+        btnToggle.className = isLeaderboardMinimized
+            ? 'btn-retro-secondary px-2 py-0.5 rounded text-[9px] font-extrabold text-yellow-300 border-yellow-400 mono-font'
+            : 'btn-retro-secondary px-2 py-0.5 rounded text-[9px] font-extrabold text-cyan-300 border-cyan-400 mono-font';
+    }
+    if (!isLeaderboardMinimized) {
+        lootLocker.fetchLeaderboard(activeLeaderboardTab);
+    }
+}
+
+document.getElementById('btn-lb-toggle-minimize')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sfx.play('ui_select');
+    setLeaderboardMinimized(!isLeaderboardMinimized);
+});
+document.getElementById('btn-lb-header-title')?.addEventListener('click', () => {
+    sfx.play('ui_select');
+    setLeaderboardMinimized(!isLeaderboardMinimized);
 });
 
 document.getElementById('tab-lb-speedrun')?.addEventListener('click', () => {
@@ -1240,8 +1368,8 @@ window.onload = function () {
     updateViewportMetrics();
     updateTouchControlsVisibility();
     syncNicknameUI();
+    setLeaderboardMinimized(true);
     loadLevel(MENU_SHOWCASE_LEVELS[0], true);
-    lootLocker.fetchLeaderboard('speedrun');
     initSegaIntroSequence();
     lastFrameTime = performance.now();
     requestAnimationFrame(gameLoop);

@@ -404,45 +404,102 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
             ctx.fillRect(tx + baseW / 2 - 5, 340 - (steps - 1) * 34 + 10, 10, 10);
         }
 
-        const midTreeOffset = -(cameraX * 0.32) % 260;
-        for (let mx = midTreeOffset - 130; mx < canvas.width + 200; mx += 260) {
-            const trunkX = mx + 90;
-            ctx.fillStyle = '#3f2305';
-            ctx.fillRect(trunkX - 18, 90, 36, 420);
-            ctx.fillStyle = '#291502';
-            ctx.fillRect(trunkX + 2, 90, 16, 420);
+        // Drzewa dżungli z naturalnymi, ukośnymi konarami i koronami liści (indeksowane w przestrzeni świata)
+        const treeSpacing = 260;
+        const treeScroll = cameraX * 0.32;
+        const firstTreeIdx = Math.floor((treeScroll - 180) / treeSpacing);
+        const lastTreeIdx = Math.ceil((treeScroll + canvas.width + 180) / treeSpacing);
 
+        for (let tIdx = firstTreeIdx; tIdx <= lastTreeIdx; tIdx++) {
+            const mx = tIdx * treeSpacing - treeScroll;
+            const trunkX = mx + 90;
+
+            // Główny pień z cieniowaniem kory
+            ctx.fillStyle = '#3f2305';
+            ctx.fillRect(trunkX - 18, 95, 36, 415);
+            ctx.fillStyle = '#5c3409';
+            ctx.fillRect(trunkX - 14, 95, 8, 415);
+            ctx.fillStyle = '#291502';
+            ctx.fillRect(trunkX + 4, 95, 14, 415);
+
+            // Korzenie przyporowe u podstawy pnia
             ctx.fillStyle = '#3f2305';
             ctx.beginPath();
-            ctx.moveTo(trunkX - 18, 390);
-            ctx.lineTo(trunkX - 52, 505);
+            ctx.moveTo(trunkX - 18, 385);
+            ctx.lineTo(trunkX - 54, 505);
             ctx.lineTo(trunkX - 10, 505);
             ctx.closePath();
             ctx.fill();
 
             ctx.fillStyle = '#291502';
             ctx.beginPath();
-            ctx.moveTo(trunkX + 18, 390);
-            ctx.lineTo(trunkX + 52, 505);
+            ctx.moveTo(trunkX + 18, 385);
+            ctx.lineTo(trunkX + 54, 505);
             ctx.lineTo(trunkX + 10, 505);
             ctx.closePath();
             ctx.fill();
 
+            // Naturalne, zwężające się ukośne konary (zamiast płaskich poziomych belek)
             ctx.fillStyle = '#3f2305';
-            ctx.fillRect(trunkX - 75, 165, 150, 14);
-            ctx.fillRect(trunkX - 55, 235, 110, 12);
+            ctx.beginPath();
+            // Lewy dolny konar
+            ctx.moveTo(trunkX - 16, 255);
+            ctx.lineTo(trunkX - 78, 205);
+            ctx.lineTo(trunkX - 72, 195);
+            ctx.lineTo(trunkX - 14, 232);
+            // Prawy dolny konar
+            ctx.moveTo(trunkX + 16, 240);
+            ctx.lineTo(trunkX + 76, 192);
+            ctx.lineTo(trunkX + 70, 182);
+            ctx.lineTo(trunkX + 14, 218);
+            // Lewy górny konar
+            ctx.moveTo(trunkX - 15, 178);
+            ctx.lineTo(trunkX - 88, 128);
+            ctx.lineTo(trunkX - 80, 118);
+            ctx.lineTo(trunkX - 12, 156);
+            // Prawy górny konar
+            ctx.moveTo(trunkX + 15, 170);
+            ctx.lineTo(trunkX + 86, 122);
+            ctx.lineTo(trunkX + 78, 112);
+            ctx.lineTo(trunkX + 12, 148);
+            ctx.fill();
+
+            // Podświetlenie górnej krawędzi konarów
+            ctx.strokeStyle = '#5c3409';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(trunkX - 14, 233); ctx.lineTo(trunkX - 74, 196);
+            ctx.moveTo(trunkX + 14, 219); ctx.lineTo(trunkX + 72, 183);
+            ctx.moveTo(trunkX - 12, 157); ctx.lineTo(trunkX - 82, 119);
+            ctx.moveTo(trunkX + 12, 149); ctx.lineTo(trunkX + 80, 113);
+            ctx.stroke();
+
+            // Boczne kępy liści na końcach konarów
+            ctx.fillStyle = '#064e3b';
+            ctx.fillRect(trunkX - 102, 176, 56, 32);
+            ctx.fillRect(trunkX + 46, 164, 56, 32);
+            ctx.fillStyle = '#059669';
+            ctx.fillRect(trunkX - 96, 172, 44, 22);
+            ctx.fillRect(trunkX + 52, 160, 44, 22);
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(trunkX - 90, 174, 28, 10);
+            ctx.fillRect(trunkX + 58, 162, 28, 10);
+
+            // Główna wielowarstwowa korona drzewa
+            ctx.fillStyle = '#064e3b';
+            ctx.fillRect(trunkX - 104, 48, 208, 72);
+            ctx.fillRect(trunkX - 88, 112, 176, 48);
 
             ctx.fillStyle = '#065f46';
-            ctx.fillRect(trunkX - 96, 55, 192, 74);
-            ctx.fillRect(trunkX - 82, 130, 164, 52);
-            ctx.fillRect(trunkX - 64, 200, 128, 44);
+            ctx.fillRect(trunkX - 96, 54, 192, 58);
+            ctx.fillRect(trunkX - 78, 114, 156, 36);
 
             ctx.fillStyle = '#059669';
-            ctx.fillRect(trunkX - 88, 62, 140, 48);
-            ctx.fillRect(trunkX - 74, 134, 120, 34);
+            ctx.fillRect(trunkX - 86, 60, 154, 42);
+            ctx.fillRect(trunkX - 68, 116, 124, 24);
 
             ctx.fillStyle = '#10b981';
-            ctx.fillRect(trunkX - 76, 68, 96, 24);
+            ctx.fillRect(trunkX - 74, 64, 110, 20);
         }
 
         ctx.fillStyle = '#052e16';
@@ -480,28 +537,71 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
             ctx.fillRect(bushX - 2, 459, 4, 4);
         }
 
-        const vineOffset = -(cameraX * 0.42) % 160;
-        for (let vx = vineOffset - 80; vx < canvas.width + 160; vx += 160) {
-            ctx.fillStyle = '#052e16';
-            ctx.fillRect(vx - 10, 0, 110, 28);
-            ctx.fillStyle = '#065f46';
-            ctx.fillRect(vx + 5, 18, 80, 18);
+        // Stabilne, bujające się liany w przestrzeni świata (nigdy nie znikają ani nie skaczą przy ruchu kamery!)
+        const vineSpacing = 160;
+        const vineScroll = cameraX * 0.42;
+        const firstVineIdx = Math.floor((vineScroll - 100) / vineSpacing);
+        const lastVineIdx = Math.ceil((vineScroll + canvas.width + 160) / vineSpacing);
 
-            const sway = Math.sin(tickCount * 0.04 + vx * 0.02) * 8;
-            const vineH = 105 + (Math.abs(Math.floor(vx)) % 65);
-            ctx.strokeStyle = '#065f46';
-            ctx.lineWidth = 4;
+        for (let vIdx = firstVineIdx; vIdx <= lastVineIdx; vIdx++) {
+            const vx = vIdx * vineSpacing - vineScroll;
+            const seed = ((vIdx * 2654435761) >>> 0);
+            const vineH = 115 + (seed % 65);
+            const phaseOffset = (seed % 628) * 0.01;
+            const sway = Math.sin(tickCount * 0.042 + phaseOffset) * 12;
+
+            // Górne sklepienie liści, z którego wyrasta liana
+            ctx.fillStyle = '#052e16';
+            ctx.fillRect(vx - 12, 0, 114, 26);
+            ctx.fillStyle = '#065f46';
+            ctx.fillRect(vx + 2, 16, 86, 18);
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(vx + 14, 20, 52, 8);
+
+            const x0 = vx + 44;
+            const y0 = 24;
+            const cx = x0 + sway * 0.65;
+            const cy = y0 + (vineH - y0) * 0.52;
+            const x1 = x0 + sway * 1.45;
+            const y1 = vineH;
+
+            // Ciemny obrys liany (zapobiega zlewaniu się z tłem)
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#022c22';
+            ctx.lineWidth = 6.5;
             ctx.beginPath();
-            ctx.moveTo(vx + 40, 20);
-            ctx.quadraticCurveTo(vx + 40 + sway, vineH * 0.5, vx + 40 + sway * 1.4, vineH);
+            ctx.moveTo(x0, y0);
+            ctx.quadraticCurveTo(cx, cy, x1, y1);
             ctx.stroke();
 
-            ctx.fillStyle = '#10b981';
-            for (let ly = 36; ly < vineH; ly += 24) {
-                const lx = vx + 40 + sway * (ly / vineH);
-                ctx.fillRect(lx - 7, ly, 6, 6);
-                ctx.fillRect(lx + 3, ly + 10, 6, 6);
+            // Jasny rdzeń liany
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x0, y0);
+            ctx.quadraticCurveTo(cx, cy, x1, y1);
+            ctx.stroke();
+
+            // Listki dokładnie na krzywej Béziera liany
+            const leafSteps = 5;
+            for (let s = 1; s <= leafSteps; s++) {
+                const t = s / (leafSteps + 0.4);
+                const invT = 1 - t;
+                const lx = invT * invT * x0 + 2 * invT * t * cx + t * t * x1;
+                const ly = invT * invT * y0 + 2 * invT * t * cy + t * t * y1;
+                const side = (s & 1) ? 1 : -1;
+
+                ctx.fillStyle = '#047857';
+                ctx.fillRect(lx + side * 3 - 4, ly - 2, 9, 6);
+                ctx.fillStyle = '#34d399';
+                ctx.fillRect(lx + side * 4 - 3, ly - 3, 7, 4);
             }
+
+            // Tropikalny pąk kwiatowy na końcu liany
+            ctx.fillStyle = (vIdx & 1) ? '#f43f5e' : '#facc15';
+            ctx.fillRect(x1 - 5, y1 - 3, 10, 10);
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(x1 - 2, y1, 4, 4);
         }
 
         for (const m of bgMotes) {
@@ -1224,6 +1324,7 @@ function drawPlayer() {
 
     const cx = player.x + player.w * 0.5;
     const cy = player.y + player.h * 0.5;
+    const isRaygunMode = (typeof playerHasRaygun === 'function') && playerHasRaygun();
 
     if (isLow) {
         const px = player.x | 0;
@@ -1243,26 +1344,33 @@ function drawPlayer() {
         ctx.fillRect(px + 19 + lookOff, py + 11, 3, 4);
 
         if (!playerHasWeapon()) return;
-        const ext = weapon.pokeExtension | 0;
         ctx.save();
         ctx.translate(cx | 0, cy | 0);
         ctx.rotate(weapon.angle);
-        ctx.fillStyle = '#78350f';
-        ctx.fillRect(8 + (ext >> 1), -3, 36, 6);
-        ctx.fillStyle = '#22d3ee';
-        ctx.fillRect(44 + ext, -6, 16, 12);
+        if (isRaygunMode) {
+            const rec = (weapon.recoilOffset || 0) | 0;
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(12 - rec, -5, 22, 10);
+            ctx.fillStyle = weapon.reloadTimer > 0 ? '#f43f5e' : '#4ade80';
+            ctx.fillRect(16 - rec, -3, 12, 6);
+            ctx.fillStyle = '#22d3ee';
+            ctx.fillRect(34 - rec, -3, 5, 6);
+        } else {
+            const ext = weapon.pokeExtension | 0;
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(8 + (ext >> 1), -3, 36, 6);
+            ctx.fillStyle = '#22d3ee';
+            ctx.fillRect(44 + ext, -6, 16, 12);
+        }
         ctx.restore();
         return;
     }
 
     ctx.save();
-    const walkBob = (player.onGround && Math.abs(player.vx) > 0.4)
-        ? Math.sin(tickCount * 0.38) * 1.6
-        : 0;
-    ctx.translate(cx, cy + walkBob);
+    ctx.translate(cx, cy);
 
-    const tilt = player.dashTimer > 0 ? (player.facing * 0.08) : (player.vx * 0.015);
-    ctx.rotate(tilt);
+    // Płynne skręcanie w powietrzu i podczas Dasha, bez pochylania w przód podczas zwykłego chodzenia po ziemi
+    ctx.rotate(player.visualTilt || 0);
 
     const stretchX = player.visualScaleX || 1;
     const stretchY = player.visualScaleY || 1;
@@ -1296,10 +1404,83 @@ function drawPlayer() {
 
     if (!playerHasWeapon()) return;
 
-    const ext = weapon.visualExt !== undefined ? weapon.visualExt : weapon.pokeExtension;
     const ang = weapon.visualAngle !== undefined ? weapon.visualAngle : weapon.angle;
+
+    if (isRaygunMode) {
+        const rec = weapon.recoilOffset || 0;
+        const isReloading = weapon.reloadTimer > 0;
+        const flipY = Math.cos(ang) < 0 ? -1 : 1;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(ang);
+        ctx.scale(1, flipY);
+
+        // Linia celownicza Rayguna 360°
+        ctx.strokeStyle = isReloading ? 'rgba(244, 63, 94, 0.28)' : 'rgba(74, 222, 128, 0.32)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 6]);
+        ctx.beginPath();
+        ctx.moveTo(36 - rec, 0);
+        ctx.lineTo(145, 0);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Uchwyt pistoletowy
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(12 - rec, 2, 7, 9);
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(12 - rec, 2, 7, 9);
+
+        // Korpus Rayguna
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(10 - rec, -6, 22, 11);
+        ctx.strokeStyle = isReloading ? '#f43f5e' : '#38bdf8';
+        ctx.lineWidth = 1.8;
+        ctx.strokeRect(10 - rec, -6, 22, 11);
+
+        // Rdzeń plazmowy (pokazuje stan baterii / przeładowania)
+        const ammoRatio = isReloading
+            ? ((weapon.reloadDuration - weapon.reloadTimer) / weapon.reloadDuration)
+            : (weapon.ammo / weapon.maxAmmo);
+        ctx.fillStyle = '#090d16';
+        ctx.fillRect(13 - rec, -3.5, 14, 6);
+        ctx.fillStyle = isReloading ? ((tickCount % 6 < 3) ? '#f43f5e' : '#facc15') : '#4ade80';
+        ctx.fillRect(13 - rec, -3.5, Math.max(2, 14 * ammoRatio), 6);
+
+        // Lufa i pierścień emisyjny
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(32 - rec, -3.5, 7, 6);
+        ctx.fillStyle = isReloading ? '#fbbf24' : '#22d3ee';
+        ctx.fillRect(37 - rec, -5, 3.5, 9);
+
+        // Rozbłysk wystrzału (Muzzle Flash)
+        if (weapon.muzzleFlashTimer > 0) {
+            ctx.shadowColor = '#4ade80';
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.arc(43 - rec, -0.5, 5.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+        ctx.restore();
+
+        // Pasek przeładowania nad głową Dave'a, gdy bateria się ładuje
+        if (isReloading) {
+            const pct = Math.max(0, Math.min(1, (weapon.reloadDuration - weapon.reloadTimer) / weapon.reloadDuration));
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(cx - 16, player.y - 12, 32, 5);
+            ctx.fillStyle = '#facc15';
+            ctx.fillRect(cx - 15, player.y - 11, 30 * pct, 3);
+        }
+        return;
+    }
+
+    const ext = weapon.visualExt !== undefined ? weapon.visualExt : weapon.pokeExtension;
     ctx.save();
-    ctx.translate(cx, cy + walkBob);
+    ctx.translate(cx, cy);
     ctx.rotate(ang);
 
     ctx.strokeStyle = 'rgba(34, 211, 238, 0.28)';
@@ -1492,7 +1673,7 @@ function drawRoboEnemy(e) {
 
     ctx.save();
     const shakeX = isHung ? Math.sin(tickCount * 0.85) * 2.2 : (e.chargeTimer > 0 ? Math.sin(tickCount * 1.1) * 2.5 : 0);
-    const walkBob = (!isRoboFish && !isHung && e.onGround) ? Math.abs(Math.sin(tickCount * 0.28 + e.minX)) * 2.2 : 0;
+    const walkBob = (!isRoboFish && !isHung && e.onGround) ? Math.abs(Math.sin(tickCount * 0.24 + e.minX)) * 0.8 : 0;
 
     ctx.translate(e.x + e.w / 2 + shakeX, e.y + e.h / 2 - walkBob);
 
@@ -1547,7 +1728,7 @@ function drawRoboEnemy(e) {
         return;
     }
 
-    ctx.rotate(isHung ? 0 : smoothDir * 0.045);
+    ctx.rotate((isHung || e.onGround) ? 0 : smoothDir * 0.048);
     ctx.scale(scaleX, scaleY);
 
     if (isEvadBot) {

@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="PDicon.ico">
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -140,10 +140,10 @@
                 </div>
 
                 <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
-                    <!-- Wskaźnik Aktywnej Broni 360° (Poziomy 71-80) -->
-                    <div id="hud-weapon-pill" class="hud-pill-skew hidden items-center gap-1 bg-cyan-950/95 border border-cyan-400 px-1.5 py-0.5 rounded">
-                        <span class="text-[9px] font-extrabold text-cyan-300 mono-font">🗡️ KIJ</span>
-                    </div>
+                    <!-- Wskaźnik Aktywnej Broni 360° (Poziomy 71-80: Kij / Raygun [Q]) -->
+                    <button id="hud-weapon-pill" type="button" title="Przełącz broń: Kij / Raygun [Q]" class="hud-pill-skew hidden items-center gap-1 bg-cyan-950/95 hover:bg-cyan-900 border border-cyan-400 px-1.5 py-0.5 rounded cursor-pointer">
+                        <span id="hud-weapon-label" class="text-[9px] font-extrabold text-cyan-300 mono-font">🗡️ KIJ</span>
+                    </button>
 
                     <!-- Wskaźnik OHKO -->
                     <div id="hud-ohko-pill" class="hud-pill-skew hidden items-center gap-1 bg-rose-950/95 border border-rose-400 px-1.5 py-0.5 rounded">
@@ -576,8 +576,8 @@
                     </div>
                     <div class="text-xs font-extrabold text-amber-400" id="final-rank">Ranga: Bóg Kwadratów 🏆</div>
 
-                    <!-- Przycisk wysyłania wyniku w osobnej linii -->
-                    <button id="btn-victory-submit-score" type="button" class="btn-retro w-full py-2 rounded-xl font-extrabold text-yellow-300 text-xs flex items-center justify-center gap-2 border-yellow-300 shrink-0">
+                    <!-- Przycisk wysyłania wyniku w osobnej linii (Tylko w trybie Speedrun lub OHKO) -->
+                    <button id="btn-victory-submit-score" type="button" class="hidden btn-retro w-full py-2 rounded-xl font-extrabold text-yellow-300 text-xs flex items-center justify-center gap-2 border-yellow-300 shrink-0">
                         <span>🏆 WYŚLIJ WYNIK NA LEADERBOARD (WR / OHKO)</span>
                     </button>
 
@@ -624,40 +624,45 @@
             </div>
 
             <!-- ==============================================================
-                 13. LEADERBOARD WIDGET (PRAWY DOLNY RÓG MENU GŁÓWNEGO)
+                 13. LEADERBOARD WIDGET (PRAWY DOLNY RÓG MENU GŁÓWNEGO - DOMYŚLNIE ZMINIMALIZOWANY)
                  ============================================================== -->
-            <aside id="leaderboard-widget" style="z-index: 35;" class="absolute bottom-2.5 right-2.5 sm:bottom-4 sm:right-4 z-30 w-[275px] sm:w-[325px] retro-panel rounded-2xl p-2.5 sm:p-3 pointer-events-auto flex flex-col gap-2 max-h-[54dvh] sm:max-h-[345px]">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-sm">🏆</span>
-                        <h3 class="retro-font text-[9px] sm:text-[10px] text-yellow-300 tracking-wide">RANKING ŚWIATOWY</h3>
+            <aside id="leaderboard-widget" style="z-index: 35;" class="absolute bottom-2.5 right-2.5 sm:bottom-4 sm:right-4 z-30 w-[235px] sm:w-[260px] retro-panel rounded-2xl p-2 sm:p-2.5 pointer-events-auto flex flex-col gap-2 max-h-[54dvh] sm:max-h-[345px] transition-all duration-150">
+                <div id="leaderboard-header" class="flex items-center justify-between gap-1.5">
+                    <div id="btn-lb-header-title" class="flex items-center gap-1.5 cursor-pointer select-none min-w-0">
+                        <span class="text-sm shrink-0">🏆</span>
+                        <h3 class="retro-font text-[8px] sm:text-[9px] text-yellow-300 tracking-wide truncate">RANKING ŚWIATOWY</h3>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <button id="btn-lb-open-submit" type="button" title="Wyślij swój wynik" class="btn-retro px-2 py-0.5 rounded text-[9px] font-extrabold text-white mono-font">
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button id="btn-lb-open-submit" type="button" title="Wyślij swój wynik" class="hidden btn-retro px-2 py-0.5 rounded text-[9px] font-extrabold text-white mono-font">
                             + WYŚLIJ
                         </button>
-                        <button id="btn-lb-refresh" type="button" title="Odśwież tablicę" class="btn-retro-secondary px-1.5 py-0.5 rounded text-[10px] font-bold text-cyan-300 mono-font">
+                        <button id="btn-lb-refresh" type="button" title="Odśwież tablicę" class="hidden btn-retro-secondary px-1.5 py-0.5 rounded text-[10px] font-bold text-cyan-300 mono-font">
                             ↻
+                        </button>
+                        <button id="btn-lb-toggle-minimize" type="button" title="Pokaż / Zwiń Ranking Światowy" class="btn-retro-secondary px-2 py-0.5 rounded text-[9px] font-extrabold text-yellow-300 border-yellow-400 mono-font">
+                            ▲ POKAŻ
                         </button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-1.5">
-                    <button id="tab-lb-speedrun" type="button" class="btn-retro py-1 px-2 rounded-lg text-[9px] sm:text-[10px] font-extrabold text-yellow-300 mono-font flex items-center justify-center gap-1">
-                        <span>⏱️</span> <span>SPEEDRUN WR</span>
-                    </button>
-                    <button id="tab-lb-ohko" type="button" class="btn-retro-secondary py-1 px-2 rounded-lg text-[9px] sm:text-[10px] font-extrabold text-slate-300 mono-font flex items-center justify-center gap-1">
-                        <span>☠️</span> <span>TRYB OHKO</span>
-                    </button>
-                </div>
+                <div id="leaderboard-body" class="hidden flex-col gap-2 border-t border-slate-800 pt-2">
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button id="tab-lb-speedrun" type="button" class="btn-retro py-1 px-2 rounded-lg text-[9px] sm:text-[10px] font-extrabold text-yellow-300 mono-font flex items-center justify-center gap-1">
+                            <span>⏱️</span> <span>SPEEDRUN WR</span>
+                        </button>
+                        <button id="tab-lb-ohko" type="button" class="btn-retro-secondary py-1 px-2 rounded-lg text-[9px] sm:text-[10px] font-extrabold text-slate-300 mono-font flex items-center justify-center gap-1">
+                            <span>☠️</span> <span>TRYB OHKO</span>
+                        </button>
+                    </div>
 
-                <div id="leaderboard-list" class="flex-1 overflow-y-auto space-y-1 pr-1 min-h-[120px] max-h-[180px] text-[10px] sm:text-[11px] mono-font">
-                    <div class="text-center text-slate-400 py-6">Łączenie z LootLocker...</div>
-                </div>
+                    <div id="leaderboard-list" class="flex-1 overflow-y-auto space-y-1 pr-1 min-h-[120px] max-h-[180px] text-[10px] sm:text-[11px] mono-font">
+                        <div class="text-center text-slate-400 py-6">Łączenie z LootLocker...</div>
+                    </div>
 
-                <div class="border-t border-slate-800 pt-1.5 flex items-center justify-between text-[9px] text-slate-400 mono-font">
-                    <span id="lb-footer-nick" class="truncate max-w-[145px] text-cyan-300 font-bold">Nick: Gość</span>
-                    <span id="lb-footer-pb" class="text-amber-300 font-bold">Twój PB: --</span>
+                    <div class="border-t border-slate-800 pt-1.5 flex items-center justify-between text-[9px] text-slate-400 mono-font">
+                        <span id="lb-footer-nick" class="truncate max-w-[145px] text-cyan-300 font-bold">Nick: Gość</span>
+                        <span id="lb-footer-pb" class="text-amber-300 font-bold">Twój PB: --</span>
+                    </div>
                 </div>
             </aside>
 
@@ -719,14 +724,14 @@
 
 
     <!-- Moduły JavaScript Gry "Przygoda Dave'a" -->
-    <script src="config.js?v=3"></script>
-    <script src="audio.js?v=3"></script>
-    <script src="levels.js?v=3"></script>
-    <script src="cutscenes.js?v=3"></script>
-    <script src="state.js?v=3"></script>
-    <script src="leaderboard.js?v=3"></script>
-    <script src="mechanics.js?v=3"></script>
-    <script src="renderer.js?v=3"></script>
-    <script src="ui_input.js?v=3"></script>
+    <script src="config.js?v=5"></script>
+    <script src="audio.js?v=5"></script>
+    <script src="levels.js?v=5"></script>
+    <script src="cutscenes.js?v=5"></script>
+    <script src="state.js?v=5"></script>
+    <script src="leaderboard.js?v=5"></script>
+    <script src="mechanics.js?v=5"></script>
+    <script src="renderer.js?v=5"></script>
+    <script src="ui_input.js?v=5"></script>
 </body>
 </html>

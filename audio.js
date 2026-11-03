@@ -436,6 +436,31 @@ class SoundSystem {
             gain.gain.linearRampToValueAtTime(0.005, now + 0.24);
             osc.start(now);
             osc.stop(now + 0.24);
+        } else if (type === 'player_raygun') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(1180, now);
+            osc.frequency.exponentialRampToValueAtTime(240, now + 0.14);
+            gain.gain.setValueAtTime(0.15 * v, now);
+            gain.gain.linearRampToValueAtTime(0.004, now + 0.14);
+            osc.start(now);
+            osc.stop(now + 0.14);
+        } else if (type === 'raygun_empty') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(190, now);
+            osc.frequency.setValueAtTime(135, now + 0.04);
+            gain.gain.setValueAtTime(0.12 * v, now);
+            gain.gain.linearRampToValueAtTime(0.004, now + 0.08);
+            osc.start(now);
+            osc.stop(now + 0.08);
+        } else if (type === 'raygun_reload') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(340, now);
+            osc.frequency.setValueAtTime(510, now + 0.06);
+            osc.frequency.setValueAtTime(760, now + 0.12);
+            gain.gain.setValueAtTime(0.16 * v, now);
+            gain.gain.linearRampToValueAtTime(0.004, now + 0.22);
+            osc.start(now);
+            osc.stop(now + 0.22);
         } else if (type === 'warn') {
             osc.type = 'square';
             osc.frequency.setValueAtTime(720, now);
