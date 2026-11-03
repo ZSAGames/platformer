@@ -488,7 +488,7 @@ function pollGamepad(timestamp) {
 // ============================================================================
 // OBSŁUGA MYSZY, KLAWIATURY, PRZYCISKÓW UI I JOYSTICKA 360°
 // ============================================================================
-canvas.addEventListener('mousemove', (e) => {
+window.addEventListener('mousemove', (e) => {
     if (gameState !== 'PLAYING' || !playerHasWeapon()) return;
     if (cachedCanvasRect.width <= 0 || cachedCanvasRect.height <= 0) refreshCanvasRectCache();
 

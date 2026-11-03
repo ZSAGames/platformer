@@ -27,7 +27,9 @@ function drawLowEndEnvironment(theme, nextTheme = null, blend = 0) {
         underwater_sand: '#0369a1',
         underwater_shallows: '#0f766e',
         jungle: '#064e3b',
-        john_base: '#090d16'
+        john_base: '#090d16',
+        sahara: '#ea580c' ,
+        mountain: '#0284c7'
     };
     const horizonFlatMap = {
         day: '#15803d',
@@ -38,7 +40,9 @@ function drawLowEndEnvironment(theme, nextTheme = null, blend = 0) {
         underwater_sand: '#ca8a04',
         underwater_shallows: '#78350f',
         jungle: '#052e16',
-        john_base: '#020617'
+        john_base: '#020617',
+        sahara: '#b45309' ,
+        mountain: '#1e293b'
     };
     const rimFlatMap = {
         day: '#22c55e',
@@ -49,7 +53,9 @@ function drawLowEndEnvironment(theme, nextTheme = null, blend = 0) {
         underwater_sand: '#facc15',
         underwater_shallows: '#15803d',
         jungle: '#16a34a',
-        john_base: '#0284c7'
+        john_base: '#0284c7',
+        sahara: '#facc15',
+        mountain: '#e2e8f0'
     };
 
     const nextEff = nextTheme === 'jungle_outpost' ? 'jungle' : (nextTheme || effTheme);
@@ -77,12 +83,31 @@ function drawLowEndEnvironment(theme, nextTheme = null, blend = 0) {
         ctx.fillStyle = (effTheme === 'darkforest') ? '#ef4444' : ((effTheme === 'forest') ? '#e2e8f0' : '#fde047');
         ctx.fillRect(canvas.width - 170, 64, 56, 56);
 
-        // Uproszczone wzgórza/filary tła w jednym przebiegu
-        const mountOff = -(cameraX * 0.2) % 360;
-        ctx.fillStyle = lerpColor(skyCol, '#05070e', 0.28);
-        for (let mx = mountOff - 180; mx < canvas.width + 180; mx += 360) {
-            ctx.fillRect((mx + 40) | 0, 340, 220, 156);
-            ctx.fillRect((mx + 85) | 0, 280, 130, 60);
+        if (effTheme === 'mountain') {
+            const descent = (typeof currentLevelIdx === 'number' && currentLevelIdx >= 100)
+                ? Math.max(0, Math.min(1, (currentLevelIdx - 100) / 24))
+                : 0;
+            const valleyY = (530 - descent * 130) | 0;
+            // Zielona dolina zbliżająca się z każdym poziomem
+            ctx.fillStyle = '#15803d';
+            ctx.fillRect(0, valleyY, canvas.width, 500 - valleyY);
+            // Uproszczone skośne zbocze góry, z której schodzimy (od lewej-góry w prawo-dół)
+            ctx.fillStyle = '#334155';
+            for (let sx = 0; sx < canvas.width; sx += 160) {
+                const sy = (240 + (sx * 0.22) + descent * 40) | 0;
+                ctx.fillRect(sx, sy, 162, 500 - sy);
+                ctx.fillStyle = descent < 0.6 ? '#f8fafc' : '#22c55e';
+                ctx.fillRect(sx, sy, 162, 6);
+                ctx.fillStyle = '#334155';
+            }
+        } else {
+            // Uproszczone wzgórza/filary tła w jednym przebiegu
+            const mountOff = -(cameraX * 0.2) % 360;
+            ctx.fillStyle = lerpColor(skyCol, '#05070e', 0.28);
+            for (let mx = mountOff - 180; mx < canvas.width + 180; mx += 360) {
+                ctx.fillRect((mx + 40) | 0, 340, 220, 156);
+                ctx.fillRect((mx + 85) | 0, 280, 130, 60);
+            }
         }
     }
 
@@ -186,7 +211,9 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
         underwater_castle:   ['#020617', '#082f49', '#0369a1'],
         underwater_sand:     ['#082f49', '#0284c7', '#0e7490'],
         underwater_shallows: ['#042f2e', '#0f766e', '#115e59'],
-        jungle:              ['#064e3b', '#047857', '#a7f3d0']
+        jungle:              ['#064e3b', '#047857', '#a7f3d0'],
+        sahara:              ['#7c2d12', '#ea580c', '#fef08a'],
+        mountain:            ['#0f172a', '#0284c7', '#bae6fd']
     };
     const cA = skyColors[theme] || skyColors.day;
     const cB = (nextTheme && skyColors[nextTheme]) ? skyColors[nextTheme] : cA;
@@ -359,259 +386,475 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
         return;
     }
 
-    if (theme === 'jungle') {
+    if (theme === 'sahara') {
         ctx.save();
-
-        ctx.globalAlpha = 0.12;
-        ctx.fillStyle = '#fef08a';
-        const beamOff = -(cameraX * 0.14) % 240;
-        for (let bx = beamOff - 100; bx < canvas.width + 200; bx += 240) {
-            ctx.beginPath();
-            ctx.moveTo(bx, 0);
-            ctx.lineTo(bx + 75, 0);
-            ctx.lineTo(bx + 210, 600);
-            ctx.lineTo(bx + 110, 600);
-            ctx.closePath();
-            ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-
-        const zigOffset = -(cameraX * 0.14) % 460;
-        for (let zx = zigOffset - 230; zx < canvas.width + 260; zx += 460) {
-            ctx.fillStyle = '#064e3b';
-            ctx.fillRect(zx - 40, 290, 220, 310);
-            ctx.fillRect(zx + 160, 320, 260, 280);
-
-            const tx = zx + 110;
-            const baseW = 180;
-            const steps = 4;
-            for (let s = 0; s < steps; s++) {
-                const sw = baseW - s * 36;
-                const sh = 34;
-                const sx = tx + (baseW - sw) / 2;
-                const sy = 340 - s * sh;
-                ctx.fillStyle = '#115e59';
-                ctx.fillRect(sx, sy, sw, sh + 4);
-                ctx.fillStyle = '#0f766e';
-                ctx.fillRect(sx, sy, sw, 6);
-                ctx.strokeStyle = '#042f2e';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(sx, sy, sw, sh);
-            }
-            ctx.fillStyle = '#134e4a';
-            ctx.fillRect(tx + baseW / 2 - 14, 340 - (steps - 1) * 34, 28, steps * 34);
-            ctx.fillStyle = '#34d399';
-            ctx.fillRect(tx + baseW / 2 - 5, 340 - (steps - 1) * 34 + 10, 10, 10);
-        }
-
-        // Drzewa dżungli z naturalnymi, ukośnymi konarami i koronami liści (indeksowane w przestrzeni świata)
-        const treeSpacing = 260;
-        const treeScroll = cameraX * 0.32;
-        const firstTreeIdx = Math.floor((treeScroll - 180) / treeSpacing);
-        const lastTreeIdx = Math.ceil((treeScroll + canvas.width + 180) / treeSpacing);
-
-        for (let tIdx = firstTreeIdx; tIdx <= lastTreeIdx; tIdx++) {
-            const mx = tIdx * treeSpacing - treeScroll;
-            const trunkX = mx + 90;
-
-            // Główny pień z cieniowaniem kory
-            ctx.fillStyle = '#3f2305';
-            ctx.fillRect(trunkX - 18, 95, 36, 415);
-            ctx.fillStyle = '#5c3409';
-            ctx.fillRect(trunkX - 14, 95, 8, 415);
-            ctx.fillStyle = '#291502';
-            ctx.fillRect(trunkX + 4, 95, 14, 415);
-
-            // Korzenie przyporowe u podstawy pnia
-            ctx.fillStyle = '#3f2305';
-            ctx.beginPath();
-            ctx.moveTo(trunkX - 18, 385);
-            ctx.lineTo(trunkX - 54, 505);
-            ctx.lineTo(trunkX - 10, 505);
-            ctx.closePath();
-            ctx.fill();
-
-            ctx.fillStyle = '#291502';
-            ctx.beginPath();
-            ctx.moveTo(trunkX + 18, 385);
-            ctx.lineTo(trunkX + 54, 505);
-            ctx.lineTo(trunkX + 10, 505);
-            ctx.closePath();
-            ctx.fill();
-
-            // Naturalne, zwężające się ukośne konary (zamiast płaskich poziomych belek)
-            ctx.fillStyle = '#3f2305';
-            ctx.beginPath();
-            // Lewy dolny konar
-            ctx.moveTo(trunkX - 16, 255);
-            ctx.lineTo(trunkX - 78, 205);
-            ctx.lineTo(trunkX - 72, 195);
-            ctx.lineTo(trunkX - 14, 232);
-            // Prawy dolny konar
-            ctx.moveTo(trunkX + 16, 240);
-            ctx.lineTo(trunkX + 76, 192);
-            ctx.lineTo(trunkX + 70, 182);
-            ctx.lineTo(trunkX + 14, 218);
-            // Lewy górny konar
-            ctx.moveTo(trunkX - 15, 178);
-            ctx.lineTo(trunkX - 88, 128);
-            ctx.lineTo(trunkX - 80, 118);
-            ctx.lineTo(trunkX - 12, 156);
-            // Prawy górny konar
-            ctx.moveTo(trunkX + 15, 170);
-            ctx.lineTo(trunkX + 86, 122);
-            ctx.lineTo(trunkX + 78, 112);
-            ctx.lineTo(trunkX + 12, 148);
-            ctx.fill();
-
-            // Podświetlenie górnej krawędzi konarów
-            ctx.strokeStyle = '#5c3409';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(trunkX - 14, 233); ctx.lineTo(trunkX - 74, 196);
-            ctx.moveTo(trunkX + 14, 219); ctx.lineTo(trunkX + 72, 183);
-            ctx.moveTo(trunkX - 12, 157); ctx.lineTo(trunkX - 82, 119);
-            ctx.moveTo(trunkX + 12, 149); ctx.lineTo(trunkX + 80, 113);
-            ctx.stroke();
-
-            // Boczne kępy liści na końcach konarów
-            ctx.fillStyle = '#064e3b';
-            ctx.fillRect(trunkX - 102, 176, 56, 32);
-            ctx.fillRect(trunkX + 46, 164, 56, 32);
-            ctx.fillStyle = '#059669';
-            ctx.fillRect(trunkX - 96, 172, 44, 22);
-            ctx.fillRect(trunkX + 52, 160, 44, 22);
-            ctx.fillStyle = '#10b981';
-            ctx.fillRect(trunkX - 90, 174, 28, 10);
-            ctx.fillRect(trunkX + 58, 162, 28, 10);
-
-            // Główna wielowarstwowa korona drzewa
-            ctx.fillStyle = '#064e3b';
-            ctx.fillRect(trunkX - 104, 48, 208, 72);
-            ctx.fillRect(trunkX - 88, 112, 176, 48);
-
-            ctx.fillStyle = '#065f46';
-            ctx.fillRect(trunkX - 96, 54, 192, 58);
-            ctx.fillRect(trunkX - 78, 114, 156, 36);
-
-            ctx.fillStyle = '#059669';
-            ctx.fillRect(trunkX - 86, 60, 154, 42);
-            ctx.fillRect(trunkX - 68, 116, 124, 24);
-
-            ctx.fillStyle = '#10b981';
-            ctx.fillRect(trunkX - 74, 64, 110, 20);
-        }
-
-        ctx.fillStyle = '#052e16';
-        ctx.fillRect(0, 494, canvas.width, 106);
-        ctx.fillStyle = '#15803d';
-        ctx.fillRect(0, 490, canvas.width, 8);
-
-        const fgOffset = -(cameraX * 0.52) % 180;
-        for (let fx = fgOffset - 90; fx < canvas.width + 180; fx += 180) {
-            const bamX = fx + 28;
-            ctx.fillStyle = '#15803d';
-            ctx.fillRect(bamX, 310, 10, 186);
-            ctx.fillStyle = '#22c55e';
-            ctx.fillRect(bamX, 310, 5, 186);
-            ctx.fillStyle = '#052e16';
-            for (let by = 335; by < 490; by += 32) {
-                ctx.fillRect(bamX - 1, by, 12, 3);
-                ctx.fillStyle = '#4ade80';
-                ctx.fillRect(bamX + 10, by - 6, 12, 5);
-                ctx.fillRect(bamX - 12, by + 6, 12, 5);
-                ctx.fillStyle = '#052e16';
-            }
-
-            const bushX = fx + 95;
-            ctx.fillStyle = '#14532d';
-            ctx.fillRect(bushX - 28, 462, 56, 32);
-            ctx.fillStyle = '#16a34a';
-            ctx.fillRect(bushX - 22, 452, 44, 24);
-            ctx.fillStyle = '#4ade80';
-            ctx.fillRect(bushX - 14, 446, 28, 12);
-
-            ctx.fillStyle = '#f43f5e';
-            ctx.fillRect(bushX - 5, 456, 10, 10);
-            ctx.fillStyle = '#facc15';
-            ctx.fillRect(bushX - 2, 459, 4, 4);
-        }
-
-        // Stabilne, bujające się liany w przestrzeni świata (nigdy nie znikają ani nie skaczą przy ruchu kamery!)
-        const vineSpacing = 160;
-        const vineScroll = cameraX * 0.42;
-        const firstVineIdx = Math.floor((vineScroll - 100) / vineSpacing);
-        const lastVineIdx = Math.ceil((vineScroll + canvas.width + 160) / vineSpacing);
-
-        for (let vIdx = firstVineIdx; vIdx <= lastVineIdx; vIdx++) {
-            const vx = vIdx * vineSpacing - vineScroll;
-            const seed = ((vIdx * 2654435761) >>> 0);
-            const vineH = 115 + (seed % 65);
-            const phaseOffset = (seed % 628) * 0.01;
-            const sway = Math.sin(tickCount * 0.042 + phaseOffset) * 12;
-
-            // Górne sklepienie liści, z którego wyrasta liana
-            ctx.fillStyle = '#052e16';
-            ctx.fillRect(vx - 12, 0, 114, 26);
-            ctx.fillStyle = '#065f46';
-            ctx.fillRect(vx + 2, 16, 86, 18);
-            ctx.fillStyle = '#10b981';
-            ctx.fillRect(vx + 14, 20, 52, 8);
-
-            const x0 = vx + 44;
-            const y0 = 24;
-            const cx = x0 + sway * 0.65;
-            const cy = y0 + (vineH - y0) * 0.52;
-            const x1 = x0 + sway * 1.45;
-            const y1 = vineH;
-
-            // Ciemny obrys liany (zapobiega zlewaniu się z tłem)
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#022c22';
-            ctx.lineWidth = 6.5;
-            ctx.beginPath();
-            ctx.moveTo(x0, y0);
-            ctx.quadraticCurveTo(cx, cy, x1, y1);
-            ctx.stroke();
-
-            // Jasny rdzeń liany
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(x0, y0);
-            ctx.quadraticCurveTo(cx, cy, x1, y1);
-            ctx.stroke();
-
-            // Listki dokładnie na krzywej Béziera liany
-            const leafSteps = 5;
-            for (let s = 1; s <= leafSteps; s++) {
-                const t = s / (leafSteps + 0.4);
-                const invT = 1 - t;
-                const lx = invT * invT * x0 + 2 * invT * t * cx + t * t * x1;
-                const ly = invT * invT * y0 + 2 * invT * t * cy + t * t * y1;
-                const side = (s & 1) ? 1 : -1;
-
-                ctx.fillStyle = '#047857';
-                ctx.fillRect(lx + side * 3 - 4, ly - 2, 9, 6);
-                ctx.fillStyle = '#34d399';
-                ctx.fillRect(lx + side * 4 - 3, ly - 3, 7, 4);
-            }
-
-            // Tropikalny pąk kwiatowy na końcu liany
-            ctx.fillStyle = (vIdx & 1) ? '#f43f5e' : '#facc15';
-            ctx.fillRect(x1 - 5, y1 - 3, 10, 10);
+        try {
+            // 1. Wielkie palące słońce Sahary
+            const sunX = canvas.width - 145;
+            const sunY = 98;
+            const pulse = Math.sin(tickCount * 0.05) * 5;
+            ctx.save();
+            ctx.translate(sunX, sunY);
+            ctx.globalAlpha = 0.18;
             ctx.fillStyle = '#fef08a';
-            ctx.fillRect(x1 - 2, y1, 4, 4);
-        }
-
-        for (const m of bgMotes) {
-            const pulse = 0.45 + Math.sin(tickCount * 0.06 + m.phase) * 0.35;
-            ctx.globalAlpha = Math.max(0, pulse);
+            ctx.fillRect(-68 - pulse, -68 - pulse, 136 + pulse * 2, 136 + pulse * 2);
+            ctx.globalAlpha = 0.32;
             ctx.fillStyle = '#fde047';
-            ctx.fillRect(m.x, m.y, m.r * 2, m.r * 2);
-        }
-        ctx.globalAlpha = 1;
+            ctx.fillRect(-48 - pulse * 0.5, -48 - pulse * 0.5, 96 + pulse, 96 + pulse);
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = '#fffbeb';
+            ctx.fillRect(-34, -34, 68, 68);
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-34, -34, 68, 68);
+            ctx.restore();
 
+            // 2. Dalekie góry stołowe (Mesas) i starożytne piramidy/formacje skalne
+            const mesaSpacing = 440;
+            const mesaScroll = cameraX * 0.14;
+            const firstMesaIdx = Math.floor((mesaScroll - 240) / mesaSpacing);
+            const lastMesaIdx = Math.ceil((mesaScroll + canvas.width + 240) / mesaSpacing);
+
+            for (let mIdx = firstMesaIdx; mIdx <= lastMesaIdx; mIdx++) {
+                const mx = mIdx * mesaSpacing - mesaScroll;
+                ctx.fillStyle = '#9a3412';
+                ctx.beginPath();
+                ctx.moveTo(mx, 495);
+                ctx.lineTo(mx + 45, 275);
+                ctx.lineTo(mx + 165, 275);
+                ctx.lineTo(mx + 215, 495);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = '#7c2d12';
+                ctx.beginPath();
+                ctx.moveTo(mx + 125, 275);
+                ctx.lineTo(mx + 165, 275);
+                ctx.lineTo(mx + 215, 495);
+                ctx.lineTo(mx + 145, 495);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = '#b45309';
+                ctx.fillRect(mx + 42, 305, 126, 8);
+                ctx.fillRect(mx + 32, 345, 146, 10);
+
+                const px = mx + 250;
+                for (let s = 0; s < 4; s++) {
+                    const sw = 136 - s * 30;
+                    const sh = 26;
+                    const sx = px + (136 - sw) * 0.5;
+                    const sy = 365 - s * sh;
+                    ctx.fillStyle = '#b45309';
+                    ctx.fillRect(sx, sy, sw, sh + 2);
+                    ctx.fillStyle = '#9a3412';
+                    ctx.fillRect(sx + sw * 0.55, sy, sw * 0.45, sh + 2);
+                }
+            }
+
+            // 3. Środkowe falujące wydmy piaszczyste + sylwetki dalekich dinozaurów
+            const duneSpacing = 360;
+            const duneScroll = cameraX * 0.26;
+            const firstDuneIdx = Math.floor((duneScroll - 220) / duneSpacing);
+            const lastDuneIdx = Math.ceil((duneScroll + canvas.width + 220) / duneSpacing);
+
+            for (let dIdx = firstDuneIdx; dIdx <= lastDuneIdx; dIdx++) {
+                const dx = dIdx * duneSpacing - duneScroll;
+                ctx.fillStyle = '#b45309';
+                ctx.beginPath();
+                ctx.moveTo(dx, 500);
+                ctx.quadraticCurveTo(dx + 95, 335, dx + 210, 415);
+                ctx.quadraticCurveTo(dx + 290, 355, dx + 360, 500);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(dx + 10, 480);
+                ctx.quadraticCurveTo(dx + 95, 337, dx + 205, 412);
+                ctx.stroke();
+
+                const bx = dx + 135;
+                const by = 382;
+                const sway = Math.sin(tickCount * 0.04 + dIdx * 1.7) * 3;
+                ctx.fillStyle = '#78350f';
+                ctx.fillRect(bx, by - 16, 26, 13);
+                ctx.fillRect(bx + 3, by - 4, 5, 9);
+                ctx.fillRect(bx + 18, by - 4, 5, 9);
+                ctx.beginPath();
+                ctx.moveTo(bx + 4, by - 14);
+                ctx.lineTo(bx - 5 + sway, by - 46);
+                ctx.lineTo(bx + 2 + sway, by - 46);
+                ctx.lineTo(bx + 11, by - 14);
+                ctx.fill();
+                ctx.fillRect(bx - 11 + sway, by - 50, 12, 6);
+            }
+
+            // 4. Bezpieczny efekt Fali Gorąca (Heat Haze / Shimmer Bands) bez kopiowania bufora canvas
+            for (let by = 210; by < 480; by += 28) {
+                const shimmerAlpha = 0.05 + Math.sin(tickCount * 0.07 + by * 0.04) * 0.035;
+                if (shimmerAlpha > 0.01) {
+                    ctx.globalAlpha = shimmerAlpha;
+                    ctx.fillStyle = '#fef08a';
+                    const waveX = Math.sin(tickCount * 0.06 + by * 0.05) * 14;
+                    ctx.fillRect(waveX, by, canvas.width, 6);
+                }
+            }
+            ctx.globalAlpha = 1;
+
+            // 5. Pierwszoplanowe podłoże Sahary i kaktusy Saguaro w paralaksie
+            ctx.fillStyle = '#92400e';
+            ctx.fillRect(0, 492, canvas.width, 108);
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(0, 490, canvas.width, 6);
+
+            const fgSpacing = 210;
+            const fgScroll = cameraX * 0.46;
+            const firstFgIdx = Math.floor((fgScroll - 120) / fgSpacing);
+            const lastFgIdx = Math.ceil((fgScroll + canvas.width + 120) / fgSpacing);
+
+            for (let fIdx = firstFgIdx; fIdx <= lastFgIdx; fIdx++) {
+                const fx = fIdx * fgSpacing - fgScroll;
+                const kx = fx + 45;
+                ctx.fillStyle = '#14532d';
+                ctx.fillRect(kx, 428, 12, 64);
+                ctx.fillRect(kx - 12, 448, 12, 7);
+                ctx.fillRect(kx - 12, 434, 7, 16);
+                ctx.fillRect(kx + 12, 454, 12, 7);
+                ctx.fillRect(kx + 17, 438, 7, 18);
+                ctx.fillStyle = '#22c55e';
+                ctx.fillRect(kx + 2, 430, 4, 60);
+
+                ctx.fillStyle = '#78350f';
+                ctx.fillRect(fx + 125, 472, 38, 20);
+                ctx.fillStyle = '#d97706';
+                ctx.fillRect(fx + 128, 466, 28, 10);
+            }
+
+            // 6. Stabilne w przestrzeni świata termiczne wstęgi gorącego powietrza (płynny fade-in i fade-out)
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 2.5;
+            const hazeSpacing = 140;
+            const hazeScroll = cameraX * 0.35;
+            const firstHazeIdx = Math.floor((hazeScroll - 80) / hazeSpacing);
+            const lastHazeIdx = Math.ceil((hazeScroll + canvas.width + 80) / hazeSpacing);
+
+            for (let hIdx = firstHazeIdx; hIdx <= lastHazeIdx; hIdx++) {
+                const hx = hIdx * hazeSpacing - hazeScroll;
+                const seed = ((hIdx * 2654435761) >>> 0);
+                const phaseOffset = (seed % 1000) * 0.001;
+                const progress = (tickCount * 0.0038 + phaseOffset) % 1;
+                const fadeAlpha = Math.sin(progress * Math.PI) * 0.24;
+                if (fadeAlpha <= 0.01) continue;
+
+                const riseY = 475 - progress * 235;
+                const swayPhase = tickCount * 0.05 + (seed % 628) * 0.01;
+                const w1 = Math.sin(swayPhase) * 7.5;
+                const w2 = Math.cos(swayPhase * 0.85) * 5.5;
+
+                ctx.globalAlpha = fadeAlpha;
+                ctx.strokeStyle = '#fef08a';
+                ctx.beginPath();
+                ctx.moveTo(hx, riseY + 46);
+                ctx.bezierCurveTo(
+                    hx + w1, riseY + 30,
+                    hx - w2, riseY + 14,
+                    hx + w1 * 0.4, riseY
+                );
+                ctx.stroke();
+            }
+
+            for (const m of bgMotes) {
+                const pulseM = 0.4 + Math.sin(tickCount * 0.08 + m.phase) * 0.3;
+                ctx.globalAlpha = Math.max(0, pulseM);
+                ctx.fillStyle = '#fef08a';
+                ctx.fillRect(m.x, m.y, m.r * 2.2, m.r * 1.4);
+            }
+            ctx.globalAlpha = 1;
+        } catch (e) {}
+        ctx.restore();
+        return;
+    }
+
+    if (theme === 'mountain') {
+        ctx.save();
+        try {
+            const lvlObj = LEVELS[currentLevelIdx] || {};
+            const maxCam = Math.max(1, (lvlObj.width || 48) * TILE - canvas.width);
+            const camRatio = Math.max(0, Math.min(1, cameraX / maxCam));
+            // Płynny wskaźnik zejścia z góry: 0.0 na Poz. 101 (Szczyt 4200m) -> 1.0 na Poz. 125 (Podnóże przy Zamku 120m)
+            const rawLvlIdx = (typeof currentLevelIdx === 'number' && currentLevelIdx >= 100) ? (currentLevelIdx - 100) : 0;
+            const descent = Math.max(0, Math.min(1, (rawLvlIdx + camRatio * 0.85) / 24.85));
+            const altitudeMeters = Math.max(95, Math.round(4200 * (1 - descent) + 95));
+
+            // 1. Niebo zmieniające się z wysokością (od ciemnego nieba stratosferycznego na szczycie do ciepłego błękitu doliny na dole)
+            const skyTop = lerpColor('#060c1f', '#0284c7', descent);
+            const skyMid = lerpColor('#0284c7', '#38bdf8', descent);
+            const skyBot = lerpColor('#bae6fd', '#dcfce7', descent);
+            ctx.fillStyle = getCachedSkyGradient(skyTop, skyMid, skyBot, 0.52);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Słońce (wznosi się wyżej na niebie, im niżej schodzimy w stronę doliny)
+            const sunX = canvas.width - 135;
+            const sunY = 128 - descent * 42;
+            const pulse = Math.sin(tickCount * 0.05) * 4;
+            ctx.save();
+            ctx.translate(sunX, sunY);
+            ctx.globalAlpha = 0.18;
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(-56 - pulse, -56 - pulse, 112 + pulse * 2, 112 + pulse * 2);
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = '#fde047';
+            ctx.fillRect(-28, -28, 56, 56);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2.5;
+            ctx.strokeRect(-28, -28, 56, 56);
+            ctx.restore();
+
+            // 3. Dalekie ośnieżone szczyty w tle (przesuwają się w górę kadru, gdy schodzimy niżej w dół doliny!)
+            const peakShiftY = -descent * 75;
+            const farSpacing = 400;
+            const farScroll = cameraX * 0.09;
+            const firstPeak = Math.floor((farScroll - 200) / farSpacing);
+            const lastPeak = Math.ceil((farScroll + canvas.width + 200) / farSpacing);
+            for (let pIdx = firstPeak; pIdx <= lastPeak; pIdx++) {
+                const px = pIdx * farSpacing - farScroll;
+                const peakY = 185 + (Math.abs(pIdx) % 3) * 22 + peakShiftY;
+                const midX = px + 200;
+
+                ctx.fillStyle = '#475569';
+                ctx.beginPath();
+                ctx.moveTo(px, 560);
+                ctx.lineTo(midX, peakY);
+                ctx.lineTo(midX, 560);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = '#334155';
+                ctx.beginPath();
+                ctx.moveTo(midX, peakY);
+                ctx.lineTo(px + 400, 560);
+                ctx.lineTo(midX, 560);
+                ctx.closePath();
+                ctx.fill();
+
+                // Śnieżna czapa na dalekich szczytach
+                ctx.fillStyle = '#f8fafc';
+                ctx.beginPath();
+                ctx.moveTo(midX, peakY);
+                ctx.lineTo(midX - 52, peakY + 92);
+                ctx.lineTo(midX - 18, peakY + 74);
+                ctx.lineTo(midX + 6, peakY + 98);
+                ctx.lineTo(midX + 52, peakY + 88);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // 4. ZIELONA DOLINA I ZAMEK DAVE'A I ANGELI W DOLE
+            // Im niższy poziom (od 101 do 125), tym ziemia i zamek są WYŻEJ i WIĘKSZE (schodzimy coraz bliżej ziemi!)
+            const valleyTopY = 548 - descent * 168; // Na Poz. 101: 548px (głęboko w dole), na Poz. 125: 380px (tuż przed nami!)
+            ctx.fillStyle = '#14532d';
+            ctx.fillRect(0, valleyTopY, canvas.width, canvas.height - valleyTopY);
+
+            // Falujące zielone wzgórza doliny i lasy u podnóża góry
+            const valHillOff = -(cameraX * 0.14) % 320;
+            ctx.fillStyle = '#15803d';
+            for (let vx = valHillOff - 160; vx < canvas.width + 160; vx += 320) {
+                ctx.beginPath();
+                ctx.arc(vx + 160, valleyTopY + 35, 190, Math.PI, 0);
+                ctx.fill();
+            }
+            ctx.fillStyle = '#22c55e';
+            ctx.fillRect(0, valleyTopY, canvas.width, 5);
+
+            // Zamek Dave'a i Angeli w dolinie – rośnie z każdym poziomem od maleńkiego (0.36x) do wielkiego (1.15x)!
+            const casScale = 0.36 + descent * 0.79;
+            const casCenterX = canvas.width * 0.74 - (cameraX * 0.04) % 180;
+            const casBaseY = valleyTopY + 12;
+            ctx.save();
+            ctx.translate(casCenterX, casBaseY);
+            ctx.scale(casScale, casScale);
+
+            // Wieże i mury Zamku Dave'a i Angeli
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(-52, -68, 28, 68);
+            ctx.fillRect(24, -68, 28, 68);
+            ctx.fillStyle = '#64748b';
+            ctx.fillRect(-28, -52, 56, 52);
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-52, -68, 28, 68);
+            ctx.strokeRect(24, -68, 28, 68);
+            ctx.strokeRect(-28, -52, 56, 52);
+
+            // Fioletowe dachy królewskie i różowe flagi Angeli
+            ctx.fillStyle = '#7e22ce';
+            ctx.fillRect(-56, -78, 36, 10);
+            ctx.fillRect(-48, -88, 20, 10);
+            ctx.fillRect(20, -78, 36, 10);
+            ctx.fillRect(28, -88, 20, 10);
+            ctx.fillStyle = '#ec4899';
+            ctx.fillRect(-38, -100, 14, 7);
+            ctx.fillRect(38, -100, 14, 7);
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(-12, -28, 24, 28);
+            ctx.restore();
+
+            // 5. MORZE CHMUR (Na Poz. 101-107 jest POD nami w dole, na Poz. 108-114 przechodzimy PRZEZ chmury, a na Poz. 115-125 chmury są NAD nami!)
+            const cloudLayerY = 445 - descent * 355;
+            const cloudScroll = -(cameraX * 0.22 + tickCount * 0.25) % 260;
+            ctx.save();
+            ctx.globalAlpha = (descent > 0.25 && descent < 0.55) ? 0.55 : 0.82;
+            for (let cx = cloudScroll - 130; cx < canvas.width + 160; cx += 260) {
+                ctx.fillStyle = '#cbd5e1';
+                ctx.beginPath();
+                ctx.arc(cx, cloudLayerY + 6, 34, 0, Math.PI * 2);
+                ctx.arc(cx + 36, cloudLayerY - 2, 42, 0, Math.PI * 2);
+                ctx.arc(cx + 76, cloudLayerY + 6, 32, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#f8fafc';
+                ctx.beginPath();
+                ctx.arc(cx, cloudLayerY, 34, 0, Math.PI * 2);
+                ctx.arc(cx + 36, cloudLayerY - 8, 42, 0, Math.PI * 2);
+                ctx.arc(cx + 76, cloudLayerY, 32, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+
+            // 6. GŁÓWNE ZBOCZE GÓRY, Z KTÓREJ SCHODZIMY (Nachylone ukośnie z lewej-góry w prawo-dół!)
+            // Daje wyraźne wrażenie, że stoimy na grzbiecie wielkiej góry i schodzimy po jej zboczu w dół!
+            const slopeScroll = cameraX * 0.32;
+            const slopeBaseLeftY = 175 + descent * 95 - (camRatio * 35);
+            const slopeRightDrop = 215; // Zbocze opada o 215px z lewej na prawą stronę ekranu!
+
+            ctx.fillStyle = lerpColor('#1e293b', '#292524', descent);
+            ctx.beginPath();
+            ctx.moveTo(0, 600);
+            for (let sx = 0; sx <= canvas.width + 40; sx += 40) {
+                const worldX = sx + slopeScroll;
+                const jag = Math.sin(worldX * 0.018) * 14 + Math.cos(worldX * 0.045) * 8;
+                const sy = slopeBaseLeftY + (sx / canvas.width) * slopeRightDrop + jag;
+                ctx.lineTo(sx, sy);
+            }
+            ctx.lineTo(canvas.width, 600);
+            ctx.closePath();
+            ctx.fill();
+
+            // Warstwy skalne, ukośna pokrywa śnieżna/trawiasta i drzewa na zboczu góry
+            const capColor = descent < 0.45
+                ? '#f8fafc'
+                : (descent < 0.75 ? lerpColor('#e2e8f0', '#4ade80', (descent - 0.45) / 0.3) : '#22c55e');
+
+            ctx.strokeStyle = capColor;
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            for (let sx = 0; sx <= canvas.width + 40; sx += 40) {
+                const worldX = sx + slopeScroll;
+                const jag = Math.sin(worldX * 0.018) * 14 + Math.cos(worldX * 0.045) * 8;
+                const sy = slopeBaseLeftY + (sx / canvas.width) * slopeRightDrop + jag;
+                if (sx === 0) ctx.moveTo(sx, sy);
+                else ctx.lineTo(sx, sy);
+            }
+            ctx.stroke();
+
+            // Ukośne półki skalne, choinki górskie (na niższych wysokościach) i bunkry Johna na zboczu
+            const featSpacing = 240;
+            const firstFeat = Math.floor((slopeScroll - 120) / featSpacing);
+            const lastFeat = Math.ceil((slopeScroll + canvas.width + 120) / featSpacing);
+            for (let fIdx = firstFeat; fIdx <= lastFeat; fIdx++) {
+                const fx = fIdx * featSpacing - slopeScroll;
+                const ratioX = Math.max(-0.2, Math.min(1.2, fx / canvas.width));
+                const worldX = fx + slopeScroll;
+                const jag = Math.sin(worldX * 0.018) * 14 + Math.cos(worldX * 0.045) * 8;
+                const fy = slopeBaseLeftY + ratioX * slopeRightDrop + jag;
+
+                // Skalne żebra na zboczu góry
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(fx - 18, fy + 16, 48, 12);
+                ctx.fillStyle = capColor;
+                ctx.fillRect(fx - 18, fy + 14, 48, 4);
+
+                // Drogowskaz szlaku zejścia z góry (pokazuje strzałkę w prawo-dół ↘)
+                if (fIdx % 2 === 0) {
+                    ctx.fillStyle = '#78350f';
+                    ctx.fillRect(fx + 54, fy - 22, 5, 26);
+                    ctx.save();
+                    ctx.translate(fx + 56, fy - 16);
+                    ctx.rotate(0.24); // Nachylony zgodnie ze spadkiem zbocza!
+                    ctx.fillStyle = '#facc15';
+                    ctx.fillRect(-14, -6, 30, 11);
+                    ctx.strokeStyle = '#090d16';
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeRect(-14, -6, 30, 11);
+                    ctx.fillStyle = '#090d16';
+                    ctx.font = 'bold 8px JetBrains Mono';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('↘ DÓŁ', 1, 2);
+                    ctx.restore();
+                }
+
+                // Choinki alpejskie pojawiające się coraz gęściej, im niżej schodzimy (od Poz. 107 w dół)
+                if (descent > 0.22) {
+                    const tx = fx + 15;
+                    const ty = fy + 4;
+                    ctx.fillStyle = '#451a03';
+                    ctx.fillRect(tx - 4, ty - 28, 8, 28);
+                    ctx.fillStyle = '#065f46';
+                    ctx.beginPath();
+                    ctx.moveTo(tx, ty - 64);
+                    ctx.lineTo(tx - 22, ty - 24);
+                    ctx.lineTo(tx + 22, ty - 24);
+                    ctx.closePath();
+                    ctx.fill();
+                    // Śnieg na czubkach choinek w środkowej strefie gór
+                    if (descent < 0.65) {
+                        ctx.fillStyle = '#f8fafc';
+                        ctx.beginPath();
+                        ctx.moveTo(tx, ty - 64);
+                        ctx.lineTo(tx - 10, ty - 46);
+                        ctx.lineTo(tx + 10, ty - 46);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                }
+
+                // Górskie Twierdze Radarowe Johna wbudowane w zbocze (Sekcja 4: Poz. 113-125)
+                if (lvlObj.hasJohnOutpost && (fIdx % 2 !== 0)) {
+                    const bx = fx + 85;
+                    const by = fy - 42;
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillRect(bx, by, 74, 68);
+                    ctx.strokeStyle = '#38bdf8';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(bx, by, 74, 68);
+                    ctx.fillStyle = '#0284c7';
+                    ctx.fillRect(bx + 8, by + 10, 58, 12);
+                    ctx.fillStyle = (tickCount % 16 < 8) ? '#f43f5e' : '#22d3ee';
+                    ctx.fillRect(bx + 30, by + 13, 14, 6);
+                }
+            }
+
+            // 7. WYSOKOŚCIOMIERZ GÓRSKI (Pokazuje na żywo jak schodzimy coraz niżej ziemi z każdym poziomem i krokiem!)
+            ctx.fillStyle = 'rgba(9, 13, 22, 0.78)';
+            ctx.fillRect(canvas.width - 208, 46, 194, 24);
+            ctx.strokeStyle = descent < 0.5 ? '#38bdf8' : '#4ade80';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(canvas.width - 208, 46, 194, 24);
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = 'bold 10px JetBrains Mono';
+            ctx.textAlign = 'right';
+            ctx.fillText(`🏔️ WYSOKOŚĆ: ${altitudeMeters}m n.p.m. ↘`, canvas.width - 20, 62);
+
+            // 8. Płatki śniegu na dużych wysokościach / pyłek wiatru niżej
+            for (const m of bgMotes) {
+                ctx.globalAlpha = 0.65;
+                ctx.fillStyle = descent < 0.65 ? '#ffffff' : '#fef08a';
+                ctx.fillRect(m.x, m.y, m.r * 2, m.r * 2);
+            }
+            ctx.globalAlpha = 1;
+        } catch (e) {}
         ctx.restore();
         return;
     }
@@ -758,7 +1001,7 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
             ctx.fill();
         }
     } else {
-        const farMountColors = { day: '#38bdf8', forest: '#1e1b4b', darkforest: '#180926', underwater: '#075985', jungle: '#065f46' };
+        const farMountColors = { day: '#38bdf8', forest: '#1e1b4b', darkforest: '#180926', underwater: '#075985', jungle: '#065f46' , mountain: '#1e293b' };
         const farBase = lerpColor(farMountColors[theme] || '#38bdf8', farMountColors[nextTheme] || farMountColors[theme] || '#38bdf8', blend);
         const farShadow = lerpColor(farBase, '#090d16', 0.22);
         const farOffset = -(cameraX * 0.08) % 440;
@@ -780,9 +1023,9 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
             ctx.fill();
         }
 
-        const mountLightColors = { day: '#64748b', forest: '#312e81', darkforest: '#3b0764', underwater: '#0369a1', jungle: '#047857' };
-        const mountDarkColors  = { day: '#475569', forest: '#1e1b4b', darkforest: '#24053d', underwater: '#0c4a6e', jungle: '#064e3b' };
-        const snowColors       = { day: '#f1f5f9', forest: '#818cf8', darkforest: '#f43f5e', underwater: '#38bdf8', jungle: '#6ee7b7' };
+        const mountLightColors = { day: '#64748b', forest: '#312e81', darkforest: '#3b0764', underwater: '#0369a1', jungle: '#047857' , mountain: '#64748b' };
+        const mountDarkColors  = { day: '#475569', forest: '#1e1b4b', darkforest: '#24053d', underwater: '#0c4a6e', jungle: '#064e3b' , mountain: '#334155' };
+        const snowColors       = { day: '#f1f5f9', forest: '#818cf8', darkforest: '#f43f5e', underwater: '#38bdf8', jungle: '#6ee7b7' , mountain: '#ffffff'};
 
         const mLight = lerpColor(mountLightColors[theme] || '#64748b', mountLightColors[nextTheme] || mountLightColors[theme] || '#64748b', blend);
         const mDark  = lerpColor(mountDarkColors[theme]  || '#475569', mountDarkColors[nextTheme]  || mountDarkColors[theme]  || '#475569', blend);
@@ -848,8 +1091,8 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
             ctx.fillRect(cx + 34, 79, 4, 9);
         }
 
-        const hillMap = { day: '#4ade80', forest: '#1e293b', darkforest: '#111827', underwater: '#0e7490', jungle: '#15803d' };
-        const hillHighlightMap = { day: '#86efac', forest: '#334155', darkforest: '#1f2937', underwater: '#22d3ee', jungle: '#4ade80' };
+        const hillMap = { day: '#4ade80', forest: '#1e293b', darkforest: '#111827', underwater: '#0e7490', jungle: '#15803d', mountain: '#334155' };
+        const hillHighlightMap = { day: '#86efac', forest: '#334155', darkforest: '#1f2937', underwater: '#22d3ee', jungle: '#4ade80', mountain: '#64748b' };
         const hillColor = lerpColor(hillMap[theme] || '#4ade80', hillMap[nextTheme] || hillMap[theme] || '#4ade80', blend);
         const hillRim   = lerpColor(hillHighlightMap[theme] || '#86efac', hillHighlightMap[nextTheme] || hillHighlightMap[theme] || '#86efac', blend);
         const hillShade = lerpColor(hillColor, '#05070e', 0.25);
@@ -877,8 +1120,8 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
             ctx.fillRect(hx + 210, 465, 18, 12);
         }
 
-        const horizonGroundMap = { day: '#15803d', forest: '#0b1324', darkforest: '#07070c', underwater: '#083344', jungle: '#052e16' };
-        const horizonTopMap    = { day: '#22c55e', forest: '#1e293b', darkforest: '#18181b', underwater: '#06b6d4', jungle: '#16a34a' };
+        const horizonGroundMap = { day: '#15803d', forest: '#0b1324', darkforest: '#07070c', underwater: '#083344', jungle: '#052e16', mountain: '#1e293b' };
+        const horizonTopMap    = { day: '#22c55e', forest: '#1e293b', darkforest: '#18181b', underwater: '#06b6d4', jungle: '#16a34a', mountain: '#e2e8f0' };
         const horizonColor = lerpColor(horizonGroundMap[theme] || '#15803d', horizonGroundMap[nextTheme] || horizonGroundMap[theme] || '#15803d', blend);
         const horizonRim   = lerpColor(horizonTopMap[theme]    || '#22c55e', horizonTopMap[nextTheme]    || horizonTopMap[theme]    || '#22c55e', blend);
 
@@ -887,9 +1130,9 @@ function drawEnvironment(theme, nextTheme = null, blend = 0) {
         ctx.fillStyle = horizonRim;
         ctx.fillRect(0, 494, canvas.width, 5);
 
-        const treeLightMap = { day: '#22c55e', forest: '#1e293b', darkforest: '#18181b', underwater: '#0d9488', jungle: '#16a34a' };
-        const treeDarkMap  = { day: '#15803d', forest: '#0f172a', darkforest: '#09090b', underwater: '#115e59', jungle: '#14532d' };
-        const trunkMap     = { day: '#78350f', forest: '#3f2305', darkforest: '#1c1917', underwater: '#134e4a', jungle: '#451a03' };
+        const treeLightMap = { day: '#22c55e', forest: '#1e293b', darkforest: '#18181b', underwater: '#0d9488', jungle: '#16a34a', mountain: '#0f766e' };
+        const treeDarkMap  = { day: '#15803d', forest: '#0f172a', darkforest: '#09090b', underwater: '#115e59', jungle: '#14532d', mountain: '#115e59' };
+        const trunkMap     = { day: '#78350f', forest: '#3f2305', darkforest: '#1c1917', underwater: '#134e4a', jungle: '#451a03', mountain: '#334155' };
 
         const tLight = lerpColor(treeLightMap[theme] || '#22c55e', treeLightMap[nextTheme] || treeLightMap[theme] || '#22c55e', blend);
         const tDark  = lerpColor(treeDarkMap[theme]  || '#15803d', treeDarkMap[nextTheme]  || treeDarkMap[theme]  || '#15803d', blend);
@@ -964,7 +1207,9 @@ const BLOCK_PALETTES = {
     underwater_castle:   { body: '#0f172a', dark: '#020617', light: '#1e293b', cap: '#0d9488', capTop: '#2dd4bf', border: '#0284c7', style: 'brick' },
     underwater_sand:     { body: '#ca8a04', dark: '#a16207', light: '#fde047', cap: '#facc15', capTop: '#fde047', border: '#713f12', style: 'sand' },
     underwater_shallows: { body: '#5c3a21', dark: '#3f2305', light: '#b45309', cap: '#4d7c0f', capTop: '#22c55e', border: '#291502', style: 'shallows' },
-    john_base:           { body: '#0f172a', dark: '#020617', light: '#1e293b', cap: '#0284c7', capTop: '#67e8f9', border: '#38bdf8', style: 'cyber' }
+    john_base:           { body: '#0f172a', dark: '#020617', light: '#1e293b', cap: '#0284c7', capTop: '#67e8f9', border: '#38bdf8', style: 'cyber' },
+    sahara:              { body: '#b45309', dark: '#78350f', light: '#fbbf24', cap: '#facc15', capTop: '#fef08a', border: '#451a03', style: 'sand' },
+    mountain:            { body: '#334155', dark: '#1e293b', light: '#64748b', cap: '#e2e8f0', capTop: '#ffffff', border: '#0f172a', style: 'earth' }
 };
 
 function easeOutBack(t) {
@@ -981,7 +1226,17 @@ function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling, nextTheme = nu
     const isLow = typeof lowEndMode !== 'undefined' && lowEndMode;
     const smoothB = blend <= 0.001 ? 0 : (blend >= 0.999 ? 1 : blend * blend * (3 - 2 * blend));
 
-    const pA = BLOCK_PALETTES[theme] || BLOCK_PALETTES.day;
+    let pA = BLOCK_PALETTES[theme] || BLOCK_PALETTES.day;
+    if (theme === 'mountain' && typeof currentLevelIdx === 'number' && currentLevelIdx >= 100) {
+        const desc = Math.max(0, Math.min(1, (currentLevelIdx - 100) / 24));
+        if (desc >= 0.72) {
+            // Niskie partie gór tuż nad ziemią: zielona trawa na górskich skałach!
+            pA = { body: '#475569', dark: '#1e293b', light: '#94a3b8', cap: '#22c55e', capTop: '#86efac', border: '#0f172a', style: 'earth' };
+        } else if (desc >= 0.38) {
+            // Środkowe partie gór: szary granit z mchem i topniejącym śniegiem
+            pA = { body: '#334155', dark: '#1e293b', light: '#64748b', cap: '#99f6e4', capTop: '#f8fafc', border: '#0f172a', style: 'earth' };
+        }
+    }
     const pB = (nextTheme && BLOCK_PALETTES[nextTheme]) ? BLOCK_PALETTES[nextTheme] : pA;
 
     let bodyA = pA.body;
@@ -1176,23 +1431,82 @@ function drawSolidBlock(x, y, w, h, theme, isPlatform, isFalling, nextTheme = nu
 
 function drawSpikes(x, y, w, h, dir, extProgress = 1) {
     const isLow = typeof lowEndMode !== 'undefined' && lowEndMode;
-    const count = Math.max(2, Math.floor(w / 14));
-    const sw = w / count;
+    const lvl = LEVELS[currentLevelIdx];
+    const isSahara = Boolean(lvl && lvl.theme === 'sahara');
 
-    // Płynne nieliniowe wysuwanie kolców (easeOutBack) w trybie High Graphics
+    // Płynne nieliniowe wysuwanie (easeOutBack) w trybie High Graphics
     let effH = h;
     if (!isLow && dir === 'up' && extProgress < 1) {
         const eased = Math.max(0.05, Math.min(1.08, easeOutBack(Math.max(0, Math.min(1, extProgress)))));
         effH = h * eased;
     }
 
+    if (dir === 'boulder') {
+        ctx.save();
+        const cx = x + w * 0.5;
+        const cy = y + h * 0.5;
+        ctx.translate(cx, cy);
+        if (!isLow) ctx.rotate((y * 0.025) % (Math.PI * 2));
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(-w * 0.45, -h * 0.45, w * 0.9, h * 0.9);
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(-w * 0.35, -h * 0.35, w * 0.45, h * 0.4);
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-w * 0.45, -h * 0.45, w * 0.9, h * 0.9);
+        ctx.restore();
+        return;
+    }
+
+    // Na Saharze pułapki podłogowe to Kolczaste Kaktusy, a sufitowe to Głazy Piaskowca!
+    if (isSahara && dir === 'up') {
+        const cCount = Math.max(1, Math.floor(w / 24));
+        const cw = w / cCount;
+        for (let i = 0; i < cCount; i++) {
+            const cx = x + i * cw + cw * 0.5;
+            const trunkW = Math.min(14, cw * 0.48);
+            const topY = y + h - effH;
+
+            // Główny pień kaktusa
+            ctx.fillStyle = '#15803d';
+            ctx.fillRect(cx - trunkW * 0.5, topY, trunkW, effH);
+            if (!isLow) {
+                ctx.fillStyle = '#22c55e';
+                ctx.fillRect(cx - trunkW * 0.25, topY + 2, trunkW * 0.4, Math.max(0, effH - 2));
+                // Boczne ramiona kaktusa
+                if (effH > 14) {
+                    ctx.fillStyle = '#16a34a';
+                    ctx.fillRect(cx - trunkW * 0.5 - 6, topY + effH * 0.38, 6, 5);
+                    ctx.fillRect(cx - trunkW * 0.5 - 6, topY + effH * 0.18, 4, effH * 0.24);
+                    ctx.fillRect(cx + trunkW * 0.5, topY + effH * 0.48, 6, 5);
+                    ctx.fillRect(cx + trunkW * 0.5 + 2, topY + effH * 0.26, 4, effH * 0.26);
+                }
+                // Białe ostre kolce kaktusa
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillRect(cx - trunkW * 0.5 - 3, topY + 5, 3, 2);
+                ctx.fillRect(cx + trunkW * 0.5, topY + 9, 3, 2);
+                ctx.fillRect(cx - 1, topY - 3, 2, 3);
+                // Czerwony kwiat pustynny na czubku
+                ctx.fillStyle = '#f43f5e';
+                ctx.fillRect(cx - 3, topY - 4, 6, 4);
+            }
+            ctx.strokeStyle = '#052e16';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(cx - trunkW * 0.5, topY, trunkW, effH);
+        }
+        return;
+    }
+
+    const count = Math.max(2, Math.floor(w / 14));
+    const sw = w / count;
+
     if (!isLow && dir === 'up') {
         ctx.fillStyle = '#1e293b';
         ctx.fillRect(x, y + h - 4, w, 4);
     }
 
-    ctx.fillStyle = '#e2e8f0';
-    ctx.strokeStyle = '#334155';
+    ctx.fillStyle = isSahara ? '#d97706' : '#e2e8f0';
+    ctx.strokeStyle = isSahara ? '#451a03' : '#334155';
     ctx.lineWidth = 1.5;
 
     ctx.beginPath();
@@ -1213,8 +1527,7 @@ function drawSpikes(x, y, w, h, dir, extProgress = 1) {
 
     if (!isLow) {
         ctx.stroke();
-        // Metaliczny połysk na ostrzach kolców w trybie High Graphics
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = isSahara ? '#fde047' : '#ffffff';
         for (let i = 0; i < count; i++) {
             const sx = x + i * sw;
             if (dir === 'up') {
@@ -1467,13 +1780,19 @@ function drawPlayer() {
         }
         ctx.restore();
 
-        // Pasek przeładowania nad głową Dave'a, gdy bateria się ładuje
+        // Pasek przeładowania nad głową Dave'a (świeci na cyjanowo-zielono podczas szybkiego ładowania kręceniem 360°!)
         if (isReloading) {
             const pct = Math.max(0, Math.min(1, (weapon.reloadDuration - weapon.reloadTimer) / weapon.reloadDuration));
+            const isSpinBoost = weapon.spinBoostTimer > 0;
             ctx.fillStyle = '#090d16';
-            ctx.fillRect(cx - 16, player.y - 12, 32, 5);
-            ctx.fillStyle = '#facc15';
-            ctx.fillRect(cx - 15, player.y - 11, 30 * pct, 3);
+            ctx.fillRect(cx - 18, player.y - 13, 36, 6);
+            if (isSpinBoost) {
+                ctx.strokeStyle = '#22d3ee';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(cx - 18, player.y - 13, 36, 6);
+            }
+            ctx.fillStyle = isSpinBoost ? '#22d3ee' : '#facc15';
+            ctx.fillRect(cx - 17, player.y - 12, 34 * pct, 4);
         }
         return;
     }
@@ -1530,7 +1849,115 @@ function drawRoboEnemy(e) {
         const ew = e.w | 0;
         const eh = e.h | 0;
         const dir = e.facing || Math.sign(e.vx) || 1;
-
+        
+        if (
+            e.type === 'john_dash_bot' ||
+            e.type === 'john_laser_sniper' ||
+            e.type === 'john_cryo_drone' ||
+            e.type === 'john_vanguard' ||
+            e.type === 'john_titan_mech'
+        ) {
+            if (e.chargeTimer > 0) {
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(ex + (ew >> 1), ey + (eh >> 1));
+                ctx.lineTo(ex + (ew >> 1) + dir * 210, ey + (eh >> 1));
+                ctx.stroke();
+            }
+            if (e.maxHp > 1 && e.hp < e.maxHp) {
+                ctx.fillStyle = '#090d16';
+                ctx.fillRect(ex, ey - 8, ew, 4);
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillRect(ex + 1, ey - 7, ((ew - 2) * (e.hp / e.maxHp)) | 0, 2);
+            }
+            if (e.type === 'john_dash_bot') {
+                // Spoilery + niebieski speedster
+                ctx.fillStyle = '#00f2fe';
+                ctx.fillRect(dir > 0 ? ex - 6 : ex + ew, ey + 4, 6, 5);
+                ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#0f172a';
+                ctx.fillRect(ex, ey, ew, eh);
+                ctx.strokeStyle = '#00f2fe';
+                ctx.strokeRect(ex + 1, ey + 1, ew - 2, eh - 2);
+                ctx.fillStyle = '#fef08a';
+                ctx.fillRect(ex + (dir > 0 ? 12 : 4), ey + 10, 14, 5);
+            } else if (e.type === 'john_laser_sniper') {
+                // Długa lufa snajperska + celownik optyczny na głowie
+                ctx.fillStyle = '#f43f5e';
+                ctx.fillRect(ex + 10, ey - 6, 12, 6);
+                ctx.fillStyle = '#334155';
+                ctx.fillRect(dir > 0 ? ex + ew : ex - 16, ey + 13, 16, 5);
+                ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#1e1b4b';
+                ctx.fillRect(ex, ey, ew, eh);
+                ctx.strokeStyle = '#f43f5e';
+                ctx.strokeRect(ex + 1, ey + 1, ew - 2, eh - 2);
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(ex + (dir > 0 ? 18 : 6), ey + 9, 8, 8);
+            } else if (e.type === 'john_cryo_drone') {
+                // Boczne gondole wirników + lodowy rdzeń
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(ex - 5, ey + 6, 5, 16);
+                ctx.fillRect(ex + ew, ey + 6, 5, 16);
+                ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#083344';
+                ctx.fillRect(ex, ey + 2, ew, eh - 4);
+                ctx.strokeStyle = '#67e8f9';
+                ctx.strokeRect(ex + 1, ey + 3, ew - 2, eh - 6);
+                ctx.fillStyle = '#a5f3fc';
+                ctx.fillRect(ex + 10, ey + 10, 12, 12);
+            } else if (e.type === 'john_vanguard') {
+                // Pancerny gwardzista + wysoka tarcza energetyczna z przodu
+                ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#1e293b';
+                ctx.fillRect(ex, ey, ew, eh);
+                ctx.strokeStyle = '#facc15';
+                ctx.strokeRect(ex + 1, ey + 1, ew - 2, eh - 2);
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillRect(ex + (dir > 0 ? 14 : 6), ey + 10, 16, 7);
+                ctx.fillStyle = '#22d3ee';
+                ctx.fillRect(dir > 0 ? ex + ew + 2 : ex - 7, ey - 2, 5, eh + 4);
+            } else if (e.type === 'john_titan_mech') {
+                // Wielki mech z 2 działkami naramiennymi
+                ctx.fillStyle = '#ec4899';
+                ctx.fillRect(ex + 4, ey - 8, 12, 8);
+                ctx.fillRect(ex + ew - 16, ey - 8, 12, 8);
+                ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#31102f';
+                ctx.fillRect(ex, ey, ew, eh);
+                ctx.strokeStyle = '#facc15';
+                ctx.strokeRect(ex + 1, ey + 1, ew - 2, eh - 2);
+                ctx.fillStyle = '#f43f5e';
+                ctx.fillRect(ex + 8, ey + 12, ew - 16, 12);
+            }
+            return;
+        }
+        if (e.type === 'dino_raptor') {
+            ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#15803d';
+            ctx.fillRect(ex, ey, ew, eh);
+            ctx.strokeStyle = '#86efac';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(ex + 1, ey + 1, ew - 2, eh - 2);
+            ctx.fillStyle = '#facc15';
+            ctx.fillRect(dir > 0 ? ex + 20 : ex + 5, ey + 8, 8, 6);
+            if (e.hp < e.maxHp) {
+                ctx.fillStyle = '#090d16';
+                ctx.fillRect(ex + 2, ey - 8, ew - 4, 4);
+                ctx.fillStyle = '#4ade80';
+                ctx.fillRect(ex + 3, ey - 7, ((ew - 6) * (e.hp / e.maxHp)) | 0, 2);
+            }
+            return;
+        }
+        if (e.type === 'dino_rex') {
+            ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#9a3412';
+            ctx.fillRect(ex, ey, ew, eh);
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(ex + 1, ey + 1, ew - 2, eh - 2);
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(dir > 0 ? ex + 30 : ex + 8, ey + 12, 12, 8);
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(ex + 4, ey - 10, ew - 8, 5);
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(ex + 5, ey - 9, ((ew - 10) * (e.hp / e.maxHp)) | 0, 3);
+            return;
+        }
         if (e.type === 'jetpack_rammer') {
             ctx.fillStyle = e.ramState === 'ramming' ? '#991b1b' : '#0f172a';
             ctx.fillRect(ex, ey, ew, eh);
@@ -1601,12 +2028,544 @@ function drawRoboEnemy(e) {
     }
 
     // Płynny kierunek patrzenia i obrotu (-1..+1) w trybie High Graphics
-    const rawDir = (isEvadBot || isRoboFish || e.type === 'jetpack_rammer' || e.type === 'raygun_drone')
+    const isJohnMtnBot = (
+        e.type === 'john_dash_bot' ||
+        e.type === 'john_laser_sniper' ||
+        e.type === 'john_cryo_drone' ||
+        e.type === 'john_vanguard' ||
+        e.type === 'john_titan_mech'
+    );
+    const rawDir = (isEvadBot || isRoboFish || isJohnMtnBot || e.type === 'jetpack_rammer' || e.type === 'raygun_drone' || e.type === 'dino_raptor' || e.type === 'dino_rex')
         ? (e.facing || Math.sign(e.vx) || 1)
         : (Math.sign(e.vx) || 1);
     const smoothDir = e.visualDir !== undefined ? e.visualDir : rawDir;
     const scaleY = e.visualScaleY !== undefined ? e.visualScaleY : 1;
     const scaleX = 2 - scaleY;
+
+    // ========================================================================
+    // 5 UNIKALNYCH MODELI GÓRSKICH ROBOTÓW JOHNA (KAŻDY Z WŁASNYM WYGLĄDEM!)
+    // ========================================================================
+    if (isJohnMtnBot) {
+        const dirSign = (e.facing || Math.sign(e.vx) || 1) >= 0 ? 1 : -1;
+        const walkBob = (e.type !== 'john_cryo_drone' && e.onGround)
+            ? Math.abs(Math.sin(tickCount * 0.32 + e.minX)) * 1.6
+            : 0;
+
+        // Smugi widmowe (Afterimages) podczas wykonywania uniku Dash przed pociskiem gracza!
+        if (e.dashVisualTimer > 0 || (e.type === 'john_dash_bot' && e.turboActive)) {
+            const ghostCount = e.dashVisualTimer > 0 ? 3 : 2;
+            for (let g = ghostCount; g >= 1; g--) {
+                ctx.save();
+                ctx.globalAlpha = (e.dashVisualTimer > 0 ? 0.28 : 0.16) * ((ghostCount - g + 1) / ghostCount);
+                ctx.fillStyle = e.type === 'john_dash_bot' ? '#00f2fe' : '#38bdf8';
+                ctx.fillRect(e.x - dirSign * g * 11, e.y + (g & 1 ? -2 : 2), e.w, e.h);
+                ctx.restore();
+            }
+        }
+
+        ctx.save();
+        ctx.translate(e.x + e.w * 0.5, e.y + e.h * 0.5 - walkBob);
+
+        // Pasek HP nad głową wielo-HP robotów Johna
+        if (e.maxHp > 1 && (e.hp < e.maxHp || e.type === 'john_titan_mech' || e.type === 'john_vanguard')) {
+            const pct = Math.max(0, e.hp / e.maxHp);
+            const barW = Math.max(32, e.w);
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(-barW * 0.5, -e.h * 0.5 - 15, barW, 6);
+            ctx.strokeStyle = e.type === 'john_titan_mech' ? '#ec4899' : '#38bdf8';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(-barW * 0.5, -e.h * 0.5 - 15, barW, 6);
+            ctx.fillStyle = e.type === 'john_titan_mech' ? '#ec4899' : (e.type === 'john_vanguard' ? '#facc15' : '#38bdf8');
+            ctx.fillRect(-barW * 0.5 + 1, -e.h * 0.5 - 14, (barW - 2) * pct, 4);
+        }
+
+        // Wiązka celownicza (jak u Robota Evada, ale z celownikiem optycznym Johna)
+        if (e.chargeTimer > 0) {
+            ctx.save();
+            const isFlash = (tickCount % 4 < 2);
+            ctx.strokeStyle = isFlash ? 'rgba(244, 63, 94, 0.92)' : 'rgba(56, 189, 248, 0.92)';
+            ctx.lineWidth = e.type === 'john_laser_sniper' ? 2.5 : 2;
+            ctx.setLineDash([7, 4]);
+            ctx.beginPath();
+            ctx.moveTo(dirSign * (e.w * 0.5 + 6), 0);
+            ctx.lineTo(dirSign * 265, 0);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            // Znacznik namierzenia na końcu wiązki
+            ctx.strokeRect(dirSign * 190 - 6, -6, 12, 12);
+            ctx.restore();
+        }
+
+        // --------------------------------------------------------------------
+        // MODEL 1: JOHN_DASH_BOT (Cyber-Dasher Mk.IV: Aerodynamiczny Zwiadowca)
+        // Posiada podwójne skośne spoilery/skrzydła na plecach, boczne dopalacze
+        // plazmowe i piorunowy wizjer w kształcie litery V!
+        // --------------------------------------------------------------------
+        if (e.type === 'john_dash_bot') {
+            ctx.rotate(smoothDir * (e.turboActive ? 0.12 : 0.05));
+            ctx.scale(scaleX, scaleY);
+
+            // Płomienie z bocznych dopalaczy odrzutowych z tyłu
+            const jetLen = (e.turboActive || e.dashVisualTimer > 0) ? (14 + (tickCount % 5) * 2) : 8;
+            ctx.fillStyle = '#00f2fe';
+            ctx.fillRect(-dirSign * (e.w * 0.5 + jetLen), -8, jetLen, 5);
+            ctx.fillRect(-dirSign * (e.w * 0.5 + jetLen * 0.8), 3, jetLen * 0.8, 5);
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(-dirSign * (e.w * 0.5 + jetLen * 0.5), -7, jetLen * 0.5, 3);
+
+            // Dwa ostre aerodynamiczne spoilery / płetwy szybkości na grzbiecie
+            ctx.fillStyle = '#0284c7';
+            ctx.beginPath();
+            ctx.moveTo(dirSign * 4, -e.h * 0.5);
+            ctx.lineTo(-dirSign * 18, -e.h * 0.5 - 11);
+            ctx.lineTo(-dirSign * 10, -e.h * 0.5);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.moveTo(-dirSign * 4, -e.h * 0.5 + 4);
+            ctx.lineTo(-dirSign * 21, -e.h * 0.5 - 4);
+            ctx.lineTo(-dirSign * 12, -e.h * 0.5 + 6);
+            ctx.closePath();
+            ctx.fill();
+
+            // Korpus Speedstera z ukośnymi pasami wyścigowymi Johna
+            ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#090d16';
+            ctx.fillRect(-e.w * 0.5, -e.h * 0.5, e.w, e.h);
+            if (e.hitFlashTimer <= 0) {
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(-e.w * 0.5 + 2, -e.h * 0.5 + 2, e.w - 4, e.h - 4);
+                // Neonowe pasy po bokach
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(-e.w * 0.5 + 3, 6, e.w - 6, 4);
+            }
+            ctx.strokeStyle = e.chargeTimer > 0 ? '#facc15' : '#00f2fe';
+            ctx.lineWidth = 2.2;
+            ctx.strokeRect(-e.w * 0.5 + 1, -e.h * 0.5 + 1, e.w - 2, e.h - 2);
+
+            // Ostry wizjer w kształcie błyskawicy / szewronu V
+            const vx = smoothDir * 4;
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(-12 + vx * 0.5, -9, 24, 12);
+            ctx.fillStyle = e.chargeTimer > 0 ? '#facc15' : '#00f2fe';
+            ctx.beginPath();
+            ctx.moveTo(-9 + vx, -6);
+            ctx.lineTo(0 + vx, -2);
+            ctx.lineTo(9 + vx, -6);
+            ctx.lineTo(9 + vx, 0);
+            ctx.lineTo(0 + vx, 3);
+            ctx.lineTo(-9 + vx, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(dirSign * 3 + vx, -5, 4, 3);
+
+            ctx.restore();
+            return;
+        }
+
+        // --------------------------------------------------------------------
+        // MODEL 2: JOHN_LASER_SNIPER (Dalekosiężny Strzelec Wyborowy)
+        // Posiada długą lufę snajperską Railgun z cewkami plazmowymi, górny
+        // celownik teleskopowy z soczewką i pojedyncze oko cyklopa z krzyżem!
+        // --------------------------------------------------------------------
+        if (e.type === 'john_laser_sniper') {
+            ctx.scale(scaleX, scaleY);
+
+            // Górny celownik teleskopowy (Rangefinder Scope) i antena na głowie
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(-7, -e.h * 0.5 - 8, 14, 8);
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(-7, -e.h * 0.5 - 8, 14, 8);
+            ctx.fillStyle = (tickCount % 10 < 5) ? '#ef4444' : '#fde047';
+            ctx.fillRect(dirSign * 4 - 2, -e.h * 0.5 - 6, 4, 4);
+
+            // Długa lufa snajperska Railgun wystająca z przodu
+            const barrelX = dirSign > 0 ? (e.w * 0.5 - 2) : (-e.w * 0.5 - 20);
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(barrelX, -3, 22, 7);
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(barrelX, -3, 22, 7);
+            // Świecące pierścienie akceleratora na lufie
+            ctx.fillStyle = e.chargeTimer > 0 ? '#facc15' : '#f43f5e';
+            ctx.fillRect(barrelX + 4, -4, 3, 9);
+            ctx.fillRect(barrelX + 11, -4, 3, 9);
+            ctx.fillRect(barrelX + 18, -5, 3, 11);
+
+            // Karmazynowo-granatowy pancerz snajpera z narożnikami taktycznymi
+            ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#1e1b4b';
+            ctx.fillRect(-e.w * 0.5, -e.h * 0.5, e.w, e.h);
+            if (e.hitFlashTimer <= 0) {
+                ctx.fillStyle = '#4c0519';
+                ctx.fillRect(-e.w * 0.5 + 3, 2, e.w - 6, e.h * 0.5 - 4);
+            }
+            ctx.strokeStyle = e.chargeTimer > 0 ? '#facc15' : '#f43f5e';
+            ctx.lineWidth = 2.2;
+            ctx.strokeRect(-e.w * 0.5 + 1, -e.h * 0.5 + 1, e.w - 2, e.h - 2);
+
+            // Wielkie pojedyncze oko optyczne snajpera (Cyklop) z krzyżem celowniczym
+            const eyeX = smoothDir * 5;
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(-11, -9, 22, 12);
+            ctx.fillStyle = e.chargeTimer > 0 ? '#facc15' : '#ef4444';
+            ctx.beginPath();
+            ctx.arc(eyeX, -3, 5.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(eyeX - 1, -7, 2, 8);
+            ctx.fillRect(eyeX - 4, -4, 8, 2);
+
+            ctx.restore();
+            return;
+        }
+
+        // --------------------------------------------------------------------
+        // MODEL 3: JOHN_CRYO_DRONE (Górski Krio-Dron Unikowy)
+        // Latający oktagonalny dron z 2 bocznymi gondolami silnikowymi VTOL,
+        // lodową koroną kryształową na górze i obracającym się rdzeniem Krio!
+        // --------------------------------------------------------------------
+        if (e.type === 'john_cryo_drone') {
+            const hoverTilt = Math.sin(tickCount * 0.1 + e.minX) * 0.08;
+            ctx.rotate(hoverTilt + smoothDir * 0.06);
+
+            // Boczne gondole odrzutowe VTOL + zimne strumienie plazmy w dół
+            const thrustH = 9 + (tickCount % 4) * 2;
+            for (const side of [-1, 1]) {
+                const nx = side * (e.w * 0.5 + 4);
+                ctx.fillStyle = '#67e8f9';
+                ctx.fillRect(nx - 3, 8, 6, thrustH);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(nx - 1.5, 8, 3, thrustH * 0.6);
+
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(nx - 5, -8, 10, 18);
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(nx - 5, -8, 10, 18);
+            }
+
+            // Trzy lodowe kryształy Krio na koronie drona
+            ctx.fillStyle = '#a5f3fc';
+            for (const cxOff of [-8, 0, 8]) {
+                ctx.beginPath();
+                ctx.moveTo(cxOff - 4, -e.h * 0.5);
+                ctx.lineTo(cxOff, -e.h * 0.5 - (cxOff === 0 ? 10 : 7));
+                ctx.lineTo(cxOff + 4, -e.h * 0.5);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // Główny korpus Krio-Drona
+            ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#083344';
+            ctx.fillRect(-e.w * 0.5, -e.h * 0.5, e.w, e.h);
+            ctx.strokeStyle = '#67e8f9';
+            ctx.lineWidth = 2.2;
+            ctx.strokeRect(-e.w * 0.5 + 1, -e.h * 0.5 + 1, e.w - 2, e.h - 2);
+
+            // Obracający się diamentowy rdzeń Krio w centrum klatki piersiowej
+            ctx.save();
+            ctx.translate(smoothDir * 3, -1);
+            ctx.rotate(tickCount * 0.08);
+            ctx.fillStyle = '#22d3ee';
+            ctx.fillRect(-7, -7, 14, 14);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(-3.5, -3.5, 7, 7);
+            ctx.restore();
+
+            // Podwójne podwieszane emitery laserowe pod spodem
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(-9, e.h * 0.5, 5, 5);
+            ctx.fillRect(4, e.h * 0.5, 5, 5);
+
+            ctx.restore();
+            return;
+        }
+
+        // --------------------------------------------------------------------
+        // MODEL 4: JOHN_VANGUARD (Pancerny Gwardzista Johna, 38x38, 5 HP)
+        // Ciężki rycerz-juggernaut ze złotymi naramiennikami, przyłbicą w
+        // kształcie litery T oraz wysoką energetyczną Tarczą Riot przed sobą!
+        // --------------------------------------------------------------------
+        if (e.type === 'john_vanguard') {
+            ctx.scale(scaleX, scaleY);
+
+            // Tylny generator mocy na plecach
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(-dirSign * (e.w * 0.5 + 6) - 3, -10, 6, 20);
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(-dirSign * (e.w * 0.5 + 6) - 2, -6, 4, 12);
+
+            // Masywny stalowo-złoty korpus Gwardzisty
+            ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#1e293b';
+            ctx.fillRect(-e.w * 0.5, -e.h * 0.5, e.w, e.h);
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 2.8;
+            ctx.strokeRect(-e.w * 0.5 + 1, -e.h * 0.5 + 1, e.w - 2, e.h - 2);
+
+            // Ciężkie naramienniki pancerne (Pauldrons) u góry po bokach
+            ctx.fillStyle = '#ca8a04';
+            ctx.fillRect(-e.w * 0.5 - 3, -e.h * 0.5 - 3, 12, 10);
+            ctx.fillRect(e.w * 0.5 - 9, -e.h * 0.5 - 3, 12, 10);
+            ctx.strokeStyle = '#fef08a';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(-e.w * 0.5 - 3, -e.h * 0.5 - 3, 12, 10);
+            ctx.strokeRect(e.w * 0.5 - 9, -e.h * 0.5 - 3, 12, 10);
+
+            // Rycerski cyber-wizjer w kształcie litery T
+            const vx = smoothDir * 4;
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(-12 + vx * 0.5, -9, 24, 15);
+            ctx.fillStyle = e.chargeTimer > 0 ? '#ef4444' : '#38bdf8';
+            ctx.fillRect(-9 + vx, -7, 18, 5);
+            ctx.fillRect(-3 + vx, -2, 6, 7);
+
+            // Wysoka projekcyjna Tarcza Energetyczna (Riot Shield) z przodu!
+            const shieldX = dirSign * (e.w * 0.5 + 7);
+            const shieldPulse = 0.72 + Math.sin(tickCount * 0.18) * 0.18;
+            ctx.fillStyle = `rgba(34, 211, 238, ${shieldPulse.toFixed(2)})`;
+            ctx.fillRect(shieldX - 3, -e.h * 0.5 - 4, 6, e.h + 8);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(shieldX - 3, -e.h * 0.5 - 4, 6, e.h + 8);
+            // Złote głowice emiterów tarczy na górze i na dole
+            ctx.fillStyle = '#facc15';
+            ctx.fillRect(shieldX - 5, -e.h * 0.5 - 6, 10, 5);
+            ctx.fillRect(shieldX - 5, e.h * 0.5 + 1, 10, 5);
+
+            ctx.restore();
+            return;
+        }
+
+        // --------------------------------------------------------------------
+        // MODEL 5: JOHN_TITAN_MECH (Górski Egzoszkielet Johna, 46x46, 9 HP)
+        // Olbrzymi elitarny Mech Bojowy z 2 podwójnymi działami laserowymi na
+        // ramionach, pasami ostrzegawczymi, hydraulicznymi goleniami i kokpitem!
+        // --------------------------------------------------------------------
+        if (e.type === 'john_titan_mech') {
+            ctx.scale(scaleX, scaleY);
+
+            // Dwa potężne działka naramienne (Shoulder Twin-Cannons) na szczycie Mecha
+            for (const sxOff of [-14, 10]) {
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(sxOff - 5, -e.h * 0.5 - 11, 14, 11);
+                ctx.strokeStyle = '#ec4899';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(sxOff - 5, -e.h * 0.5 - 11, 14, 11);
+                // Lufy działek skierowane w stronę gracza
+                ctx.fillStyle = '#facc15';
+                ctx.fillRect(sxOff + (dirSign > 0 ? 9 : -11), -e.h * 0.5 - 8, 6, 5);
+            }
+
+            // Hydrauliczne stopy / golenie pancerne u dołu
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(-e.w * 0.5 + 3, e.h * 0.5 - 4, 14, 7);
+            ctx.fillRect(e.w * 0.5 - 17, e.h * 0.5 - 4, 14, 7);
+
+            // Główny masywny kadłub Egzoszkieletu (46x46)
+            ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#2e1065';
+            ctx.fillRect(-e.w * 0.5, -e.h * 0.5, e.w, e.h);
+            ctx.strokeStyle = e.chargeTimer > 0 ? '#facc15' : '#ec4899';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-e.w * 0.5 + 1.5, -e.h * 0.5 + 1.5, e.w - 3, e.h - 3);
+
+            // Żółto-czarne pasy ostrzegawcze (Hazard Stripes) na dolnej płycie pancerza
+            if (e.hitFlashTimer <= 0) {
+                ctx.fillStyle = '#facc15';
+                ctx.fillRect(-e.w * 0.5 + 4, e.h * 0.5 - 11, e.w - 8, 7);
+                ctx.fillStyle = '#090d16';
+                for (let hx = -e.w * 0.5 + 6; hx < e.w * 0.5 - 8; hx += 10) {
+                    ctx.fillRect(hx, e.h * 0.5 - 11, 5, 7);
+                }
+            }
+
+            // Pancerna szyba kokpitu w centrum i świecący rdzeń AI Johna
+            const lookX = smoothDir * 5;
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(-16, -13, 32, 18);
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(-16, -13, 32, 18);
+
+            // Dwa groźne cyber-oczy Tytana + centralny rdzeń reaktora
+            ctx.fillStyle = e.chargeTimer > 0 ? '#facc15' : '#f43f5e';
+            ctx.fillRect(-12 + lookX, -9, 9, 8);
+            ctx.fillRect(3 + lookX, -9, 9, 8);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(-9 + lookX, -7, 3, 3);
+            ctx.fillRect(6 + lookX, -7, 3, 3);
+
+            ctx.fillStyle = '#22d3ee';
+            ctx.fillRect(-5, 0, 10, 4);
+
+            ctx.restore();
+            return;
+        }
+    }
+
+    // 1. MAŁY KWADRATOWY DINOZAUR (DINO-RAPTOR: Szybki Skoczek, 5 HP)
+    if (e.type === 'dino_raptor') {
+        ctx.save();
+        const walkBob = e.onGround ? Math.abs(Math.sin(tickCount * 0.35 + e.minX)) * 1.5 : 0;
+        ctx.translate(e.x + e.w / 2, e.y + e.h / 2 - walkBob);
+
+        // Pasek HP nad głową Raptora (gdy uszkodzony lub goni gracza)
+        if (e.hp < e.maxHp || e.chasingPlayer) {
+            const pct = Math.max(0, e.hp / e.maxHp);
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(-16, -e.h / 2 - 14, 32, 5);
+            ctx.fillStyle = pct > 0.4 ? '#4ade80' : '#f43f5e';
+            ctx.fillRect(-15, -e.h / 2 - 13, 30 * pct, 3);
+        }
+
+        ctx.rotate(e.onGround ? 0 : smoothDir * 0.08);
+        ctx.scale(scaleX, scaleY);
+
+        // Kwadratowy ogon Raptora z tyłu
+        const tailWag = Math.sin(tickCount * 0.4) * 3;
+        ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#14532d';
+        ctx.fillRect(-smoothDir * (e.w / 2 + 5) - 5, 2 + tailWag * 0.5, 10, 8);
+
+        // Grzebień kolców na grzbiecie kwadratu
+        ctx.fillStyle = '#f97316';
+        for (let s = -10; s <= 8; s += 9) {
+            ctx.fillRect(s - 3, -e.h / 2 - 5, 6, 5);
+        }
+
+        // Kwadratowy korpus Raptora
+        ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : (e.turboActive ? '#15803d' : '#166534');
+        ctx.fillRect(-e.w / 2, -e.h / 2, e.w, e.h);
+        ctx.strokeStyle = e.turboActive ? '#facc15' : '#4ade80';
+        ctx.lineWidth = 2.2;
+        ctx.strokeRect(-e.w / 2 + 1, -e.h / 2 + 1, e.w - 2, e.h - 2);
+
+        // Cętki / łuski na pancerzu
+        if (e.hitFlashTimer <= 0) {
+            ctx.fillStyle = '#14532d';
+            ctx.fillRect(-smoothDir * 8 - 4, 2, 7, 7);
+            ctx.fillRect(-smoothDir * 5 - 3, -10, 6, 5);
+        }
+
+        // Kwadratowa paszcza i ostre białe zęby
+        const jawX = smoothDir * 8;
+        ctx.fillStyle = '#090d16';
+        ctx.fillRect(jawX - 7, 3, 14, 7);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(jawX - 5, 3, 3, 3);
+        ctx.fillRect(jawX, 3, 3, 3);
+        ctx.fillRect(jawX + 4, 3, 3, 3);
+
+        // Gadzie oczy z pionową źrenicą
+        ctx.fillStyle = '#facc15';
+        ctx.fillRect(-8 + smoothDir * 4, -9, 7, 7);
+        ctx.fillRect(2 + smoothDir * 4, -9, 7, 7);
+        ctx.fillStyle = '#090d16';
+        ctx.fillRect(-5 + smoothDir * 5, -8, 2.5, 5);
+        ctx.fillRect(5 + smoothDir * 5, -8, 2.5, 5);
+
+        // Małe pazury z przodu
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(smoothDir * (e.w / 2) - 2, 4, 4, 4);
+        ctx.restore();
+        return;
+    }
+
+    // 2. DUŻY KWADRATOWY DINOZAUR (DINO-REX: Pancerny T-Rex, 14 HP)
+    if (e.type === 'dino_rex') {
+        ctx.save();
+        const isRoaring = Boolean(e.roaring);
+        const stompBob = isRoaring
+            ? Math.sin(tickCount * 0.75) * 1.5
+            : (e.onGround ? Math.abs(Math.sin(tickCount * 0.22 + e.minX)) * 2.0 : 0);
+        const roarShakeX = isRoaring ? Math.cos(tickCount * 1.1) * 2.0 : 0;
+        ctx.translate(e.x + e.w / 2 + roarShakeX, e.y + e.h / 2 - stompBob);
+
+        // Wyraźny pasek HP nad głową wielkiego T-Rexa (14 HP)
+        const pct = Math.max(0, e.hp / e.maxHp);
+        ctx.fillStyle = '#090d16';
+        ctx.fillRect(-24, -e.h / 2 - 16, 48, 7);
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-24, -e.h / 2 - 16, 48, 7);
+        ctx.fillStyle = pct > 0.5 ? '#ef4444' : (pct > 0.25 ? '#f97316' : '#facc15');
+        ctx.fillRect(-23, -e.h / 2 - 15, 46 * pct, 5);
+
+        ctx.rotate(isRoaring ? (-smoothDir * 0.04) : (e.onGround ? 0 : smoothDir * 0.05));
+        ctx.scale(scaleX, scaleY);
+
+        // Masywny kwadratowy ogon z tyłu
+        ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : '#7c2d12';
+        ctx.fillRect(-smoothDir * (e.w / 2 + 7) - 7, 4, 14, 12);
+        ctx.strokeStyle = '#451a03';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-smoothDir * (e.w / 2 + 7) - 7, 4, 14, 12);
+
+        // Płytki pancerne na grzbiecie
+        ctx.fillStyle = '#facc15';
+        for (let s = -16; s <= 14; s += 10) {
+            ctx.fillRect(s - 4, -e.h / 2 - 6, 7, 6);
+        }
+
+        // Olbrzymi kwadratowy korpus T-Rexa (52x52)
+        ctx.fillStyle = e.hitFlashTimer > 0 ? '#ffffff' : ((e.turboActive || isRoaring) ? '#9a3412' : '#7c2d12');
+        ctx.fillRect(-e.w / 2, -e.h / 2, e.w, e.h);
+        ctx.strokeStyle = (e.turboActive || isRoaring) ? '#facc15' : '#fb923c';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(-e.w / 2 + 1.5, -e.h / 2 + 1.5, e.w - 3, e.h - 3);
+
+        // Pancerny brzuch i łuski
+        if (e.hitFlashTimer <= 0) {
+            ctx.fillStyle = '#d97706';
+            ctx.fillRect(-e.w / 2 + 6, 8, e.w - 12, e.h / 2 - 10);
+            ctx.fillStyle = '#451a03';
+            ctx.fillRect(-smoothDir * 12 - 5, -14, 10, 8);
+            ctx.fillRect(-smoothDir * 10 - 5, -2, 8, 8);
+        }
+
+        // Potężna kwadratowa paszcza pełna kłów (otwiera się szeroko podczas darcia się/ryku!)
+        const jawX = smoothDir * 8;
+        const roarOpen = isRoaring ? (3 + Math.abs(Math.sin(tickCount * 0.3)) * 5) : 0;
+        ctx.fillStyle = isRoaring ? '#450a0a' : '#090d16';
+        ctx.fillRect(jawX - 14, 1 - roarOpen * 0.4, 28, 12 + roarOpen);
+        ctx.fillStyle = '#ffffff';
+        for (let t = -11; t <= 9; t += 5) {
+            ctx.fillRect(jawX + t, 1 - roarOpen * 0.4, 3.5, 4.5);
+            ctx.fillRect(jawX + t + 1, 9 + roarOpen * 0.6, 3, 4);
+        }
+
+        // Fale dźwiękowe ryku, gdy T-Rex stoi przy krawędzi i drze się na gracza!
+        if (isRoaring) {
+            const faceSign = smoothDir >= 0 ? 1 : -1;
+            ctx.strokeStyle = (tickCount % 6 < 3) ? 'rgba(250, 204, 21, 0.85)' : 'rgba(249, 115, 22, 0.85)';
+            ctx.lineWidth = 2.2;
+            for (let r = 1; r <= 3; r++) {
+                const rad = 10 + ((tickCount * 1.4 + r * 11) % 34);
+                const startA = faceSign > 0 ? -0.65 : (Math.PI - 0.65);
+                const endA   = faceSign > 0 ?  0.65 : (Math.PI + 0.65);
+                ctx.beginPath();
+                ctx.arc(faceSign * (e.w / 2 + 4), 4, rad, startA, endA);
+                ctx.stroke();
+            }
+        }
+
+        // Groźne oczy drapieżnika pod masywnymi brwiami
+        ctx.fillStyle = '#090d16';
+        ctx.fillRect(-16 + smoothDir * 5, -18, 32, 13);
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(-13 + smoothDir * 6, -15, 10, 9);
+        ctx.fillRect(3 + smoothDir * 6, -15, 10, 9);
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(-9 + smoothDir * 7, -13, 4, 6);
+        ctx.fillRect(7 + smoothDir * 7, -13, 4, 6);
+
+        // Krótkie łapki T-Rexa
+        ctx.fillStyle = '#f97316';
+        ctx.fillRect(smoothDir * (e.w / 2 - 2) - 3, 6, 8, 5);
+        ctx.restore();
+        return;
+    }
 
     if (e.type === 'jetpack_rammer') {
         ctx.save();

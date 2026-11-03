@@ -6,7 +6,7 @@ let cameraX = 0;
 let tickCount = 0;
 let levelTransitionAlpha = 0;
 
-const MENU_SHOWCASE_LEVELS = [0, 14, 28, 40, 65, 75];
+const MENU_SHOWCASE_LEVELS = [0, 14, 28, 40, 65, 75, 85, 104];
 let menuShowcasePos = 0;
 let menuCycleTimer = 0;
 let menuFadeState = 'NONE';
@@ -60,11 +60,12 @@ const player = {
     visualTilt: 0
 };
 
-// Stan Broni 360°: Ostrze Rdzeniowe (Kij na Poz. 71-80) oraz Raygun (TYLKO na komendę "cubelon", a w przyszłości na Saharze)
+// Stan Broni 360°: Ostrze Rdzeniowe (Kij na Poz. 71-80) oraz Raygun (Sahara Poz. 81-100 oraz komenda "cubelon")
 const weapon = {
     type: 'spear', // 'spear' (Kij) lub 'raygun' (Raygun 360°)
     devForceEnabled: false,
     angle: 0,
+    prevAngle: 0,
     targetAngle: 0,
     length: 54,
     pokeExtension: 0,
@@ -75,10 +76,12 @@ const weapon = {
     ammo: 20,
     maxAmmo: 20,
     reloadTimer: 0,
-    reloadDuration: 195, // ~3.25s dłuższego ładowania po wystrzeleniu 20 pocisków
+    reloadDuration: 120, // ~2.0s bazowego przeładowania (kręcenie bronią 360° przyspiesza ładowanie!)
+    reloadSpinAccum: 0,
+    spinBoostTimer: 0,
     fireCooldown: 0,
-    minFireInterval: 12, // min. odstęp między strzałami (~5 strzałów/s max)
-    jamTimer: 0,         // blokada Anti-Autoclicker przy spamowaniu kliknięciami
+    minFireInterval: 4,  // bardzo szybkie strzelanie (do 15 pocisków/s przy szybkim klikaniu!)
+    jamTimer: 0,         // blokada Anti-Autoclicker przy bocie/makrze
     clickTimestamps: [], // historia kliknięć dla detektora Auto-Clickera
     recoilOffset: 0,
     muzzleFlashTimer: 0,
@@ -126,9 +129,16 @@ function updateWeaponHUD() {
             pill.className = 'hud-pill-skew flex items-center gap-1 bg-rose-950/95 border border-rose-400 px-1.5 py-0.5 rounded cursor-pointer';
         } else if (weapon.reloadTimer > 0) {
             const pct = Math.max(0, Math.min(99, Math.floor(((weapon.reloadDuration - weapon.reloadTimer) / weapon.reloadDuration) * 100)));
-            label.textContent = `🔋 ŁADUJĘ ${pct}%${switchHint}`;
-            label.className = 'text-[9px] font-extrabold text-amber-300 mono-font';
-            pill.className = 'hud-pill-skew flex items-center gap-1 bg-amber-950/95 border border-amber-400 px-1.5 py-0.5 rounded cursor-pointer';
+            const isSpinFast = weapon.spinBoostTimer > 0;
+            label.textContent = isSpinFast
+                ? `⚡ SZYBKO ${pct}%${switchHint}`
+                : `🔋 ŁADUJĘ ${pct}% (KRĘĆ 360°!)${switchHint}`;
+            label.className = isSpinFast
+                ? 'text-[9px] font-extrabold text-cyan-200 mono-font'
+                : 'text-[9px] font-extrabold text-amber-300 mono-font';
+            pill.className = isSpinFast
+                ? 'hud-pill-skew flex items-center gap-1 bg-cyan-950/95 border border-cyan-300 px-1.5 py-0.5 rounded cursor-pointer'
+                : 'hud-pill-skew flex items-center gap-1 bg-amber-950/95 border border-amber-400 px-1.5 py-0.5 rounded cursor-pointer';
         } else {
             label.textContent = `🔫 RAYGUN ${weapon.ammo}/${weapon.maxAmmo}${switchHint}`;
             label.className = 'text-[9px] font-extrabold text-emerald-300 mono-font';
@@ -179,26 +189,26 @@ function firePlayerRaygun(evt = null) {
     }
 
     let isMacroPattern = false;
-    if (weapon.clickTimestamps.length >= 6) {
+    if (weapon.clickTimestamps.length >= 8) {
         let minDiff = Infinity;
         let maxDiff = 0;
         let sumDiff = 0;
         const len = weapon.clickTimestamps.length;
-        for (let i = len - 5; i < len; i++) {
+        for (let i = len - 6; i < len; i++) {
             const d = weapon.clickTimestamps[i] - weapon.clickTimestamps[i - 1];
             if (d < minDiff) minDiff = d;
             if (d > maxDiff) maxDiff = d;
             sumDiff += d;
         }
-        const avgDiff = sumDiff / 5;
-        // Jeśli 5 kolejnych kliknięć ma niemal identyczny odstęp (< 3.5ms różnicy) i są szybkie (< 125ms) -> Auto-Clicker!
-        if (avgDiff < 125 && (maxDiff - minDiff) < 3.5) {
+        const avgDiff = sumDiff / 6;
+        // Jeśli 6 kolejnych kliknięć ma robotycznie stały odstęp (< 2.0ms różnicy) i są bardzo szybkie (< 65ms) -> Auto-Clicker!
+        if (avgDiff < 65 && (maxDiff - minDiff) < 2.0) {
             isMacroPattern = true;
         }
     }
 
-    if (weapon.clickTimestamps.length >= 10 || isMacroPattern) {
-        weapon.jamTimer = 95; // ~1.6s blokady broni za używanie Auto-Clickera
+    if (weapon.clickTimestamps.length >= 16 || isMacroPattern) {
+        weapon.jamTimer = 85; // blokada broni za używanie Auto-Clickera (>20 CPS lub stałe makro)
         weapon.clickTimestamps.length = 0;
         sfx.play('troll');
         spawnFloatingText(player.x + player.w * 0.5, player.y - 14, '🚫 ANTI-CLICKER! PRZEGRZANIE!', '#f43f5e');
@@ -215,7 +225,7 @@ function firePlayerRaygun(evt = null) {
         return false;
     }
 
-    // 3. Minimalny odstęp między strzałami (blokuje spamowanie w miejscu)
+    // 3. Minimalny odstęp między strzałami (4 klatki = pozwala bardzo szybko nawalać pociskami!)
     if (weapon.fireCooldown > 0) {
         return false;
     }
@@ -223,14 +233,15 @@ function firePlayerRaygun(evt = null) {
     if (weapon.reloadTimer > 0) {
         sfx.play('raygun_empty');
         if (weapon.emptyWarnCooldown <= 0) {
-            weapon.emptyWarnCooldown = 28;
-            spawnFloatingText(player.x + player.w * 0.5, player.y - 10, '⏳ ŁADOWANIE BATERII...', '#fbbf24');
+            weapon.emptyWarnCooldown = 26;
+            spawnFloatingText(player.x + player.w * 0.5, player.y - 10, '🌀 KRĘĆ BRONIĄ 360° BY SZYBCIEJ NAŁADOWAĆ!', '#38bdf8');
         }
         return false;
     }
 
     if (weapon.ammo <= 0) {
         weapon.reloadTimer = weapon.reloadDuration;
+        weapon.reloadSpinAccum = 0;
         sfx.play('raygun_empty');
         updateWeaponHUD();
         return false;
@@ -238,8 +249,8 @@ function firePlayerRaygun(evt = null) {
 
     weapon.ammo--;
     weapon.fireCooldown = weapon.minFireInterval;
-    weapon.recoilOffset = 8.5;
-    weapon.muzzleFlashTimer = 5;
+    weapon.recoilOffset = 6.5;
+    weapon.muzzleFlashTimer = 4;
 
     const px = player.x + player.w * 0.5;
     const py = player.y + player.h * 0.5;
@@ -247,7 +258,7 @@ function firePlayerRaygun(evt = null) {
     const sinA = Math.sin(weapon.angle);
     const barrelTipX = px + cosA * 38;
     const barrelTipY = py + sinA * 38;
-    const boltSpeed = 11.8;
+    const boltSpeed = 13.8;
 
     projectiles.push({
         x: barrelTipX,
@@ -265,7 +276,8 @@ function firePlayerRaygun(evt = null) {
 
     if (weapon.ammo <= 0) {
         weapon.reloadTimer = weapon.reloadDuration;
-        spawnFloatingText(px, player.y - 12, '🔋 ŁADOWANIE (0/20)...', '#fbbf24');
+        weapon.reloadSpinAccum = 0;
+        spawnFloatingText(px, player.y - 12, '🔋 ŁADOWANIE (KRĘĆ 360° = SZYBCIEJ!)', '#fbbf24');
     }
 
     updateWeaponHUD();
@@ -350,13 +362,18 @@ function showChapterBanner(title, levelNum = currentLevelIdx + 1) {
     const actBadge = document.getElementById('chapter-act-badge');
     const cardInner = document.getElementById('chapter-card-inner');
 
-    const isCh2 = levelNum > 50;
-    const secNum = !isCh2
-        ? (levelNum <= 14 ? 1 : (levelNum <= 28 ? 2 : (levelNum <= 40 ? 3 : 4)))
-        : (levelNum <= 60 ? 1 : (levelNum <= 70 ? 2 : (levelNum <= 75 ? 3 : 4)));
+    const isCh3 = levelNum > 80;
+    const isCh2 = levelNum > 50 && levelNum <= 80;
+    const secNum = isCh3
+        ? (levelNum <= 90 ? 1 : (levelNum <= 100 ? 2 : (levelNum <= 112 ? 3 : 4)))
+        : (!isCh2
+            ? (levelNum <= 14 ? 1 : (levelNum <= 28 ? 2 : (levelNum <= 40 ? 3 : 4)))
+            : (levelNum <= 60 ? 1 : (levelNum <= 70 ? 2 : (levelNum <= 75 ? 3 : 4))));
 
     if (subtitleEl) {
-        subtitleEl.textContent = isCh2 ? 'ROZDZIAŁ 2 • GŁĘBINY, DŻUNGLA I BAZA' : 'ROZDZIAŁ 1 • FORTECA EVADA';
+        subtitleEl.textContent = isCh3
+            ? (levelNum > 100 ? 'ROZDZIAŁ 3 • GÓRY CUBELONU' : 'ROZDZIAŁ 3 • PREHISTORYCZNA SAHARA')
+            : (isCh2 ? 'ROZDZIAŁ 2 • GŁĘBINY, DŻUNGLA I BAZA' : 'ROZDZIAŁ 1 • FORTECA EVADA');
     }
     if (actBadge) actBadge.textContent = `SEKCJA ${secNum} • POZ. ${levelNum}`;
     chapterTitleEl.textContent = title;
@@ -387,7 +404,7 @@ function syncMusicForState() {
     if (gameState === 'CUTSCENE') {
         if (activeCutsceneKey === 'outro' || activeCutsceneKey === 'john_base_portal') {
             music.playTrack('cutscene_outro');
-        } else if (activeCutsceneKey === 'jerry_jungle') {
+        } else if (activeCutsceneKey === 'jerry_jungle' || activeCutsceneKey === 'sahara_awakening' || activeCutsceneKey === 'sahara_portal_escape') {
             music.playTrack('jungle');
         } else {
             music.playTrack('cutscene_intro');
@@ -410,7 +427,7 @@ function syncMusicForState() {
         music.playTrack('underwater');
     } else if (lvl.theme === 'john_base') {
         music.playTrack('castle');
-    } else if (lvl.theme === 'jungle' || lvl.theme === 'jungle_outpost') {
+    } else if (lvl.theme === 'sahara' || lvl.theme === 'jungle' || lvl.theme === 'jungle_outpost') {
         music.playTrack('jungle');
     } else if (lvl.theme === 'castle') {
         music.playTrack('castle');
@@ -418,6 +435,8 @@ function syncMusicForState() {
         music.playTrack('night');
     } else if (lvl.theme === 'forest') {
         music.playTrack('forest');
+    } else if (lvl.theme === 'mountain') {
+        music.playTrack(lvl.hasJohnOutpost ? 'castle' : 'hills');
     } else {
         music.playTrack('hills');
     }
@@ -488,6 +507,9 @@ function loadLevel(idx, isMenuPreview = false) {
     }
     weapon.ammo = weapon.maxAmmo;
     weapon.reloadTimer = 0;
+    weapon.reloadSpinAccum = 0;
+    weapon.spinBoostTimer = 0;
+    weapon.prevAngle = weapon.angle;
     weapon.fireCooldown = 0;
     weapon.jamTimer = 0;
     weapon.clickTimestamps.length = 0;
@@ -582,39 +604,58 @@ function loadLevel(idx, isMenuPreview = false) {
         extProgress: t.dir === 'up' ? 0 : 1
     }));
 
-    enemies = lvl.enemies.map(e => ({
-        x: e.x * TILE,
-        y: e.y * TILE,
-        origY: e.y * TILE,
-        w: 32,
-        h: 32,
-        vx: e.speed || 1.8,
-        vy: 0,
-        onGround: true,
-        minX: e.minX * TILE,
-        maxX: e.maxX * TILE,
-        baseSpeed: e.speed || 1.8,
-        type: e.type || 'robo',
-        hungTimer: 0,
-        maxHungTimer: 125,
-        chasingPlayer: false,
-        chargeTimer: 0,
-        cooldownTimer: 0,
-        ramState: 'patrol',
-        lockTimer: 0,
-        ramVx: 0,
-        ramVy: 0,
-        fireTimer: undefined,
-        trollSpeed: e.trollSpeed || null,
-        trollJump: e.trollJump || false,
-        jumped: false,
-        turboActive: false,
-        visualDir: Math.sign(e.speed || 1.8) || 1,
-        visualScaleY: 1,
-        eyeColor: e.type === 'mimic'
-            ? '#facc15'
-            : (e.type === 'robo_fish' ? '#fb923c' : (e.type === 'evad_bot' ? '#ef4444' : (e.trollSpeed ? '#ff0055' : (e.trollJump ? '#00f2fe' : '#ef4444'))))
-    }));
+    enemies = lvl.enemies.map(e => {
+        const eType = e.type || 'robo';
+        const isRex = eType === 'dino_rex';
+        const isTitan = eType === 'john_titan_mech';
+        const isVanguard = eType === 'john_vanguard';
+        const isRaptor = eType === 'dino_raptor';
+        const ew = isRex ? 52 : (isTitan ? 46 : (isVanguard ? 38 : (isRaptor ? 34 : 32)));
+        const eh = isRex ? 52 : (isTitan ? 46 : (isVanguard ? 38 : (isRaptor ? 34 : 32)));
+        const yOff = eh - 32;
+        const maxHp = isRex ? 14 : (isTitan ? 9 : (isVanguard ? 5 : (isRaptor ? 5 : (
+            (eType === 'john_dash_bot' || eType === 'john_laser_sniper' || eType === 'john_cryo_drone') ? 2 : 1
+        ))));
+        return {
+            x: e.x * TILE,
+            y: e.y * TILE - yOff,
+            origY: e.y * TILE - yOff,
+            w: ew,
+            h: eh,
+            hp: maxHp,
+            maxHp: maxHp,
+            hitFlashTimer: 0,
+            jumpCooldown: 0,
+            dodgeCooldown: 0,
+            dashVisualTimer: 0,
+            vx: e.speed || 1.8,
+            vy: 0,
+            onGround: true,
+            minX: e.minX * TILE,
+            maxX: e.maxX * TILE,
+            baseSpeed: e.speed || 1.8,
+            type: eType,
+            hungTimer: 0,
+            maxHungTimer: 125,
+            chasingPlayer: false,
+            chargeTimer: 0,
+            cooldownTimer: 0,
+            ramState: 'patrol',
+            lockTimer: 0,
+            ramVx: 0,
+            ramVy: 0,
+            fireTimer: undefined,
+            trollSpeed: e.trollSpeed || null,
+            trollJump: e.trollJump || false,
+            jumped: false,
+            turboActive: false,
+            visualDir: Math.sign(e.speed || 1.8) || 1,
+            visualScaleY: 1,
+            eyeColor: eType === 'mimic'
+                ? '#facc15'
+                : (eType === 'robo_fish' ? '#fb923c' : (eType === 'evad_bot' ? '#ef4444' : '#38bdf8'))
+        };
+    });
 
     fakeGoals = (lvl.fakeGoals || []).map(fg => ({
         x: fg[0] * TILE,
@@ -835,21 +876,53 @@ function completeLevel() {
         return;
     }
 
-    // 3. Zwykłe przejście do następnego poziomu
+    // 3. Koniec Rozdziału 2 (Poziom 80 -> Cutscenka z Portalem -> Cutscenka Przebudzenia na Saharze -> Poziom 81: Rozdział 3 Sahara!)
+    if (currentLevelIdx === 79) {
+        saveUnlockedLevelProgress(80);
+        resetPlayerInputs();
+        if (!isSpeedrunMode) {
+            startCutscene('john_base_portal', () => {
+                startCutscene('sahara_awakening', () => {
+                    gameState = 'PLAYING';
+                    inGameHud.classList.remove('hidden');
+                    updateTouchControlsVisibility();
+                    loadLevel(80, false);
+                });
+            });
+        } else {
+            loadLevel(80, false);
+        }
+        return;
+    }
+    
+
+// 4. Koniec Sahary (Poziom 100 -> Cutscenki ucieczki z Sahary i lądowania w Górach -> Poziom 101: Góry!)
+    if (currentLevelIdx === 99 && LEVELS.length > 100) {
+        saveUnlockedLevelProgress(100);
+        resetPlayerInputs();
+        if (!isSpeedrunMode) {
+            startCutscene('sahara_portal_escape', () => {
+                startCutscene('mountain_cliff_arrival', () => {
+                    gameState = 'PLAYING';
+                    inGameHud.classList.remove('hidden');
+                    updateTouchControlsVisibility();
+                    loadLevel(100, false);
+                });
+            });
+        } else {
+            loadLevel(100, false);
+        }
+        return;
+    }
+
+    // 5. Zwykłe przejście do następnego poziomu lub Finał Poziomu 125
     if (currentLevelIdx < LEVELS.length - 1) {
         saveUnlockedLevelProgress(currentLevelIdx + 1);
         loadLevel(currentLevelIdx + 1, false);
     } else {
-        // 4. Finał Poziomu 80 (Tajna Baza Johna -> Cutscenka z Angelą, Czerwonym Przyciskiem i Portalem!)
         saveUnlockedLevelProgress(LEVELS.length - 1);
         resetPlayerInputs();
-        if (!isSpeedrunMode) {
-            startCutscene('john_base_portal', () => {
-                showFinalVictoryModal();
-            });
-        } else {
-            showFinalVictoryModal();
-        }
+        showFinalVictoryModal();
     }
 }
 
@@ -900,16 +973,46 @@ function updateWeaponAndAdvancedBots() {
     }
     if (weapon.muzzleFlashTimer > 0) weapon.muzzleFlashTimer--;
     if (weapon.recoilOffset > 0) {
-        weapon.recoilOffset = Math.max(0, weapon.recoilOffset - 1.1);
+        weapon.recoilOffset = Math.max(0, weapon.recoilOffset - 1.8);
     }
+
+    // Obliczanie prędkości kątowej obrotu broni 360° (kręcenie bronią przyspiesza przeładowanie Rayguna!)
+    const angleDelta = Math.abs(Math.atan2(
+        Math.sin(weapon.angle - (weapon.prevAngle ?? weapon.angle)),
+        Math.cos(weapon.angle - (weapon.prevAngle ?? weapon.angle))
+    ));
+    weapon.prevAngle = weapon.angle;
+
+    if (weapon.spinBoostTimer > 0) weapon.spinBoostTimer--;
+
     if (weapon.reloadTimer > 0) {
         weapon.reloadTimer--;
-        if (weapon.reloadTimer === 0) {
+
+        if (angleDelta > 0.035) {
+            weapon.spinBoostTimer = 10;
+            const spinAccel = Math.min(3.4, angleDelta * 10.5);
+            weapon.reloadSpinAccum = (weapon.reloadSpinAccum || 0) + spinAccel;
+            const bonusTicks = Math.floor(weapon.reloadSpinAccum);
+            if (bonusTicks > 0) {
+                weapon.reloadTimer = Math.max(0, weapon.reloadTimer - bonusTicks);
+                weapon.reloadSpinAccum -= bonusTicks;
+            }
+            if ((tickCount & 1) === 0) {
+                const sparkX = player.x + player.w * 0.5 + Math.cos(weapon.angle) * 28;
+                const sparkY = player.y + player.h * 0.5 + Math.sin(weapon.angle) * 28;
+                spawnParticles(sparkX, sparkY, '#22d3ee', 2, 2.6);
+            }
+        }
+
+        if (weapon.reloadTimer <= 0) {
+            weapon.reloadTimer = 0;
+            weapon.reloadSpinAccum = 0;
+            weapon.spinBoostTimer = 0;
             weapon.ammo = weapon.maxAmmo;
             sfx.play('raygun_reload');
-            spawnFloatingText(player.x + player.w * 0.5, player.y - 12, '🔋 NAŁADOWANO (20/20)!', '#4ade80');
+            spawnFloatingText(player.x + player.w * 0.5, player.y - 12, '⚡ NAŁADOWANO (20/20)!', '#4ade80');
             updateWeaponHUD();
-        } else if (weapon.reloadTimer % 6 === 0) {
+        } else if (weapon.reloadTimer % 5 === 0) {
             updateWeaponHUD();
         }
     }
@@ -1127,19 +1230,31 @@ function updateWeaponAndAdvancedBots() {
                 }
                 if (canceledEnemyProj) continue;
 
-                // Trafienie we wroga
+                // Trafienie we wroga (z obsługą wielokrotnego HP dla wytrzymałych Dinozaurów na Saharze!)
                 let hitEnemy = false;
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     const e = enemies[j];
                     if (rectOverlap(p.x - p.r - 4, p.y - p.r - 4, (p.r + 4) * 2, (p.r + 4) * 2, e.x, e.y, e.w, e.h)) {
                         const ex = e.x + e.w / 2;
                         const ey = e.y + e.h / 2;
-                        screenShake = 10;
-                        sfx.play('boss_hit');
-                        spawnParticles(ex, ey, '#4ade80', 22, 6);
-                        spawnParticles(ex, ey, '#facc15', 14, 5);
-                        spawnFloatingText(ex, ey - 10, "🎯 TRAFIONY!", "#4ade80");
-                        enemies.splice(j, 1);
+                        e.hp = (e.hp !== undefined ? e.hp : 1) - 1;
+                        e.hitFlashTimer = 6;
+                        e.chasingPlayer = true;
+
+                        if (e.hp > 0) {
+                            const kb = e.type === 'dino_rex' ? 2.2 : 4.5;
+                            e.x = Math.max(e.minX, Math.min(e.maxX - e.w, e.x + Math.sign(p.vx) * kb));
+                            sfx.play('stomp');
+                            spawnParticles(p.x, p.y, '#facc15', 6, 3.5);
+                        } else {
+                            screenShake = e.type === 'dino_rex' ? 14 : 10;
+                            sfx.play('boss_hit');
+                            spawnParticles(ex, ey, '#4ade80', e.type === 'dino_rex' ? 30 : 20, 6);
+                            spawnParticles(ex, ey, '#facc15', 16, 5);
+                            const killLabel = (e.type === 'dino_rex' || e.type === 'dino_raptor') ? "🦖 POKONANY!" : "🎯 TRAFIONY!";
+                            spawnFloatingText(ex, ey - 10, killLabel, "#4ade80");
+                            enemies.splice(j, 1);
+                        }
                         hitEnemy = true;
                         break;
                     }
@@ -1815,18 +1930,22 @@ function update() {
         }
     }
 
-    for (const st of spikeTraps) {
+for (const st of spikeTraps) {
         if (!st.triggered && player.x + player.w >= st.triggerX) {
             st.triggered = true;
             if (st.dir === 'up') st.extProgress = lowEndMode ? 1 : 0.08;
-            sfx.play('troll');
+            sfx.play(st.dir === 'boulder' ? 'boss_wall_crash' : 'troll');
+            if (st.dir === 'boulder') {
+                spawnParticles(st.x + st.w * 0.5, st.y + 12, '#94a3b8', 8, 3.5);
+            }
         }
         if (st.triggered && st.dir === 'up' && st.extProgress < 1) {
             st.extProgress = lowEndMode ? 1 : Math.min(1, st.extProgress + 0.15);
         }
-        if (st.triggered && st.dir === 'down') {
-            st.vy += 0.68;
+        if (st.triggered && (st.dir === 'down' || st.dir === 'boulder')) {
+            st.vy += st.dir === 'boulder' ? 0.76 : 0.68;
             st.y += st.vy;
+            st.rot = (st.rot || 0) + 0.14;
         }
         const spikeActive = st.dir === 'up' ? (st.triggered && st.extProgress >= 0.45) : true;
         if (spikeActive) {
@@ -1835,7 +1954,13 @@ function update() {
             const hitW = st.w - 10;
             const hitH = st.h - 8;
             if (rectOverlap(player.x + 3, player.y + 3, player.w - 6, player.h - 6, hitX, hitY, hitW, hitH)) {
-                killPlayer(st.dir === 'up' ? "Zaskoczony kolcami z podłogi? Klasyk!" : "Patrz w górę! Spadające kolce!");
+                if (lvl.theme === 'mountain') {
+                    killPlayer(st.dir === 'up' ? "Wpadłeś na lodowo-skalne kolce górskie!" : "Zmiażdżył Cię spadający z góry głaz! Użyj Dasha, gdy słyszysz huk kamieni!");
+                } else if (lvl.theme === 'sahara') {
+                    killPlayer(st.dir === 'up' ? "Wpadłeś na kolczastego kaktusa Sahary! Patrz pod nogi!" : "Spadający głaz piaskowca! Uważaj na sufit kanionu!");
+                } else {
+                    killPlayer(st.dir === 'up' ? "Zaskoczony kolcami z podłogi? Klasyk!" : "Patrz w górę! Spadające kolce!");
+                }
                 return;
             }
         }
@@ -1856,6 +1981,9 @@ function update() {
             }
             continue;
         }
+
+        if (e.hitFlashTimer > 0) e.hitFlashTimer--;
+        if (e.jumpCooldown > 0) e.jumpCooldown--;
 
         const dxToPlayer = (player.x + player.w / 2) - (e.x + e.w / 2);
         const distX = Math.abs(dxToPlayer);
@@ -1889,6 +2017,345 @@ function update() {
                 }
             }
         };
+        
+        // ====================================================================
+        // NOWE ROBOTY JOHNA W GÓRACH (OD-DASHOWANIE OD POCISKÓW + LASERY)
+        // ====================================================================
+        if (
+            e.type === 'john_dash_bot' ||
+            e.type === 'john_laser_sniper' ||
+            e.type === 'john_cryo_drone' ||
+            e.type === 'john_vanguard' ||
+            e.type === 'john_titan_mech'
+        ) {
+            if (e.dodgeCooldown > 0) e.dodgeCooldown--;
+            if (e.dashVisualTimer > 0) e.dashVisualTimer--;
+            if (e.cooldownTimer > 0) e.cooldownTimer--;
+
+            const ex = e.x + e.w * 0.5;
+            const ey = e.y + e.h * 0.5;
+            const dyToPlayer = (player.y + player.h * 0.5) - ey;
+            const dirToPlayer = dxToPlayer >= 0 ? 1 : -1;
+            e.facing = dirToPlayer;
+
+            // 1. RADAR BALISTYCZNY: Wykrywanie nadlatujących pocisków Dave'a i szybki OD-DASH!
+            if (e.dodgeCooldown <= 0) {
+                for (let pi = 0; pi < projectiles.length; pi++) {
+                    const pr = projectiles[pi];
+                    if (!pr.isPlayerShot && !pr.deflected) continue;
+                    const pDistX = ex - pr.x;
+                    const pDistY = ey - pr.y;
+                    const pDist = Math.hypot(pDistX, pDistY);
+                    // Sprawdź, czy pocisk leci w stronę tego bota
+                    const headingTowardBot = (pr.vx * pDistX + pr.vy * pDistY) > 0;
+                    if (headingTowardBot && pDist < 175 && Math.abs(pDistY) < e.h + 34) {
+                        e.dodgeCooldown = e.type === 'john_dash_bot' ? 38 : (e.type === 'john_cryo_drone' ? 42 : 58);
+                        e.dashVisualTimer = 14;
+                        sfx.play('dash');
+                        spawnParticles(ex, ey, '#38bdf8', 10, 4.5);
+                        spawnFloatingText(ex, e.y - 10, "⚡ UNIK DASH!", "#38bdf8");
+
+                        if (e.type === 'john_cryo_drone') {
+                            // Powietrzny unik drona w górę lub w dół od linii strzału
+                            const dodgeSignY = (pr.y >= ey) ? -1 : 1;
+                            e.y = Math.max(48, Math.min(440, e.y + dodgeSignY * 54));
+                            e.x = Math.max(e.minX, Math.min(e.maxX - e.w, e.x - Math.sign(pr.vx) * 36));
+                        } else {
+                            // Naziemny bot Johna od-dashowuje w górę i w bok
+                            if (e.onGround) {
+                                e.vy = e.type === 'john_titan_mech' ? -8.8 : -10.6;
+                                e.onGround = false;
+                                e.jumped = true;
+                            }
+                            const dashStep = (e.type === 'john_dash_bot' ? 56 : 42) * (Math.random() < 0.5 ? dirToPlayer : -dirToPlayer);
+                            e.x = Math.max(e.minX, Math.min(e.maxX - e.w, e.x + dashStep));
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // 2. Specyficzne zachowanie i wystrzeliwanie laserów (jak u Robota Evada, ale ulepszone!)
+            if (e.type === 'john_cryo_drone') {
+                const targetY = e.origY + Math.sin(tickCount * 0.07 + e.minX * 0.1) * 18;
+                e.y += (targetY - e.y) * 0.12;
+                e.x += Math.sign(e.vx) * e.baseSpeed;
+                if (e.x <= e.minX) { e.x = e.minX; e.vx = Math.abs(e.baseSpeed); }
+                else if (e.x + e.w >= e.maxX) { e.x = e.maxX - e.w; e.vx = -Math.abs(e.baseSpeed); }
+
+                if (e.fireTimer === undefined) e.fireTimer = 50;
+                e.fireTimer--;
+                if (e.fireTimer <= 0 && distX < 420 && distY < 260) {
+                    e.fireTimer = 68;
+                    const aimA = Math.atan2(dyToPlayer, dxToPlayer);
+                    projectiles.push({
+                        x: ex + Math.cos(aimA) * 18,
+                        y: ey + Math.sin(aimA) * 18,
+                        vx: Math.cos(aimA) * 7.4,
+                        vy: Math.sin(aimA) * 7.4,
+                        r: 6.5
+                    });
+                    sfx.play('laser');
+                    spawnParticles(ex + Math.cos(aimA) * 18, ey + Math.sin(aimA) * 18, '#38bdf8', 7, 3.2);
+                }
+            } else {
+                // Jednostki naziemne: john_dash_bot, john_laser_sniper, john_vanguard, john_titan_mech
+                const sightRange = e.type === 'john_laser_sniper' ? 340 : 280;
+                const inLaserSight = (distX < sightRange && distY < 95 && e.cooldownTimer <= 0);
+
+                if (e.chargeTimer > 0) {
+                    e.chargeTimer--;
+                    e.turboActive = true;
+                    if (e.chargeTimer === 0) {
+                        const shotDir = dirToPlayer;
+                        const laserSpeed = e.type === 'john_laser_sniper' ? 8.6 : 7.6;
+                        // Poziomy laser w stylu Evad-Bota (Snajper i Tytan strzelają podwójną wiązką!)
+                        projectiles.push({
+                            x: ex + shotDir * (e.w * 0.5 + 6),
+                            y: ey - 2,
+                            vx: shotDir * laserSpeed,
+                            vy: 0,
+                            r: 6.5
+                        });
+                        if (e.type === 'john_laser_sniper' || e.type === 'john_titan_mech') {
+                            const aimAng = Math.atan2(dyToPlayer, dxToPlayer);
+                            projectiles.push({
+                                x: ex + shotDir * (e.w * 0.5 + 6),
+                                y: ey + 5,
+                                vx: Math.cos(aimAng) * (laserSpeed * 0.92),
+                                vy: Math.sin(aimAng) * (laserSpeed * 0.92),
+                                r: 6
+                            });
+                        }
+                        sfx.play('laser');
+                        spawnParticles(ex + shotDir * 18, ey, '#ef4444', 9, 3.5);
+                        e.cooldownTimer = e.type === 'john_laser_sniper' ? 72 : (e.type === 'john_dash_bot' ? 82 : 90);
+                        e.turboActive = false;
+                    }
+                } else if (inLaserSight) {
+                    e.chargeTimer = e.type === 'john_laser_sniper' ? 24 : 30;
+                    sfx.play('warn');
+                } else {
+                    // Aktywne ściganie i taktyczne dashe na platformie
+                    const moveSpd = (distX < 260 ? e.baseSpeed * 1.35 : e.baseSpeed);
+                    e.turboActive = distX < 260;
+                    if (distX < 260 && distX > 18) {
+                        e.vx = dirToPlayer * Math.abs(e.baseSpeed);
+                    }
+                    e.x += Math.sign(e.vx) * moveSpd;
+                    if (e.x <= e.minX) { e.x = e.minX; e.vx = Math.abs(e.baseSpeed); }
+                    else if (e.x + e.w >= e.maxX) { e.x = e.maxX - e.w; e.vx = -Math.abs(e.baseSpeed); }
+
+                    // Skok szturmowy Tytana lub Dash-Bota, gdy gracz skacze wyżej
+                    if (e.onGround && e.jumpCooldown <= 0 && distX < 150 && player.y + player.h < e.y + 10) {
+                        e.vy = e.type === 'john_titan_mech' ? -9.5 : -10.8;
+                        e.onGround = false;
+                        e.jumped = true;
+                        e.jumpCooldown = 55;
+                        sfx.play('jump');
+                    }
+                }
+
+                applyEnemyVerticalPhysics(false);
+            }
+
+            if (rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, e.x + 3, e.y + 3, e.w - 6, e.h - 6)) {
+                killPlayer("Zostałeś zlikwidowany przez zaawansowanego bota górskiego Johna! Uważaj na ich uniki Dash i wiązki laserowe!");
+                return;
+            }
+            continue;
+        }
+        
+        if (e.type === 'dino_raptor') {
+            if (distX < 360 && distY < 210) {
+                e.chasingPlayer = true;
+            } else if (distX > 520) {
+                e.chasingPlayer = false;
+            }
+
+            const dirToPlayer = dxToPlayer >= 0 ? 1 : -1;
+
+            if (e.chasingPlayer) {
+                e.turboActive = true;
+                e.facing = dirToPlayer;
+
+                // Sprawdź, czy przed stopami Raptora kończy się platforma (przepaść między platformami)
+                let groundAhead = false;
+                const probeX = dirToPlayer > 0 ? (e.x + e.w + 6) : (e.x - 6);
+                const probeY = e.y + e.h + 6;
+                for (let ci = 0; ci < activeColliders.length; ci++) {
+                    const col = activeColliders[ci];
+                    if (probeX >= col.x && probeX <= col.x + col.w && probeY >= col.y && probeY <= col.y + col.h + 14) {
+                        groundAhead = true;
+                        break;
+                    }
+                }
+
+                // Jeśli Raptor jest na ziemi i dobiega do krawędzi platformy (lub gracz jest wyżej/w zasięgu skoku),
+                // przeskakuje przez przepaść prosto w stronę platformy Dave'a!
+                const playerOnHigherPlatform = (player.y + player.h <= e.y + 6 && distX < 185);
+                const atPlatformEdgeTowardPlayer = (!groundAhead && distX > 18);
+                const inDirectPounceRange = (distX < 145 && distX > 26 && distY < 90);
+
+                if (e.onGround && e.jumpCooldown <= 0 && (atPlatformEdgeTowardPlayer || playerOnHigherPlatform || inDirectPounceRange)) {
+                    e.vy = (player.y < e.y - 24 || atPlatformEdgeTowardPlayer) ? -11.8 : -10.4;
+                    e.leapVx = dirToPlayer * Math.max(4.6, e.baseSpeed * 1.92);
+                    e.vx = e.leapVx;
+                    e.jumped = true;
+                    e.onGround = false;
+                    e.jumpCooldown = 38;
+                    sfx.play('jump');
+                }
+
+                const moveVx = !e.onGround
+                    ? (e.leapVx !== undefined ? e.leapVx : dirToPlayer * e.baseSpeed * 1.8)
+                    : (distX > 8 ? dirToPlayer * e.baseSpeed * 1.62 : 0);
+
+                e.x += moveVx;
+
+                // Kolizja ze ścianą boczną (jeśli trafi na wyższy stopień, wskakuje na niego!)
+                for (let ci = 0; ci < activeColliders.length; ci++) {
+                    const col = activeColliders[ci];
+                    if (!col.isPlatform && rectOverlap(e.x, e.y + 4, e.w, e.h - 8, col.x, col.y, col.w, col.h)) {
+                        if (moveVx > 0) e.x = col.x - e.w;
+                        else if (moveVx < 0) e.x = col.x + col.w;
+                        if (e.onGround && e.jumpCooldown <= 0) {
+                            e.vy = -11.6;
+                            e.leapVx = dirToPlayer * Math.max(4.2, e.baseSpeed * 1.75);
+                            e.onGround = false;
+                            e.jumped = true;
+                            e.jumpCooldown = 32;
+                            sfx.play('jump');
+                        }
+                        break;
+                    }
+                }
+            } else {
+                // Zwykły patrol, gdy gracz jest daleko
+                e.turboActive = false;
+                e.x += Math.sign(e.vx) * e.baseSpeed;
+                if (e.x <= e.minX) { e.x = e.minX; e.vx = Math.abs(e.baseSpeed); }
+                else if (e.x + e.w >= e.maxX) { e.x = e.maxX - e.w; e.vx = -Math.abs(e.baseSpeed); }
+                e.facing = Math.sign(e.vx) || 1;
+            }
+
+            // Fizyka pionowa Raptora + aktualizacja granic nowej platformy po wylądowaniu
+            e.vy += 0.55;
+            if (e.vy > 12) e.vy = 12;
+            e.y += e.vy;
+            e.onGround = false;
+            for (let ci = 0; ci < activeColliders.length; ci++) {
+                const c = activeColliders[ci];
+                if (rectOverlap(e.x, e.y, e.w, e.h, c.x, c.y, c.w, c.h)) {
+                    if (e.vy >= 0 && e.y + e.h - e.vy <= c.y + 16) {
+                        e.y = c.y - e.h;
+                        e.vy = 0;
+                        e.onGround = true;
+                        e.jumped = false;
+                        e.leapVx = undefined;
+                        // Aktualizuj granice platformy na tę, na której wylądował Raptor
+                        e.minX = c.x;
+                        e.maxX = c.x + c.w;
+                    } else if (!c.isPlatform && e.vy < 0 && e.y - e.vy >= c.y + c.h - 14) {
+                        e.y = c.y + c.h;
+                        e.vy = 0;
+                    }
+                }
+            }
+
+            // Jeśli Raptor wpadł w przepaść poza ekranem, usuń go bezpiecznie
+            if (e.y > canvas.height + 70) {
+                e.hp = 0;
+                const idxR = enemies.indexOf(e);
+                if (idxR !== -1) enemies.splice(idxR, 1);
+                continue;
+            }
+
+            if (rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, e.x + 3, e.y + 3, e.w - 6, e.h - 6)) {
+                killPlayer("Dopadł Cię skaczący między platformami Dino-Raptor! Używaj Rayguna w biegu!");
+                return;
+            }
+            continue;
+        }
+
+        if (e.type === 'dino_rex') {
+            if (distX < 400 && distY < 200) {
+                e.chasingPlayer = true;
+            } else if (distX > 520) {
+                e.chasingPlayer = false;
+            }
+
+            const playerCenterX = player.x + player.w * 0.5;
+            const dirToPlayer = dxToPlayer >= 0 ? 1 : -1;
+            const playerOnRexPlatform = (
+                playerCenterX >= e.minX - 24 &&
+                playerCenterX <= e.maxX + 24 &&
+                Math.abs((player.y + player.h) - (e.y + e.h)) < 75
+            );
+
+            if (e.chasingPlayer) {
+                e.facing = dirToPlayer;
+                if (playerOnRexPlatform) {
+                    // Gracz jest na tej samej platformie -> T-Rex szarżuje na niego!
+                    e.roaring = false;
+                    e.turboActive = true;
+                    if (distX > 12) {
+                        e.vx = dirToPlayer * Math.abs(e.baseSpeed);
+                        e.x += dirToPlayer * (e.baseSpeed * 1.38);
+                    }
+                    e.x = Math.max(e.minX, Math.min(e.maxX - e.w, e.x));
+
+                    // Ciężki podskok tylko gdy gracz próbuje przeskoczyć bezpośrednio nad T-Rexem
+                    if (e.onGround && e.jumpCooldown <= 0 && distX < 92 && player.y + player.h < e.y + 18 && player.y > e.y - 90) {
+                        e.vy = -8.2;
+                        e.jumped = true;
+                        e.onGround = false;
+                        e.jumpCooldown = 78;
+                        sfx.play('boss_wall_crash');
+                    }
+                } else {
+                    // Gracz jest na INNEJ platformie -> T-Rex podchodzi blisko krawędzi, czeka zwrócony w stronę Dave'a i DRZE SIĘ (RYCZY)!
+                    const targetEdgeX = Math.max(e.minX + 2, Math.min(e.maxX - e.w - 2, playerCenterX - e.w * 0.5));
+                    const diffEdge = targetEdgeX - e.x;
+
+                    if (Math.abs(diffEdge) > 6) {
+                        e.roaring = false;
+                        e.turboActive = true;
+                        const stepDir = Math.sign(diffEdge);
+                        e.vx = stepDir * Math.abs(e.baseSpeed);
+                        e.x += stepDir * (e.baseSpeed * 1.22);
+                        e.x = Math.max(e.minX, Math.min(e.maxX - e.w, e.x));
+                    } else {
+                        // Stoi przy samej krawędzi bliżej gracza, czeka i ryczy!
+                        e.x = targetEdgeX;
+                        e.turboActive = false;
+                        e.roaring = true;
+                        e.roarTimer = (e.roarTimer || 0) + 1;
+                        if (e.roarTimer % 75 === 8) {
+                            sfx.play('boss_charge_warn');
+                            if (distX < 310 && screenShake < 4) screenShake = 3.5;
+                            spawnFloatingText(e.x + e.w * 0.5, e.y - 18, "🦖 ROOOAAAR!!", "#fb923c");
+                        }
+                    }
+                }
+            } else {
+                // Spokojny patrol, gdy gracz jest daleko
+                e.roaring = false;
+                e.turboActive = false;
+                e.x += Math.sign(e.vx) * e.baseSpeed;
+                if (e.x <= e.minX) { e.x = e.minX; e.vx = Math.abs(e.baseSpeed); }
+                else if (e.x + e.w >= e.maxX) { e.x = e.maxX - e.w; e.vx = -Math.abs(e.baseSpeed); }
+                e.facing = Math.sign(e.vx) || 1;
+            }
+
+            applyEnemyVerticalPhysics(false);
+
+            if (rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, e.x + 4, e.y + 4, e.w - 8, e.h - 8)) {
+                killPlayer("Zostałeś stratowany przez potężnego Dino-Rexa! Trzymaj dystans i ostrzeliwuj go z Rayguna!");
+                return;
+            }
+            continue;
+        }
 
         if (e.type === 'robo_fish') {
             const dyToPlayer = (player.y + player.h / 2) - (e.y + e.h / 2);
@@ -2107,7 +2574,7 @@ function update() {
     if (!lowEndMode) {
         for (let i = 0; i < enemies.length; i++) {
             const e = enemies[i];
-            const rawDir = (e.type === 'evad_bot' || e.type === 'robo_fish' || e.type === 'jetpack_rammer' || e.type === 'raygun_drone')
+            const rawDir = (e.type === 'evad_bot' || e.type === 'robo_fish' || e.type === 'jetpack_rammer' || e.type === 'raygun_drone' || e.type === 'dino_raptor' || e.type === 'dino_rex' || e.type === 'john_dash_bot' || e.type === 'john_laser_sniper' || e.type === 'john_cryo_drone' || e.type === 'john_vanguard' || e.type === 'john_titan_mech')
                 ? (e.facing || Math.sign(e.vx) || 1)
                 : (Math.sign(e.vx) || 1);
             e.visualDir = (e.visualDir ?? rawDir) + (rawDir - (e.visualDir ?? rawDir)) * 0.18;

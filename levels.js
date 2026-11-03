@@ -2186,6 +2186,1527 @@ const LEVELS = [
             { x: 40.0, y: 4.2, minX: 33.0, maxX: 41.5, speed: 2.7, type: 'jetpack_rammer' }
         ],
         fakeGoals: []
+    }    ,
+    // ========================================================================
+    // ROZDZIAŁ 3 - SEKCJA 1: ROZŻARZONE WYDMY SAHARY (POZIOMY 81 - 90)
+    // Dave budzi się z Raygunem 360° wśród fal gorąca, kaktusów i Dino-Raptorów!
+    // ========================================================================
+    {
+        name: "81. Przebudzenie na Saharze",
+        theme: "sahara",
+        hasRaygun: true,
+        chapterTitle: "ROZDZIAŁ 3 • SEKCJA 1: ROZŻARZONE WYDMY",
+        width: 42,
+        spawn: [1.5, 10],
+        goal: [39.0, 8.2],
+        solids: [
+            [0, 12, 9.5, 3],
+            [11.5, 11.0, 8.5, 4.0],
+            [22.0, 10.0, 8.0, 5.0],
+            [32.0, 10.0, 10.0, 5.0]
+        ],
+        invisBlocks: [[10.2, 7.8]],
+        fallingFloors: [[20.2, 11.0, 1.8, 1]],
+        spikeTraps: [
+            { x: 6.5, y: 11.2, w: 1, dir: 'up', triggerX: 5.5 },
+            { x: 25.0, y: 9.2, w: 1, dir: 'up', triggerX: 24.0 }
+        ],
+        enemies: [
+            { x: 15.0, y: 10.2, minX: 11.8, maxX: 19.5, speed: 2.5, type: 'dino_raptor' },
+            { x: 35.5, y: 9.2, minX: 32.5, maxX: 38.5, speed: 2.6, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "82. Kaktusowy Szlak",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 44,
+        spawn: [1.5, 10],
+        goal: [41.0, 7.2],
+        solids: [
+            [0, 12, 7.5, 3],
+            [9.5, 11.0, 8.5, 4.0],
+            [12.0, 7.5, 3.8, 0.7],
+            [20.0, 10.0, 9.0, 5.0],
+            [31.0, 9.0, 13.0, 6.0]
+        ],
+        invisBlocks: [[8.2, 8.0], [18.5, 7.0]],
+        fallingFloors: [[29.0, 10.0, 2.0, 1]],
+        spikeTraps: [
+            { x: 11.5, y: 10.2, w: 1, dir: 'up', triggerX: 10.6 },
+            { x: 23.5, y: 9.2, w: 1.2, dir: 'up', triggerX: 22.5 },
+            { x: 34.0, y: 8.2, w: 1, dir: 'up', triggerX: 33.0 }
+        ],
+        enemies: [
+            { x: 15.5, y: 10.2, minX: 12.8, maxX: 17.6, speed: 2.6, type: 'dino_raptor' },
+            { x: 26.0, y: 9.2, minX: 25.0, maxX: 28.6, speed: 2.7, type: 'dino_raptor' },
+            { x: 38.0, y: 8.2, minX: 35.2, maxX: 40.5, speed: 2.7, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "83. Pierwszy Dino-Rex",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 44,
+        spawn: [1.5, 10],
+        goal: [41.0, 6.2],
+        solids: [
+            [0, 12, 7.0, 3],
+            [9.0, 11.0, 10.5, 4.0],
+            [12.5, 7.2, 4.0, 0.7],
+            [21.5, 9.5, 10.5, 5.5],
+            [25.0, 5.8, 4.0, 0.7],
+            [34.0, 8.0, 10.0, 7.0]
+        ],
+        invisBlocks: [[7.8, 8.2], [20.2, 6.8]],
+        fallingFloors: [[32.0, 9.5, 2.0, 1]],
+        spikeTraps: [{ x: 36.0, y: 7.2, w: 1, dir: 'up', triggerX: 35.0 }],
+        enemies: [
+            { x: 14.5, y: 10.2, minX: 9.4, maxX: 19.0, speed: 2.6, type: 'dino_raptor' },
+            { x: 26.5, y: 8.7, minX: 22.0, maxX: 31.2, speed: 1.65, type: 'dino_rex' },
+            { x: 38.5, y: 7.2, minX: 37.2, maxX: 40.6, speed: 2.7, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "84. Ruchome Piaski",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 44,
+        spawn: [1.5, 9],
+        goal: [41.0, 9],
+        solids: [
+            [0, 11, 6.0, 4],
+            [14.0, 7.2, 5.5, 0.7],
+            [25.5, 7.2, 5.5, 0.7],
+            [35.5, 11, 8.5, 4]
+        ],
+        invisBlocks: [[11.0, 7.0], [22.5, 7.0]],
+        fallingFloors: [
+            [6.2, 11, 3.4, 0.9],
+            [10.2, 11, 3.4, 0.9],
+            [14.5, 10.8, 3.8, 0.9],
+            [19.0, 10.8, 3.4, 0.9],
+            [23.2, 11, 3.6, 0.9],
+            [27.5, 11, 3.6, 0.9],
+            [31.8, 11, 3.2, 0.9]
+        ],
+        spikeTraps: [
+            { x: 16.5, y: 0, w: 1.3, dir: 'down', triggerX: 15.2 },
+            { x: 28.0, y: 0, w: 1.3, dir: 'down', triggerX: 26.8 }
+        ],
+        enemies: [
+            { x: 15.5, y: 6.4, minX: 14.2, maxX: 19.0, speed: 2.5, type: 'dino_raptor' },
+            { x: 27.0, y: 6.4, minX: 25.8, maxX: 30.5, speed: 2.6, type: 'dino_raptor' },
+            { x: 38.5, y: 10.2, minX: 36.0, maxX: 40.6, speed: 1.7, type: 'dino_rex' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "85. Oaza Mirażu",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 44,
+        spawn: [1.5, 10],
+        goal: [16.5, 2.8],
+        solids: [
+            [0, 12, 8.0, 3],
+            [10.5, 12, 12.0, 3],
+            [13.5, 8.2, 6.0, 0.7],
+            [25.0, 12, 11.5, 3],
+            [27.5, 4.2, 1.3, 6.8],
+            [23.0, 2.5, 1.3, 6.5],
+            [15.0, 4.6, 5.5, 0.8]
+        ],
+        invisBlocks: [[9.0, 8.8], [23.5, 8.8]],
+        fallingFloors: [[16.0, 12, 2.5, 3]],
+        spikeTraps: [{ x: 20.2, y: 11.2, w: 1, dir: 'up', triggerX: 19.2 }],
+        enemies: [
+            { x: 12.0, y: 11.2, minX: 10.8, maxX: 15.6, speed: 2.6, type: 'dino_raptor' },
+            { x: 15.0, y: 7.4, minX: 13.8, maxX: 19.0, speed: 2.6, type: 'dino_raptor' },
+            { x: 28.5, y: 11.2, minX: 25.5, maxX: 32.5, speed: 1.7, type: 'dino_rex' }
+        ],
+        fakeGoals: [[33.8, 10.2]]
+    },
+    {
+        name: "86. Stado Raptorów",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 46,
+        spawn: [1.5, 10],
+        goal: [43.0, 7.2],
+        solids: [
+            [0, 12, 7.0, 3],
+            [9.0, 11.0, 8.5, 4.0],
+            [19.5, 9.8, 8.5, 5.2],
+            [30.0, 9.0, 16.0, 6.0],
+            [34.0, 5.6, 4.5, 0.7]
+        ],
+        invisBlocks: [[7.8, 8.2], [18.2, 7.0]],
+        fallingFloors: [[28.0, 9.8, 2.0, 1]],
+        spikeTraps: [
+            { x: 13.0, y: 0, w: 1.3, dir: 'down', triggerX: 11.8 },
+            { x: 32.0, y: 8.2, w: 1, dir: 'up', triggerX: 31.0 }
+        ],
+        enemies: [
+            { x: 11.5, y: 10.2, minX: 9.3, maxX: 17.0, speed: 2.7, type: 'dino_raptor' },
+            { x: 15.2, y: 10.2, minX: 9.3, maxX: 17.0, speed: 2.5, type: 'dino_raptor' },
+            { x: 22.5, y: 9.0, minX: 19.8, maxX: 27.5, speed: 2.7, type: 'dino_raptor' },
+            { x: 36.5, y: 8.2, minX: 33.4, maxX: 42.5, speed: 2.8, type: 'dino_raptor' },
+            { x: 40.5, y: 8.2, minX: 33.4, maxX: 42.5, speed: 2.6, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "87. Słoneczny Krater",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 46,
+        spawn: [1.5, 10],
+        goal: [43.0, 5.0],
+        solids: [
+            [0, 12, 6.0, 3],
+            [6.0, 4.5, 1.3, 8.5],
+            [10.0, 10.2, 7.5, 4.8],
+            [19.5, 8.6, 7.5, 6.4],
+            [29.0, 3.5, 1.3, 8.0],
+            [33.0, 6.8, 13.0, 8.2]
+        ],
+        invisBlocks: [[8.5, 7.5], [18.0, 6.0], [31.0, 4.8]],
+        fallingFloors: [[27.0, 8.6, 2.0, 1]],
+        spikeTraps: [
+            { x: 3.8, y: 11.2, w: 1, dir: 'up', triggerX: 3.0 },
+            { x: 35.0, y: 6.0, w: 1, dir: 'up', triggerX: 34.0 }
+        ],
+        enemies: [
+            { x: 13.0, y: 9.4, minX: 10.4, maxX: 17.0, speed: 2.7, type: 'dino_raptor' },
+            { x: 22.5, y: 7.8, minX: 19.8, maxX: 26.5, speed: 1.75, type: 'dino_rex' },
+            { x: 38.5, y: 6.0, minX: 36.4, maxX: 42.5, speed: 2.8, type: 'dino_raptor' },
+            { x: 41.0, y: 6.0, minX: 36.4, maxX: 42.5, speed: 1.75, type: 'dino_rex' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "88. Burza Piaskowa",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 46,
+        spawn: [1.5, 10],
+        goal: [43.0, 8.2],
+        solids: [
+            [0, 12, 6.5, 3],
+            [8.5, 10.8, 8.0, 4.2],
+            [10.5, 7.0, 4.0, 0.7],
+            [18.5, 9.5, 8.5, 5.5],
+            [20.5, 5.8, 4.0, 0.7],
+            [29.0, 10.8, 6.0, 4.2],
+            [37.0, 10.0, 9.0, 5.0]
+        ],
+        invisBlocks: [[7.2, 8.0], [17.2, 6.8], [35.5, 7.2]],
+        fallingFloors: [[27.0, 9.5, 2.0, 1], [33.0, 10.8, 2.0, 4.2]],
+        spikeTraps: [
+            { x: 12.5, y: 10.0, w: 1, dir: 'up', triggerX: 11.5 },
+            { x: 22.5, y: 0, w: 1.4, dir: 'down', triggerX: 21.2 },
+            { x: 38.2, y: 9.2, w: 1, dir: 'up', triggerX: 37.3 }
+        ],
+        enemies: [
+            { x: 14.5, y: 10.0, minX: 13.8, maxX: 16.2, speed: 2.6, type: 'dino_raptor' },
+            { x: 21.5, y: 8.7, minX: 18.8, maxX: 26.5, speed: 1.8, type: 'dino_rex' },
+            { x: 30.0, y: 10.0, minX: 29.3, maxX: 32.6, speed: 2.7, type: 'dino_raptor' },
+            { x: 40.5, y: 9.2, minX: 39.5, maxX: 42.6, speed: 2.8, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "89. Kościste Wydmy",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 46,
+        spawn: [1.5, 10],
+        goal: [43.0, 6.2],
+        solids: [
+            [0, 12, 6.5, 3],
+            [8.5, 11.0, 9.5, 4.0],
+            [20.0, 9.6, 9.5, 5.4],
+            [22.5, 5.8, 4.5, 0.7],
+            [31.5, 8.0, 14.5, 7.0]
+        ],
+        invisBlocks: [[7.2, 8.2], [18.8, 6.8], [30.2, 5.5]],
+        fallingFloors: [[18.0, 11.0, 2.0, 1]],
+        spikeTraps: [
+            { x: 11.0, y: 10.2, w: 1, dir: 'up', triggerX: 10.0 },
+            { x: 34.0, y: 7.2, w: 1.2, dir: 'up', triggerX: 33.0 }
+        ],
+        enemies: [
+            { x: 14.0, y: 10.2, minX: 12.4, maxX: 17.6, speed: 1.8, type: 'dino_rex' },
+            { x: 23.0, y: 8.8, minX: 20.4, maxX: 29.0, speed: 2.8, type: 'dino_raptor' },
+            { x: 26.8, y: 8.8, minX: 20.4, maxX: 29.0, speed: 2.7, type: 'dino_raptor' },
+            { x: 37.5, y: 7.2, minX: 35.6, maxX: 42.5, speed: 1.85, type: 'dino_rex' },
+            { x: 41.0, y: 7.2, minX: 35.6, maxX: 42.5, speed: 2.8, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "90. Brama Kanionu Rexa",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 48,
+        spawn: [1.5, 10],
+        goal: [44.5, 5.2],
+        solids: [
+            [0, 12, 6.5, 3],
+            [8.5, 10.5, 8.5, 4.5],
+            [19.0, 9.0, 8.5, 6.0],
+            [29.5, 10.5, 7.0, 4.5],
+            [36.5, 3.5, 1.3, 6.5],
+            [39.5, 7.0, 8.5, 8.0]
+        ],
+        invisBlocks: [[7.2, 7.8], [17.6, 6.2], [28.2, 7.0]],
+        fallingFloors: [[27.5, 9.0, 2.0, 1]],
+        spikeTraps: [
+            { x: 12.5, y: 0, w: 1.3, dir: 'down', triggerX: 11.2 },
+            { x: 40.5, y: 6.2, w: 1, dir: 'up', triggerX: 39.6 }
+        ],
+        enemies: [
+            { x: 11.5, y: 9.7, minX: 8.8, maxX: 16.5, speed: 1.85, type: 'dino_rex' },
+            { x: 15.0, y: 9.7, minX: 8.8, maxX: 16.5, speed: 2.8, type: 'dino_raptor' },
+            { x: 22.0, y: 8.2, minX: 19.4, maxX: 27.0, speed: 1.85, type: 'dino_rex' },
+            { x: 42.5, y: 6.2, minX: 41.8, maxX: 44.2, speed: 2.8, type: 'dino_raptor' }
+        ],
+        fakeGoals: [[34.2, 8.7]]
+    },
+
+    // ========================================================================
+    // ROZDZIAŁ 3 - SEKCJA 2: KANION WIELKICH DINOZAURÓW (POZIOMY 91 - 100)
+    // ========================================================================
+    {
+        name: "91. Wąwóz T-Rexów",
+        theme: "sahara",
+        hasRaygun: true,
+        chapterTitle: "ROZDZIAŁ 3 • SEKCJA 2: KANION DINOZAURÓW",
+        width: 48,
+        spawn: [1.5, 10],
+        goal: [45.0, 7.2],
+        solids: [
+            [0, 12, 7.0, 3],
+            [9.0, 11.0, 10.5, 4.0],
+            [12.0, 7.2, 4.5, 0.7],
+            [21.5, 9.6, 10.5, 5.4],
+            [24.5, 5.8, 4.5, 0.7],
+            [34.0, 9.0, 14.0, 6.0]
+        ],
+        invisBlocks: [[7.8, 8.0], [20.2, 6.8], [32.6, 6.2]],
+        fallingFloors: [[32.0, 9.6, 2.0, 1]],
+        spikeTraps: [
+            { x: 4.5, y: 11.2, w: 1, dir: 'up', triggerX: 3.6 },
+            { x: 36.5, y: 8.2, w: 1.2, dir: 'up', triggerX: 35.5 }
+        ],
+        enemies: [
+            { x: 13.5, y: 10.2, minX: 9.4, maxX: 19.0, speed: 1.85, type: 'dino_rex' },
+            { x: 17.5, y: 10.2, minX: 9.4, maxX: 19.0, speed: 2.8, type: 'dino_raptor' },
+            { x: 25.5, y: 8.8, minX: 22.0, maxX: 31.4, speed: 1.9, type: 'dino_rex' },
+            { x: 40.0, y: 8.2, minX: 38.0, maxX: 44.5, speed: 1.9, type: 'dino_rex' },
+            { x: 43.2, y: 8.2, minX: 38.0, maxX: 44.5, speed: 2.8, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "92. Półki Piaskowca",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 48,
+        spawn: [1.5, 10],
+        goal: [45.0, 4.6],
+        solids: [
+            [0, 12, 6.0, 3],
+            [6.0, 4.5, 1.3, 8.5],
+            [9.8, 2.5, 1.3, 8.0],
+            [11.2, 9.5, 7.5, 5.5],
+            [20.8, 8.0, 7.5, 7.0],
+            [30.5, 3.5, 1.3, 8.0],
+            [34.2, 6.4, 13.8, 8.6]
+        ],
+        invisBlocks: [[19.2, 5.8], [32.4, 4.5]],
+        fallingFloors: [[28.3, 8.0, 2.0, 1]],
+        spikeTraps: [
+            { x: 12.2, y: 8.7, w: 1, dir: 'up', triggerX: 11.4 },
+            { x: 36.2, y: 5.6, w: 1, dir: 'up', triggerX: 35.3 }
+        ],
+        enemies: [
+            { x: 15.0, y: 8.7, minX: 13.5, maxX: 18.2, speed: 2.8, type: 'dino_raptor' },
+            { x: 23.5, y: 7.2, minX: 21.2, maxX: 27.8, speed: 1.85, type: 'dino_rex' },
+            { x: 39.5, y: 5.6, minX: 37.6, maxX: 44.5, speed: 1.9, type: 'dino_rex' },
+            { x: 43.0, y: 5.6, minX: 37.6, maxX: 44.5, speed: 2.85, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "93.Skamieniały Most",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 48,
+        spawn: [1.5, 9],
+        goal: [45.0, 9],
+        solids: [
+            [0, 11, 5.5, 4],
+            [12.5, 6.8, 6.5, 0.7],
+            [25.0, 6.8, 6.5, 0.7],
+            [38.0, 11, 10.0, 4]
+        ],
+        invisBlocks: [[9.5, 6.8], [22.0, 6.8], [35.0, 7.5]],
+        fallingFloors: [
+            [5.8, 11, 3.2, 0.8],
+            [9.5, 11, 3.2, 0.8],
+            [14.0, 10.8, 3.5, 0.8],
+            [18.5, 10.8, 3.5, 0.8],
+            [23.0, 11, 3.5, 0.8],
+            [27.5, 11, 3.5, 0.8],
+            [32.0, 11, 3.2, 0.8],
+            [35.5, 11, 2.5, 0.8]
+        ],
+        spikeTraps: [
+            { x: 15.5, y: 0, w: 1.3, dir: 'down', triggerX: 14.2 },
+            { x: 28.0, y: 0, w: 1.3, dir: 'down', triggerX: 26.8 },
+            { x: 39.0, y: 10.2, w: 1, dir: 'up', triggerX: 38.2 }
+        ],
+        enemies: [
+            { x: 14.5, y: 6.0, minX: 12.8, maxX: 18.5, speed: 1.8, type: 'dino_rex' },
+            { x: 27.0, y: 6.0, minX: 25.3, maxX: 31.0, speed: 2.85, type: 'dino_raptor' },
+            { x: 41.5, y: 10.2, minX: 40.3, maxX: 44.5, speed: 1.9, type: 'dino_rex' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "94. Gniazdo Drapieżników",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 48,
+        spawn: [1.5, 10],
+        goal: [45.0, 8.2],
+        solids: [
+            [0, 12, 6.5, 3],
+            [8.5, 11.0, 11.0, 4.0],
+            [11.5, 7.2, 5.0, 0.7],
+            [21.5, 11.0, 11.0, 4.0],
+            [24.5, 7.2, 5.0, 0.7],
+            [34.5, 10.0, 13.5, 5.0]
+        ],
+        invisBlocks: [[7.2, 8.2], [20.2, 8.2], [33.2, 7.5]],
+        fallingFloors: [[35.5, 10.0, 2.2, 5.0]],
+        spikeTraps: [
+            { x: 14.0, y: 0, w: 1.3, dir: 'down', triggerX: 12.8 },
+            { x: 27.0, y: 0, w: 1.3, dir: 'down', triggerX: 25.8 }
+        ],
+        enemies: [
+            { x: 10.5, y: 10.2, minX: 8.8, maxX: 19.0, speed: 2.8, type: 'dino_raptor' },
+            { x: 15.5, y: 10.2, minX: 8.8, maxX: 19.0, speed: 1.85, type: 'dino_rex' },
+            { x: 23.5, y: 10.2, minX: 21.8, maxX: 32.0, speed: 2.85, type: 'dino_raptor' },
+            { x: 28.5, y: 10.2, minX: 21.8, maxX: 32.0, speed: 1.9, type: 'dino_rex' },
+            { x: 40.5, y: 9.2, minX: 38.2, maxX: 44.5, speed: 2.9, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "95. Rozżarzony Labirynt",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 48,
+        spawn: [1.5, 10],
+        goal: [16.5, 2.8],
+        solids: [
+            [0, 12, 8.0, 3],
+            [10.5, 12, 12.5, 3],
+            [13.0, 8.2, 6.5, 0.7],
+            [25.5, 12, 12.0, 3],
+            [28.5, 4.2, 1.3, 6.8],
+            [24.0, 2.5, 1.3, 6.5],
+            [15.0, 4.6, 6.0, 0.8]
+        ],
+        invisBlocks: [[9.0, 8.8], [24.0, 8.8]],
+        fallingFloors: [[16.0, 12, 2.5, 3]],
+        spikeTraps: [{ x: 20.5, y: 11.2, w: 1, dir: 'up', triggerX: 19.5 }],
+        enemies: [
+            { x: 12.0, y: 11.2, minX: 10.8, maxX: 15.6, speed: 2.8, type: 'dino_raptor' },
+            { x: 15.0, y: 7.4, minX: 13.4, maxX: 19.0, speed: 1.85, type: 'dino_rex' },
+            { x: 28.0, y: 11.2, minX: 26.0, maxX: 34.0, speed: 1.9, type: 'dino_rex' },
+            { x: 32.0, y: 11.2, minX: 26.0, maxX: 34.0, speed: 2.85, type: 'dino_raptor' }
+        ],
+        fakeGoals: [[35.0, 10.2]]
+    },
+    {
+        name: "96. Kaktusowa Forteca",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 48,
+        spawn: [1.5, 10],
+        goal: [45.0, 6.2],
+        solids: [
+            [0, 12, 6.5, 3],
+            [8.5, 10.8, 8.5, 4.2],
+            [19.0, 9.4, 8.5, 5.6],
+            [29.5, 8.0, 18.5, 7.0],
+            [34.5, 4.6, 5.0, 0.7]
+        ],
+        invisBlocks: [[7.2, 8.0], [17.6, 6.5], [28.0, 5.2]],
+        fallingFloors: [[27.5, 9.4, 2.0, 1]],
+        spikeTraps: [
+            { x: 10.5, y: 10.0, w: 1, dir: 'up', triggerX: 9.6 },
+            { x: 21.0, y: 8.6, w: 1, dir: 'up', triggerX: 20.1 },
+            { x: 32.0, y: 7.2, w: 1.2, dir: 'up', triggerX: 31.0 },
+            { x: 40.5, y: 7.2, w: 1, dir: 'up', triggerX: 39.5 }
+        ],
+        enemies: [
+            { x: 14.0, y: 10.0, minX: 11.8, maxX: 16.6, speed: 2.85, type: 'dino_raptor' },
+            { x: 24.5, y: 8.6, minX: 22.3, maxX: 27.0, speed: 1.9, type: 'dino_rex' },
+            { x: 36.0, y: 7.2, minX: 33.6, maxX: 39.8, speed: 1.95, type: 'dino_rex' },
+            { x: 43.0, y: 7.2, minX: 41.8, maxX: 44.6, speed: 2.9, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "97. Dolina Tyranozaurów",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 50,
+        spawn: [1.5, 10],
+        goal: [47.0, 7.2],
+        solids: [
+            [0, 12, 6.5, 3],
+            [8.5, 11.0, 11.5, 4.0],
+            [11.5, 7.2, 5.0, 0.7],
+            [22.0, 10.0, 11.5, 5.0],
+            [25.0, 6.2, 5.0, 0.7],
+            [35.5, 9.0, 14.5, 6.0]
+        ],
+        invisBlocks: [[7.2, 8.2], [20.6, 7.2], [34.2, 6.2]],
+        fallingFloors: [[33.5, 10.0, 2.0, 1]],
+        spikeTraps: [
+            { x: 14.0, y: 0, w: 1.4, dir: 'down', triggerX: 12.8 },
+            { x: 38.0, y: 8.2, w: 1.2, dir: 'up', triggerX: 37.0 }
+        ],
+        enemies: [
+            { x: 12.5, y: 10.2, minX: 8.8, maxX: 19.5, speed: 1.9, type: 'dino_rex' },
+            { x: 17.0, y: 10.2, minX: 8.8, maxX: 19.5, speed: 1.9, type: 'dino_rex' },
+            { x: 26.0, y: 9.2, minX: 22.4, maxX: 33.0, speed: 1.95, type: 'dino_rex' },
+            { x: 30.5, y: 9.2, minX: 22.4, maxX: 33.0, speed: 2.9, type: 'dino_raptor' },
+            { x: 42.5, y: 8.2, minX: 39.6, maxX: 46.5, speed: 1.95, type: 'dino_rex' },
+            { x: 45.2, y: 8.2, minX: 39.6, maxX: 46.5, speed: 2.9, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "98. Piekielny Upał",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 50,
+        spawn: [1.5, 10],
+        goal: [47.0, 4.6],
+        solids: [
+            [0, 12, 6.0, 3],
+            [6.0, 4.5, 1.3, 8.5],
+            [9.8, 2.5, 1.3, 8.0],
+            [11.2, 10.0, 8.0, 5.0],
+            [21.2, 8.5, 8.0, 6.5],
+            [31.2, 7.0, 8.0, 8.0],
+            [41.0, 6.4, 9.0, 8.6]
+        ],
+        invisBlocks: [[19.6, 6.2], [29.6, 4.8], [39.6, 4.2]],
+        fallingFloors: [[19.2, 10.0, 1.8, 1], [39.2, 7.0, 1.8, 1]],
+        spikeTraps: [
+            { x: 3.8, y: 11.2, w: 1, dir: 'up', triggerX: 3.0 },
+            { x: 24.5, y: 0, w: 1.4, dir: 'down', triggerX: 23.2 },
+            { x: 42.2, y: 5.6, w: 1, dir: 'up', triggerX: 41.3 }
+        ],
+        enemies: [
+            { x: 14.5, y: 9.2, minX: 11.5, maxX: 18.8, speed: 2.9, type: 'dino_raptor' },
+            { x: 24.5, y: 7.7, minX: 21.5, maxX: 28.8, speed: 1.95, type: 'dino_rex' },
+            { x: 34.5, y: 6.2, minX: 31.5, maxX: 38.8, speed: 1.95, type: 'dino_rex' },
+            { x: 37.5, y: 6.2, minX: 31.5, maxX: 38.8, speed: 2.9, type: 'dino_raptor' },
+            { x: 45.0, y: 5.6, minX: 43.6, maxX: 46.6, speed: 2.9, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "99. Marsz Prehistorii",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 50,
+        spawn: [1.5, 10],
+        goal: [47.0, 6.2],
+        solids: [
+            [0, 12, 6.5, 3],
+            [8.5, 10.8, 9.5, 4.2],
+            [11.0, 7.0, 4.5, 0.7],
+            [20.0, 9.4, 9.5, 5.6],
+            [22.5, 5.6, 4.5, 0.7],
+            [31.5, 8.0, 18.5, 7.0]
+        ],
+        invisBlocks: [[7.2, 8.0], [18.6, 6.5], [30.2, 5.2]],
+        fallingFloors: [[34.0, 8.0, 2.2, 7.0]],
+        spikeTraps: [
+            { x: 9.5, y: 10.0, w: 1, dir: 'up', triggerX: 8.6 },
+            { x: 38.0, y: 7.2, w: 1.2, dir: 'up', triggerX: 37.0 }
+        ],
+        enemies: [
+            { x: 14.0, y: 10.0, minX: 11.0, maxX: 17.6, speed: 1.95, type: 'dino_rex' },
+            { x: 16.5, y: 10.0, minX: 11.0, maxX: 17.6, speed: 2.9, type: 'dino_raptor' },
+            { x: 24.0, y: 8.6, minX: 20.4, maxX: 29.0, speed: 1.95, type: 'dino_rex' },
+            { x: 27.5, y: 8.6, minX: 20.4, maxX: 29.0, speed: 2.9, type: 'dino_raptor' },
+            { x: 41.5, y: 7.2, minX: 39.6, maxX: 46.5, speed: 2.0, type: 'dino_rex' },
+            { x: 45.0, y: 7.2, minX: 39.6, maxX: 46.5, speed: 2.95, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "100. Król Sahary • Wyrwa Czasu",
+        theme: "sahara",
+        hasRaygun: true,
+        width: 52,
+        spawn: [1.5, 10],
+        goal: [48.5, 6.2],
+        solids: [
+            [0, 12, 7.0, 3],
+            [9.0, 10.5, 10.0, 4.5],
+            [11.5, 6.8, 5.0, 0.7],
+            [21.0, 9.0, 10.0, 6.0],
+            [23.5, 5.2, 5.0, 0.7],
+            [33.0, 8.0, 19.0, 7.0]
+        ],
+        invisBlocks: [[7.8, 7.8], [19.6, 6.2], [31.6, 5.0]],
+        fallingFloors: [[31.0, 9.0, 2.0, 1]],
+        spikeTraps: [
+            { x: 36.0, y: 7.2, w: 1.2, dir: 'up', triggerX: 35.0 },
+            { x: 42.5, y: 0, w: 1.4, dir: 'down', triggerX: 41.2 }
+        ],
+        enemies: [
+            { x: 13.0, y: 9.7, minX: 9.4, maxX: 18.5, speed: 1.95, type: 'dino_rex' },
+            { x: 17.0, y: 9.7, minX: 9.4, maxX: 18.5, speed: 2.9, type: 'dino_raptor' },
+            { x: 25.0, y: 8.2, minX: 21.4, maxX: 30.5, speed: 2.0, type: 'dino_rex' },
+            { x: 29.0, y: 8.2, minX: 21.4, maxX: 30.5, speed: 2.95, type: 'dino_raptor' },
+            { x: 40.0, y: 7.2, minX: 37.6, maxX: 47.8, speed: 2.0, type: 'dino_rex' },
+            { x: 44.5, y: 7.2, minX: 37.6, maxX: 47.8, speed: 2.0, type: 'dino_rex' },
+            { x: 46.8, y: 7.2, minX: 37.6, maxX: 47.8, speed: 3.0, type: 'dino_raptor' }
+        ],
+        fakeGoals: []
+    }
+
+    ,
+    // ========================================================================
+    // ROZDZIAŁ 3 - SEKCJA 3: OŚNIEŻONE GRANIE I LAWINY (POZIOMY 101 - 112)
+    // Dave schodzi ze szczytu góry (4200m -> 120m) walcząc z nowymi botami Johna!
+    // ========================================================================
+    {
+        name: "101. Urwisko nad Chmurami",
+        theme: "mountain",
+        hasRaygun: true,
+        chapterTitle: "ROZDZIAŁ 3 • SEKCJA 3: SZCZYT GÓRY (4200m)",
+        width: 46,
+        spawn: [1.5, 3.8],
+        goal: [42.5, 8.6],
+        solids: [
+            [0, 5.8, 6.5, 9.2],
+            [9.8, 7.2, 8.8, 7.8],
+            [21.8, 8.8, 9.2, 6.2],
+            [23.8, 5.4, 4.5, 0.7],
+            [34.2, 10.4, 11.8, 4.6]
+        ],
+        invisBlocks: [[8.0, 4.2], [20.0, 5.6], [32.4, 7.0]],
+        fallingFloors: [
+            [6.8, 6.4, 2.4, 0.8],
+            [19.0, 8.0, 2.2, 0.8],
+            [31.4, 9.6, 2.2, 0.8]
+        ],
+        spikeTraps: [
+            { x: 13.0, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.5 },
+            { x: 25.3, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.8 },
+            { x: 37.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 35.7 },
+            { x: 36.4, y: 9.6, w: 1.2, dir: 'up', triggerX: 35.4 }
+        ],
+        enemies: [
+            { x: 13.0, y: 6.4, minX: 10.2, maxX: 18.1, speed: 2.6, type: 'john_dash_bot' },
+            { x: 28.0, y: 8.0, minX: 22.2, maxX: 30.5, speed: 2.45, type: 'evad_bot' },
+            { x: 39.4, y: 9.6, minX: 38.0, maxX: 42.0, speed: 2.6, type: 'john_dash_bot' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "102. Kamienna Lawina",
+        theme: "mountain",
+        hasRaygun: true,
+        width: 48,
+        spawn: [1.5, 3.2],
+        goal: [44.5, 9.4],
+        solids: [
+            [0, 5.2, 6.0, 9.8],
+            [9.2, 6.8, 8.5, 8.2],
+            [21.0, 8.4, 9.0, 6.6],
+            [33.2, 9.8, 8.5, 5.2],
+            [44.2, 11.2, 3.8, 3.8]
+        ],
+        invisBlocks: [[7.5, 3.8], [19.2, 5.2], [31.5, 6.8], [42.6, 8.0]],
+        fallingFloors: [
+            [6.3, 5.8, 2.3, 0.8],
+            [18.1, 7.5, 2.3, 0.8],
+            [30.4, 9.0, 2.2, 0.8],
+            [41.9, 10.4, 2.0, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.4, y: 0, w: 1.6, dir: 'boulder', triggerX: 10.9 },
+            { x: 24.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.0 },
+            { x: 36.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 34.7 },
+            { x: 46.4, y: 10.4, w: 1.2, dir: 'up', triggerX: 45.4 }
+        ],
+        enemies: [
+            { x: 12.3, y: 6.0, minX: 9.6, maxX: 17.2, speed: 2.47, type: 'john_laser_sniper' },
+            { x: 27.1, y: 7.6, minX: 21.4, maxX: 29.5, speed: 2.62, type: 'john_dash_bot' },
+            { x: 36.3, y: 9.0, minX: 33.6, maxX: 41.2, speed: 2.47, type: 'evad_bot' },
+            { x: 45.2, y: 10.4, minX: 48.0, maxX: 44.0, speed: 2.47, type: 'john_laser_sniper' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "103. Przełęcz Snajperów",
+        theme: "mountain",
+        hasRaygun: true,
+        width: 48,
+        spawn: [1.5, 3.5],
+        goal: [44.5, 9.6],
+        solids: [
+            [0, 5.5, 6.2, 9.5],
+            [9.5, 7.0, 9.2, 8.0],
+            [11.8, 3.8, 4.2, 0.7],
+            [22.0, 8.6, 9.5, 6.4],
+            [24.5, 5.2, 4.2, 0.7],
+            [34.8, 10.2, 8.5, 4.8],
+            [45.5, 11.4, 2.5, 3.6]
+        ],
+        invisBlocks: [[7.8, 4.0], [20.2, 5.5], [33.0, 7.2]],
+        fallingFloors: [
+            [6.6, 6.2, 2.3, 0.8],
+            [19.1, 7.8, 2.3, 0.8],
+            [31.9, 9.4, 2.3, 0.8],
+            [43.5, 10.8, 1.8, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.7, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.2 },
+            { x: 25.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 24.0 },
+            { x: 37.8, y: 0, w: 1.6, dir: 'boulder', triggerX: 36.3 },
+            { x: 47.7, y: 10.6, w: 1.2, dir: 'up', triggerX: 46.7 }
+        ],
+        enemies: [
+            { x: 12.8, y: 6.2, minX: 9.9, maxX: 18.2, speed: 2.49, type: 'john_laser_sniper' },
+            { x: 28.4, y: 7.8, minX: 22.4, maxX: 31.0, speed: 2.64, type: 'john_dash_bot' },
+            { x: 37.9, y: 6.4, minX: 35.2, maxX: 42.8, speed: 2.49, type: 'john_cryo_drone' },
+            { x: 45.6, y: 10.6, minX: 49.3, maxX: 44.0, speed: 2.49, type: 'john_laser_sniper' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "104. Rozpadlina Wichrów",
+        theme: "mountain",
+        hasRaygun: true,
+        width: 50,
+        spawn: [1.5, 3.8],
+        goal: [46.5, 8.6],
+        solids: [
+            [0, 5.8, 6.5, 9.2],
+            [9.8, 7.2, 8.8, 7.8],
+            [21.8, 8.8, 9.2, 6.2],
+            [23.8, 5.4, 4.5, 0.7],
+            [34.2, 10.4, 15.8, 4.6]
+        ],
+        invisBlocks: [[8.0, 4.2], [20.0, 5.6], [32.4, 7.0]],
+        fallingFloors: [
+            [6.8, 6.4, 2.4, 0.8],
+            [19.0, 8.0, 2.2, 0.8],
+            [31.4, 9.6, 2.2, 0.8]
+        ],
+        spikeTraps: [
+            { x: 13.0, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.5 },
+            { x: 25.3, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.8 },
+            { x: 37.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 35.7 },
+            { x: 36.4, y: 9.6, w: 1.2, dir: 'up', triggerX: 35.4 }
+        ],
+        enemies: [
+            { x: 13.0, y: 6.4, minX: 10.2, maxX: 18.1, speed: 2.66, type: 'john_dash_bot' },
+            { x: 28.0, y: 5.0, minX: 22.2, maxX: 30.5, speed: 2.51, type: 'john_cryo_drone' },
+            { x: 40.8, y: 9.6, minX: 38.0, maxX: 46.0, speed: 2.51, type: 'john_laser_sniper' },
+            { x: 43.6, y: 9.6, minX: 38.0, maxX: 46.0, speed: 2.51, type: 'evad_bot' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "105. Pancerny Patrol Johna",
+        theme: "mountain",
+        hasRaygun: true,
+        width: 50,
+        spawn: [1.5, 3.2],
+        goal: [46.5, 9.4],
+        solids: [
+            [0, 5.2, 6.0, 9.8],
+            [9.2, 6.8, 8.5, 8.2],
+            [21.0, 8.4, 9.0, 6.6],
+            [33.2, 9.8, 8.5, 5.2],
+            [44.2, 11.2, 5.8, 3.8]
+        ],
+        invisBlocks: [[7.5, 3.8], [19.2, 5.2], [31.5, 6.8], [42.6, 8.0]],
+        fallingFloors: [
+            [6.3, 5.8, 2.3, 0.8],
+            [18.1, 7.5, 2.3, 0.8],
+            [30.4, 9.0, 2.2, 0.8],
+            [41.9, 10.4, 2.0, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.4, y: 0, w: 1.6, dir: 'boulder', triggerX: 10.9 },
+            { x: 24.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.0 },
+            { x: 36.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 34.7 },
+            { x: 46.4, y: 10.4, w: 1.2, dir: 'up', triggerX: 45.4 }
+        ],
+        enemies: [
+            { x: 12.3, y: 6.0, minX: 9.6, maxX: 17.2, speed: 2.21, type: 'john_vanguard' },
+            { x: 27.1, y: 7.6, minX: 21.4, maxX: 29.5, speed: 2.68, type: 'john_dash_bot' },
+            { x: 36.3, y: 6.0, minX: 33.6, maxX: 41.2, speed: 2.53, type: 'john_cryo_drone' },
+            { x: 46.6, y: 10.4, minX: 48.0, maxX: 46.0, speed: 2.21, type: 'john_vanguard' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "106. Stromy Żleb Głazów",
+        theme: "mountain",
+        hasRaygun: true,
+        width: 50,
+        spawn: [1.5, 3.5],
+        goal: [46.5, 9.6],
+        solids: [
+            [0, 5.5, 6.2, 9.5],
+            [9.5, 7.0, 9.2, 8.0],
+            [11.8, 3.8, 4.2, 0.7],
+            [22.0, 8.6, 9.5, 6.4],
+            [24.5, 5.2, 4.2, 0.7],
+            [34.8, 10.2, 8.5, 4.8],
+            [45.5, 11.4, 4.5, 3.6]
+        ],
+        invisBlocks: [[7.8, 4.0], [20.2, 5.5], [33.0, 7.2]],
+        fallingFloors: [
+            [6.6, 6.2, 2.3, 0.8],
+            [19.1, 7.8, 2.3, 0.8],
+            [31.9, 9.4, 2.3, 0.8],
+            [43.5, 10.8, 1.8, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.7, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.2 },
+            { x: 25.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 24.0 },
+            { x: 37.8, y: 0, w: 1.6, dir: 'boulder', triggerX: 36.3 },
+            { x: 47.7, y: 10.6, w: 1.2, dir: 'up', triggerX: 46.7 }
+        ],
+        enemies: [
+            { x: 12.8, y: 6.2, minX: 9.9, maxX: 18.2, speed: 2.7, type: 'john_dash_bot' },
+            { x: 28.4, y: 7.8, minX: 22.4, maxX: 31.0, speed: 2.55, type: 'evad_bot' },
+            { x: 37.9, y: 9.4, minX: 35.2, maxX: 42.8, speed: 2.55, type: 'john_laser_sniper' },
+            { x: 47.0, y: 10.6, minX: 49.3, maxX: 46.0, speed: 2.23, type: 'john_vanguard' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "107. Lodowcowy Most",
+        theme: "mountain",
+        hasRaygun: true,
+        width: 50,
+        spawn: [1.5, 3.8],
+        goal: [46.5, 8.6],
+        solids: [
+            [0, 5.8, 6.5, 9.2],
+            [9.8, 7.2, 8.8, 7.8],
+            [21.8, 8.8, 9.2, 6.2],
+            [23.8, 5.4, 4.5, 0.7],
+            [34.2, 10.4, 15.8, 4.6]
+        ],
+        invisBlocks: [[8.0, 4.2], [20.0, 5.6], [32.4, 7.0]],
+        fallingFloors: [
+            [6.8, 6.4, 2.4, 0.8],
+            [19.0, 8.0, 2.2, 0.8],
+            [31.4, 9.6, 2.2, 0.8]
+        ],
+        spikeTraps: [
+            { x: 13.0, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.5 },
+            { x: 25.3, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.8 },
+            { x: 37.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 35.7 },
+            { x: 36.4, y: 9.6, w: 1.2, dir: 'up', triggerX: 35.4 }
+        ],
+        enemies: [
+            { x: 13.0, y: 6.4, minX: 10.2, maxX: 18.1, speed: 2.57, type: 'john_laser_sniper' },
+            { x: 28.0, y: 5.0, minX: 22.2, maxX: 30.5, speed: 2.57, type: 'john_cryo_drone' },
+            { x: 40.8, y: 9.6, minX: 38.0, maxX: 46.0, speed: 2.72, type: 'john_dash_bot' },
+            { x: 43.6, y: 9.6, minX: 38.0, maxX: 46.0, speed: 2.57, type: 'evad_bot' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "108. Zejście Przez Chmury",
+        theme: "mountain",
+        hasRaygun: true,
+        width: 52,
+        spawn: [1.5, 3.2],
+        goal: [48.5, 9.4],
+        solids: [
+            [0, 5.2, 6.0, 9.8],
+            [9.2, 6.8, 8.5, 8.2],
+            [21.0, 8.4, 9.0, 6.6],
+            [33.2, 9.8, 8.5, 5.2],
+            [44.2, 11.2, 7.8, 3.8]
+        ],
+        invisBlocks: [[7.5, 3.8], [19.2, 5.2], [31.5, 6.8], [42.6, 8.0]],
+        fallingFloors: [
+            [6.3, 5.8, 2.3, 0.8],
+            [18.1, 7.5, 2.3, 0.8],
+            [30.4, 9.0, 2.2, 0.8],
+            [41.9, 10.4, 2.0, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.4, y: 0, w: 1.6, dir: 'boulder', triggerX: 10.9 },
+            { x: 24.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.0 },
+            { x: 36.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 34.7 },
+            { x: 46.4, y: 10.4, w: 1.2, dir: 'up', triggerX: 45.4 }
+        ],
+        enemies: [
+            { x: 12.3, y: 6.0, minX: 9.6, maxX: 17.2, speed: 2.74, type: 'john_dash_bot' },
+            { x: 27.1, y: 4.6, minX: 21.4, maxX: 29.5, speed: 2.59, type: 'john_cryo_drone' },
+            { x: 36.3, y: 9.0, minX: 33.6, maxX: 41.2, speed: 2.25, type: 'john_vanguard' },
+            { x: 48.0, y: 10.4, minX: 48.0, maxX: 48.0, speed: 2.59, type: 'john_laser_sniper' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "109. Gniazdo Krio-Dronów",
+        theme: "mountain",
+        hasRaygun: true,
+        width: 52,
+        spawn: [1.5, 3.5],
+        goal: [48.5, 9.6],
+        solids: [
+            [0, 5.5, 6.2, 9.5],
+            [9.5, 7.0, 9.2, 8.0],
+            [11.8, 3.8, 4.2, 0.7],
+            [22.0, 8.6, 9.5, 6.4],
+            [24.5, 5.2, 4.2, 0.7],
+            [34.8, 10.2, 8.5, 4.8],
+            [45.5, 11.4, 6.5, 3.6]
+        ],
+        invisBlocks: [[7.8, 4.0], [20.2, 5.5], [33.0, 7.2]],
+        fallingFloors: [
+            [6.6, 6.2, 2.3, 0.8],
+            [19.1, 7.8, 2.3, 0.8],
+            [31.9, 9.4, 2.3, 0.8],
+            [43.5, 10.8, 1.8, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.7, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.2 },
+            { x: 25.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 24.0 },
+            { x: 37.8, y: 0, w: 1.6, dir: 'boulder', triggerX: 36.3 },
+            { x: 47.7, y: 10.6, w: 1.2, dir: 'up', triggerX: 46.7 }
+        ],
+        enemies: [
+            { x: 12.8, y: 3.2, minX: 9.9, maxX: 18.2, speed: 2.61, type: 'john_cryo_drone' },
+            { x: 28.4, y: 7.8, minX: 22.4, maxX: 31.0, speed: 2.76, type: 'john_dash_bot' },
+            { x: 37.9, y: 6.4, minX: 35.2, maxX: 42.8, speed: 2.61, type: 'john_cryo_drone' },
+            { x: 48.4, y: 10.6, minX: 49.3, maxX: 48.0, speed: 2.61, type: 'john_laser_sniper' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "110. Pierwszy Egzoszkielet Johna",
+        theme: "mountain",
+        hasRaygun: true,
+        width: 52,
+        spawn: [1.5, 3.8],
+        goal: [48.5, 8.6],
+        solids: [
+            [0, 5.8, 6.5, 9.2],
+            [9.8, 7.2, 8.8, 7.8],
+            [21.8, 8.8, 9.2, 6.2],
+            [23.8, 5.4, 4.5, 0.7],
+            [34.2, 10.4, 17.8, 4.6]
+        ],
+        invisBlocks: [[8.0, 4.2], [20.0, 5.6], [32.4, 7.0]],
+        fallingFloors: [
+            [6.8, 6.4, 2.4, 0.8],
+            [19.0, 8.0, 2.2, 0.8],
+            [31.4, 9.6, 2.2, 0.8]
+        ],
+        spikeTraps: [
+            { x: 13.0, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.5 },
+            { x: 25.3, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.8 },
+            { x: 37.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 35.7 },
+            { x: 36.4, y: 9.6, w: 1.2, dir: 'up', triggerX: 35.4 }
+        ],
+        enemies: [
+            { x: 13.0, y: 6.4, minX: 10.2, maxX: 18.1, speed: 2.78, type: 'john_dash_bot' },
+            { x: 28.0, y: 8.0, minX: 22.2, maxX: 30.5, speed: 1.99, type: 'john_titan_mech' },
+            { x: 41.5, y: 6.6, minX: 38.0, maxX: 48.0, speed: 2.63, type: 'john_cryo_drone' },
+            { x: 45.0, y: 9.6, minX: 38.0, maxX: 48.0, speed: 2.29, type: 'john_vanguard' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "111. Grań Bez Odwrotu",
+        theme: "mountain",
+        hasRaygun: true,
+        width: 52,
+        spawn: [1.5, 3.2],
+        goal: [48.5, 9.4],
+        solids: [
+            [0, 5.2, 6.0, 9.8],
+            [9.2, 6.8, 8.5, 8.2],
+            [21.0, 8.4, 9.0, 6.6],
+            [33.2, 9.8, 8.5, 5.2],
+            [44.2, 11.2, 7.8, 3.8]
+        ],
+        invisBlocks: [[7.5, 3.8], [19.2, 5.2], [31.5, 6.8], [42.6, 8.0]],
+        fallingFloors: [
+            [6.3, 5.8, 2.3, 0.8],
+            [18.1, 7.5, 2.3, 0.8],
+            [30.4, 9.0, 2.2, 0.8],
+            [41.9, 10.4, 2.0, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.4, y: 0, w: 1.6, dir: 'boulder', triggerX: 10.9 },
+            { x: 24.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.0 },
+            { x: 36.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 34.7 },
+            { x: 46.4, y: 10.4, w: 1.2, dir: 'up', triggerX: 45.4 }
+        ],
+        enemies: [
+            { x: 12.3, y: 6.0, minX: 9.6, maxX: 17.2, speed: 2.65, type: 'john_laser_sniper' },
+            { x: 27.1, y: 7.6, minX: 21.4, maxX: 29.5, speed: 2.8, type: 'john_dash_bot' },
+            { x: 36.3, y: 6.0, minX: 33.6, maxX: 41.2, speed: 2.65, type: 'john_cryo_drone' },
+            { x: 48.0, y: 10.4, minX: 48.0, maxX: 48.0, speed: 2.0, type: 'john_titan_mech' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "112. Kaskada Graniowa",
+        theme: "mountain",
+        hasRaygun: true,
+        width: 54,
+        spawn: [1.5, 3.5],
+        goal: [50.5, 9.6],
+        solids: [
+            [0, 5.5, 6.2, 9.5],
+            [9.5, 7.0, 9.2, 8.0],
+            [11.8, 3.8, 4.2, 0.7],
+            [22.0, 8.6, 9.5, 6.4],
+            [24.5, 5.2, 4.2, 0.7],
+            [34.8, 10.2, 8.5, 4.8],
+            [45.5, 11.4, 8.5, 3.6]
+        ],
+        invisBlocks: [[7.8, 4.0], [20.2, 5.5], [33.0, 7.2]],
+        fallingFloors: [
+            [6.6, 6.2, 2.3, 0.8],
+            [19.1, 7.8, 2.3, 0.8],
+            [31.9, 9.4, 2.3, 0.8],
+            [43.5, 10.8, 1.8, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.7, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.2 },
+            { x: 25.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 24.0 },
+            { x: 37.8, y: 0, w: 1.6, dir: 'boulder', triggerX: 36.3 },
+            { x: 47.7, y: 10.6, w: 1.2, dir: 'up', triggerX: 46.7 }
+        ],
+        enemies: [
+            { x: 12.8, y: 6.2, minX: 9.9, maxX: 18.2, speed: 2.31, type: 'john_vanguard' },
+            { x: 28.4, y: 7.8, minX: 22.4, maxX: 31.0, speed: 2.82, type: 'john_dash_bot' },
+            { x: 37.9, y: 9.4, minX: 35.2, maxX: 42.8, speed: 2.01, type: 'john_titan_mech' },
+            { x: 49.8, y: 10.6, minX: 49.3, maxX: 50.0, speed: 2.67, type: 'john_laser_sniper' }
+        ],
+        fakeGoals: []
+    },
+
+    // ========================================================================
+    // ROZDZIAŁ 3 - SEKCJA 4: GÓRSKIE TWIERDZE JOHNA (POZIOMY 113 - 125)
+    // Elitarne garnizony Johna na dolnych zboczach góry tuż nad Zamkiem Dave'a!
+    // ========================================================================
+    {
+        name: "113. Górski Posterunek Radarowy",
+        theme: "mountain",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        chapterTitle: "ROZDZIAŁ 3 • SEKCJA 4: ZBOCZA TWIERDZY JOHNA",
+        width: 52,
+        spawn: [1.5, 3.8],
+        goal: [48.5, 8.6],
+        solids: [
+            [0, 5.8, 6.5, 9.2],
+            [9.8, 7.2, 8.8, 7.8],
+            [21.8, 8.8, 9.2, 6.2],
+            [23.8, 5.4, 4.5, 0.7],
+            [34.2, 10.4, 17.8, 4.6]
+        ],
+        invisBlocks: [[8.0, 4.2], [20.0, 5.6], [32.4, 7.0]],
+        fallingFloors: [
+            [6.8, 6.4, 2.4, 0.8],
+            [19.0, 8.0, 2.2, 0.8],
+            [31.4, 9.6, 2.2, 0.8]
+        ],
+        spikeTraps: [
+            { x: 13.0, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.5 },
+            { x: 25.3, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.8 },
+            { x: 37.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 35.7 },
+            { x: 36.4, y: 9.6, w: 1.2, dir: 'up', triggerX: 35.4 }
+        ],
+        enemies: [
+            { x: 13.0, y: 6.4, minX: 10.2, maxX: 18.1, speed: 2.84, type: 'john_dash_bot' },
+            { x: 28.0, y: 8.0, minX: 22.2, maxX: 30.5, speed: 2.69, type: 'evad_bot' },
+            { x: 41.5, y: 9.6, minX: 38.0, maxX: 48.0, speed: 2.69, type: 'john_laser_sniper' },
+            { x: 45.0, y: 9.6, minX: 38.0, maxX: 48.0, speed: 2.33, type: 'john_vanguard' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "114. Stalowy Wąwóz",
+        theme: "mountain",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        width: 52,
+        spawn: [1.5, 3.2],
+        goal: [48.5, 9.4],
+        solids: [
+            [0, 5.2, 6.0, 9.8],
+            [9.2, 6.8, 8.5, 8.2],
+            [21.0, 8.4, 9.0, 6.6],
+            [33.2, 9.8, 8.5, 5.2],
+            [44.2, 11.2, 7.8, 3.8]
+        ],
+        invisBlocks: [[7.5, 3.8], [19.2, 5.2], [31.5, 6.8], [42.6, 8.0]],
+        fallingFloors: [
+            [6.3, 5.8, 2.3, 0.8],
+            [18.1, 7.5, 2.3, 0.8],
+            [30.4, 9.0, 2.2, 0.8],
+            [41.9, 10.4, 2.0, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.4, y: 0, w: 1.6, dir: 'boulder', triggerX: 10.9 },
+            { x: 24.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.0 },
+            { x: 36.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 34.7 },
+            { x: 46.4, y: 10.4, w: 1.2, dir: 'up', triggerX: 45.4 }
+        ],
+        enemies: [
+            { x: 12.3, y: 6.0, minX: 9.6, maxX: 17.2, speed: 2.03, type: 'john_titan_mech' },
+            { x: 27.1, y: 7.6, minX: 21.4, maxX: 29.5, speed: 2.86, type: 'john_dash_bot' },
+            { x: 36.3, y: 6.0, minX: 33.6, maxX: 41.2, speed: 2.71, type: 'john_cryo_drone' },
+            { x: 48.0, y: 10.4, minX: 48.0, maxX: 48.0, speed: 2.71, type: 'john_laser_sniper' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "115. Pole Ostrzału Orbitalnego",
+        theme: "mountain",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        width: 54,
+        spawn: [1.5, 3.5],
+        goal: [50.5, 9.6],
+        solids: [
+            [0, 5.5, 6.2, 9.5],
+            [9.5, 7.0, 9.2, 8.0],
+            [11.8, 3.8, 4.2, 0.7],
+            [22.0, 8.6, 9.5, 6.4],
+            [24.5, 5.2, 4.2, 0.7],
+            [34.8, 10.2, 8.5, 4.8],
+            [45.5, 11.4, 8.5, 3.6]
+        ],
+        invisBlocks: [[7.8, 4.0], [20.2, 5.5], [33.0, 7.2]],
+        fallingFloors: [
+            [6.6, 6.2, 2.3, 0.8],
+            [19.1, 7.8, 2.3, 0.8],
+            [31.9, 9.4, 2.3, 0.8],
+            [43.5, 10.8, 1.8, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.7, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.2 },
+            { x: 25.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 24.0 },
+            { x: 37.8, y: 0, w: 1.6, dir: 'boulder', triggerX: 36.3 },
+            { x: 47.7, y: 10.6, w: 1.2, dir: 'up', triggerX: 46.7 }
+        ],
+        enemies: [
+            { x: 12.8, y: 6.2, minX: 9.9, maxX: 18.2, speed: 2.73, type: 'john_laser_sniper' },
+            { x: 28.4, y: 7.8, minX: 22.4, maxX: 31.0, speed: 2.88, type: 'john_dash_bot' },
+            { x: 37.9, y: 6.4, minX: 35.2, maxX: 42.8, speed: 2.73, type: 'john_cryo_drone' },
+            { x: 49.8, y: 10.6, minX: 49.3, maxX: 50.0, speed: 2.36, type: 'john_vanguard' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "116. Wiszące Platformy nad Otchłanią",
+        theme: "mountain",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        width: 54,
+        spawn: [1.5, 3.8],
+        goal: [50.5, 8.6],
+        solids: [
+            [0, 5.8, 6.5, 9.2],
+            [9.8, 7.2, 8.8, 7.8],
+            [21.8, 8.8, 9.2, 6.2],
+            [23.8, 5.4, 4.5, 0.7],
+            [34.2, 10.4, 19.8, 4.6]
+        ],
+        invisBlocks: [[8.0, 4.2], [20.0, 5.6], [32.4, 7.0]],
+        fallingFloors: [
+            [6.8, 6.4, 2.4, 0.8],
+            [19.0, 8.0, 2.2, 0.8],
+            [31.4, 9.6, 2.2, 0.8]
+        ],
+        spikeTraps: [
+            { x: 13.0, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.5 },
+            { x: 25.3, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.8 },
+            { x: 37.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 35.7 },
+            { x: 36.4, y: 9.6, w: 1.2, dir: 'up', triggerX: 35.4 }
+        ],
+        enemies: [
+            { x: 13.0, y: 6.4, minX: 10.2, maxX: 18.1, speed: 2.9, type: 'john_dash_bot' },
+            { x: 28.0, y: 5.0, minX: 22.2, maxX: 30.5, speed: 2.75, type: 'john_cryo_drone' },
+            { x: 42.2, y: 9.6, minX: 38.0, maxX: 50.0, speed: 2.75, type: 'john_laser_sniper' },
+            { x: 46.4, y: 9.6, minX: 38.0, maxX: 50.0, speed: 2.05, type: 'john_titan_mech' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "117. Bunkier Tytanów",
+        theme: "mountain",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        width: 54,
+        spawn: [1.5, 3.2],
+        goal: [50.5, 9.4],
+        solids: [
+            [0, 5.2, 6.0, 9.8],
+            [9.2, 6.8, 8.5, 8.2],
+            [21.0, 8.4, 9.0, 6.6],
+            [33.2, 9.8, 8.5, 5.2],
+            [44.2, 11.2, 9.8, 3.8]
+        ],
+        invisBlocks: [[7.5, 3.8], [19.2, 5.2], [31.5, 6.8], [42.6, 8.0]],
+        fallingFloors: [
+            [6.3, 5.8, 2.3, 0.8],
+            [18.1, 7.5, 2.3, 0.8],
+            [30.4, 9.0, 2.2, 0.8],
+            [41.9, 10.4, 2.0, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.4, y: 0, w: 1.6, dir: 'boulder', triggerX: 10.9 },
+            { x: 24.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.0 },
+            { x: 36.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 34.7 },
+            { x: 46.4, y: 10.4, w: 1.2, dir: 'up', triggerX: 45.4 }
+        ],
+        enemies: [
+            { x: 12.3, y: 6.0, minX: 9.6, maxX: 17.2, speed: 2.06, type: 'john_titan_mech' },
+            { x: 27.1, y: 7.6, minX: 21.4, maxX: 29.5, speed: 2.92, type: 'john_dash_bot' },
+            { x: 36.3, y: 9.0, minX: 33.6, maxX: 41.2, speed: 2.39, type: 'john_vanguard' },
+            { x: 49.4, y: 10.4, minX: 48.0, maxX: 50.0, speed: 2.77, type: 'john_laser_sniper' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "118. Pionowy Klif Evada i Johna",
+        theme: "mountain",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        width: 54,
+        spawn: [1.5, 3.5],
+        goal: [50.5, 9.6],
+        solids: [
+            [0, 5.5, 6.2, 9.5],
+            [9.5, 7.0, 9.2, 8.0],
+            [11.8, 3.8, 4.2, 0.7],
+            [22.0, 8.6, 9.5, 6.4],
+            [24.5, 5.2, 4.2, 0.7],
+            [34.8, 10.2, 8.5, 4.8],
+            [45.5, 11.4, 8.5, 3.6]
+        ],
+        invisBlocks: [[7.8, 4.0], [20.2, 5.5], [33.0, 7.2]],
+        fallingFloors: [
+            [6.6, 6.2, 2.3, 0.8],
+            [19.1, 7.8, 2.3, 0.8],
+            [31.9, 9.4, 2.3, 0.8],
+            [43.5, 10.8, 1.8, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.7, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.2 },
+            { x: 25.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 24.0 },
+            { x: 37.8, y: 0, w: 1.6, dir: 'boulder', triggerX: 36.3 },
+            { x: 47.7, y: 10.6, w: 1.2, dir: 'up', triggerX: 46.7 }
+        ],
+        enemies: [
+            { x: 12.8, y: 6.2, minX: 9.9, maxX: 18.2, speed: 2.79, type: 'evad_bot' },
+            { x: 28.4, y: 7.8, minX: 22.4, maxX: 31.0, speed: 2.94, type: 'john_dash_bot' },
+            { x: 37.9, y: 9.4, minX: 35.2, maxX: 42.8, speed: 2.79, type: 'john_laser_sniper' },
+            { x: 49.8, y: 10.6, minX: 49.3, maxX: 50.0, speed: 2.4, type: 'john_vanguard' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "119. Zdradziecka Przełęcz",
+        theme: "mountain",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        width: 54,
+        spawn: [1.5, 3.8],
+        goal: [50.5, 8.6],
+        solids: [
+            [0, 5.8, 6.5, 9.2],
+            [9.8, 7.2, 8.8, 7.8],
+            [21.8, 8.8, 9.2, 6.2],
+            [23.8, 5.4, 4.5, 0.7],
+            [34.2, 10.4, 19.8, 4.6]
+        ],
+        invisBlocks: [[8.0, 4.2], [20.0, 5.6], [32.4, 7.0]],
+        fallingFloors: [
+            [6.8, 6.4, 2.4, 0.8],
+            [19.0, 8.0, 2.2, 0.8],
+            [31.4, 9.6, 2.2, 0.8]
+        ],
+        spikeTraps: [
+            { x: 13.0, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.5 },
+            { x: 25.3, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.8 },
+            { x: 37.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 35.7 },
+            { x: 36.4, y: 9.6, w: 1.2, dir: 'up', triggerX: 35.4 }
+        ],
+        enemies: [
+            { x: 13.0, y: 6.4, minX: 10.2, maxX: 18.1, speed: 2.96, type: 'john_dash_bot' },
+            { x: 28.0, y: 8.0, minX: 22.2, maxX: 30.5, speed: 2.81, type: 'john_laser_sniper' },
+            { x: 42.2, y: 9.6, minX: 38.0, maxX: 50.0, speed: 2.08, type: 'john_titan_mech' },
+            { x: 46.4, y: 9.6, minX: 38.0, maxX: 50.0, speed: 2.81, type: 'evad_bot' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "120. Lawina Kamieni i Laserów",
+        theme: "mountain",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        width: 56,
+        spawn: [1.5, 3.2],
+        goal: [52.5, 9.4],
+        solids: [
+            [0, 5.2, 6.0, 9.8],
+            [9.2, 6.8, 8.5, 8.2],
+            [21.0, 8.4, 9.0, 6.6],
+            [33.2, 9.8, 8.5, 5.2],
+            [44.2, 11.2, 11.8, 3.8]
+        ],
+        invisBlocks: [[7.5, 3.8], [19.2, 5.2], [31.5, 6.8], [42.6, 8.0]],
+        fallingFloors: [
+            [6.3, 5.8, 2.3, 0.8],
+            [18.1, 7.5, 2.3, 0.8],
+            [30.4, 9.0, 2.2, 0.8],
+            [41.9, 10.4, 2.0, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.4, y: 0, w: 1.6, dir: 'boulder', triggerX: 10.9 },
+            { x: 24.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.0 },
+            { x: 36.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 34.7 },
+            { x: 46.4, y: 10.4, w: 1.2, dir: 'up', triggerX: 45.4 }
+        ],
+        enemies: [
+            { x: 12.3, y: 6.0, minX: 9.6, maxX: 17.2, speed: 2.98, type: 'john_dash_bot' },
+            { x: 27.1, y: 7.6, minX: 21.4, maxX: 29.5, speed: 2.44, type: 'john_vanguard' },
+            { x: 36.3, y: 6.0, minX: 33.6, maxX: 41.2, speed: 2.83, type: 'john_cryo_drone' },
+            { x: 50.8, y: 10.4, minX: 48.0, maxX: 52.0, speed: 2.09, type: 'john_titan_mech' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "121. Kaskada Pięciu Regimów",
+        theme: "mountain",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        width: 56,
+        spawn: [1.5, 3.5],
+        goal: [52.5, 9.6],
+        solids: [
+            [0, 5.5, 6.2, 9.5],
+            [9.5, 7.0, 9.2, 8.0],
+            [11.8, 3.8, 4.2, 0.7],
+            [22.0, 8.6, 9.5, 6.4],
+            [24.5, 5.2, 4.2, 0.7],
+            [34.8, 10.2, 8.5, 4.8],
+            [45.5, 11.4, 10.5, 3.6]
+        ],
+        invisBlocks: [[7.8, 4.0], [20.2, 5.5], [33.0, 7.2]],
+        fallingFloors: [
+            [6.6, 6.2, 2.3, 0.8],
+            [19.1, 7.8, 2.3, 0.8],
+            [31.9, 9.4, 2.3, 0.8],
+            [43.5, 10.8, 1.8, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.7, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.2 },
+            { x: 25.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 24.0 },
+            { x: 37.8, y: 0, w: 1.6, dir: 'boulder', triggerX: 36.3 },
+            { x: 47.7, y: 10.6, w: 1.2, dir: 'up', triggerX: 46.7 }
+        ],
+        enemies: [
+            { x: 12.8, y: 6.2, minX: 9.9, maxX: 18.2, speed: 3.0, type: 'john_dash_bot' },
+            { x: 28.4, y: 7.8, minX: 22.4, maxX: 31.0, speed: 2.85, type: 'john_laser_sniper' },
+            { x: 37.9, y: 6.4, minX: 35.2, maxX: 42.8, speed: 2.85, type: 'john_cryo_drone' },
+            { x: 51.2, y: 10.6, minX: 49.3, maxX: 52.0, speed: 2.45, type: 'john_vanguard' },
+            { x: 12.8, y: 6.2, minX: 9.9, maxX: 18.2, speed: 2.1, type: 'john_titan_mech' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "122. Most nad Przepaścią Królestwa",
+        theme: "mountain",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        width: 56,
+        spawn: [1.5, 3.8],
+        goal: [52.5, 8.6],
+        solids: [
+            [0, 5.8, 6.5, 9.2],
+            [9.8, 7.2, 8.8, 7.8],
+            [21.8, 8.8, 9.2, 6.2],
+            [23.8, 5.4, 4.5, 0.7],
+            [34.2, 10.4, 21.8, 4.6]
+        ],
+        invisBlocks: [[8.0, 4.2], [20.0, 5.6], [32.4, 7.0]],
+        fallingFloors: [
+            [6.8, 6.4, 2.4, 0.8],
+            [19.0, 8.0, 2.2, 0.8],
+            [31.4, 9.6, 2.2, 0.8]
+        ],
+        spikeTraps: [
+            { x: 13.0, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.5 },
+            { x: 25.3, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.8 },
+            { x: 37.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 35.7 },
+            { x: 36.4, y: 9.6, w: 1.2, dir: 'up', triggerX: 35.4 }
+        ],
+        enemies: [
+            { x: 13.0, y: 6.4, minX: 10.2, maxX: 18.1, speed: 2.87, type: 'john_laser_sniper' },
+            { x: 28.0, y: 5.0, minX: 22.2, maxX: 30.5, speed: 2.87, type: 'john_cryo_drone' },
+            { x: 42.9, y: 9.6, minX: 38.0, maxX: 52.0, speed: 3.02, type: 'john_dash_bot' },
+            { x: 47.8, y: 9.6, minX: 38.0, maxX: 52.0, speed: 2.46, type: 'john_vanguard' },
+            { x: 13.0, y: 6.4, minX: 10.2, maxX: 18.1, speed: 2.87, type: 'evad_bot' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "123. Bastion Cyber-Snajperów",
+        theme: "mountain",
+        transitionToTheme: "day",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        width: 56,
+        spawn: [1.5, 3.2],
+        goal: [52.5, 9.4],
+        solids: [
+            [0, 5.2, 6.0, 9.8],
+            [9.2, 6.8, 8.5, 8.2],
+            [21.0, 8.4, 9.0, 6.6],
+            [33.2, 9.8, 8.5, 5.2],
+            [44.2, 11.2, 11.8, 3.8]
+        ],
+        invisBlocks: [[7.5, 3.8], [19.2, 5.2], [31.5, 6.8], [42.6, 8.0]],
+        fallingFloors: [
+            [6.3, 5.8, 2.3, 0.8],
+            [18.1, 7.5, 2.3, 0.8],
+            [30.4, 9.0, 2.2, 0.8],
+            [41.9, 10.4, 2.0, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.4, y: 0, w: 1.6, dir: 'boulder', triggerX: 10.9 },
+            { x: 24.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.0 },
+            { x: 36.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 34.7 },
+            { x: 46.4, y: 10.4, w: 1.2, dir: 'up', triggerX: 45.4 }
+        ],
+        enemies: [
+            { x: 12.3, y: 6.0, minX: 9.6, maxX: 17.2, speed: 2.89, type: 'john_laser_sniper' },
+            { x: 27.1, y: 7.6, minX: 21.4, maxX: 29.5, speed: 3.04, type: 'john_dash_bot' },
+            { x: 36.3, y: 9.0, minX: 33.6, maxX: 41.2, speed: 2.48, type: 'john_vanguard' },
+            { x: 50.8, y: 10.4, minX: 48.0, maxX: 52.0, speed: 2.12, type: 'john_titan_mech' },
+            { x: 12.3, y: 6.0, minX: 9.6, maxX: 17.2, speed: 2.89, type: 'john_laser_sniper' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "124. Przedpole Doliny Zamkowej",
+        theme: "mountain",
+        transitionToTheme: "day",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        width: 56,
+        spawn: [1.5, 3.5],
+        goal: [52.5, 9.6],
+        solids: [
+            [0, 5.5, 6.2, 9.5],
+            [9.5, 7.0, 9.2, 8.0],
+            [11.8, 3.8, 4.2, 0.7],
+            [22.0, 8.6, 9.5, 6.4],
+            [24.5, 5.2, 4.2, 0.7],
+            [34.8, 10.2, 8.5, 4.8],
+            [45.5, 11.4, 10.5, 3.6]
+        ],
+        invisBlocks: [[7.8, 4.0], [20.2, 5.5], [33.0, 7.2]],
+        fallingFloors: [
+            [6.6, 6.2, 2.3, 0.8],
+            [19.1, 7.8, 2.3, 0.8],
+            [31.9, 9.4, 2.3, 0.8],
+            [43.5, 10.8, 1.8, 0.8]
+        ],
+        spikeTraps: [
+            { x: 12.7, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.2 },
+            { x: 25.5, y: 0, w: 1.6, dir: 'boulder', triggerX: 24.0 },
+            { x: 37.8, y: 0, w: 1.6, dir: 'boulder', triggerX: 36.3 },
+            { x: 47.7, y: 10.6, w: 1.2, dir: 'up', triggerX: 46.7 }
+        ],
+        enemies: [
+            { x: 12.8, y: 6.2, minX: 9.9, maxX: 18.2, speed: 3.06, type: 'john_dash_bot' },
+            { x: 28.4, y: 7.8, minX: 22.4, maxX: 31.0, speed: 2.13, type: 'john_titan_mech' },
+            { x: 37.9, y: 6.4, minX: 35.2, maxX: 42.8, speed: 2.91, type: 'john_cryo_drone' },
+            { x: 51.2, y: 10.6, minX: 49.3, maxX: 52.0, speed: 2.5, type: 'john_vanguard' },
+            { x: 12.8, y: 6.2, minX: 9.9, maxX: 18.2, speed: 2.91, type: 'john_laser_sniper' }
+        ],
+        fakeGoals: []
+    },
+    {
+        name: "125. Ostatni Bastion Gór • Bramy Domu",
+        theme: "mountain",
+        transitionToTheme: "day",
+        hasRaygun: true,
+        hasJohnOutpost: true,
+        hasCastleGate: true,
+        width: 58,
+        spawn: [1.5, 3.8],
+        goal: [54.5, 8.6],
+        solids: [
+            [0, 5.8, 6.5, 9.2],
+            [9.8, 7.2, 8.8, 7.8],
+            [21.8, 8.8, 9.2, 6.2],
+            [23.8, 5.4, 4.5, 0.7],
+            [34.2, 10.4, 23.8, 4.6]
+        ],
+        invisBlocks: [[8.0, 4.2], [20.0, 5.6], [32.4, 7.0]],
+        fallingFloors: [
+            [6.8, 6.4, 2.4, 0.8],
+            [19.0, 8.0, 2.2, 0.8],
+            [31.4, 9.6, 2.2, 0.8]
+        ],
+        spikeTraps: [
+            { x: 13.0, y: 0, w: 1.6, dir: 'boulder', triggerX: 11.5 },
+            { x: 25.3, y: 0, w: 1.6, dir: 'boulder', triggerX: 23.8 },
+            { x: 37.2, y: 0, w: 1.6, dir: 'boulder', triggerX: 35.7 },
+            { x: 36.4, y: 9.6, w: 1.2, dir: 'up', triggerX: 35.4 }
+        ],
+        enemies: [
+            { x: 13.0, y: 6.4, minX: 10.2, maxX: 18.1, speed: 3.08, type: 'john_dash_bot' },
+            { x: 28.0, y: 8.0, minX: 22.2, maxX: 30.5, speed: 2.93, type: 'john_laser_sniper' },
+            { x: 43.6, y: 9.6, minX: 38.0, maxX: 54.0, speed: 2.14, type: 'john_titan_mech' },
+            { x: 49.2, y: 6.6, minX: 38.0, maxX: 54.0, speed: 2.93, type: 'john_cryo_drone' },
+            { x: 13.0, y: 6.4, minX: 10.2, maxX: 18.1, speed: 2.51, type: 'john_vanguard' },
+            { x: 28.0, y: 8.0, minX: 22.2, maxX: 30.5, speed: 2.93, type: 'evad_bot' }
+        ],
+        fakeGoals: []
     }
 ];
 
@@ -2211,6 +3732,15 @@ const CHAPTER_DEFINITIONS = [
         minIdx: 50,
         maxIdx: 79,
         accent: "border-cyan-400 text-cyan-300"
+    },
+    {
+        id: 2,
+        badge: "ROZDZIAŁ 3 • 4 SEKCJE (POZIOMY 81 - 125)",
+        title: "Rozdział 3: Sahara i Góry Johna",
+        desc: "Przebij się z Raygunem 360° przez wydmy Dinozaurów, wyskocz z portalu w Górach i pokonaj elitarne boty Johna!",
+        minIdx: 80,
+        maxIdx: 124,
+        accent: "border-orange-400 text-orange-300"
     }
 ];
 
@@ -2294,6 +3824,47 @@ const SECTION_DEFINITIONS = [
         minIdx: 75,
         maxIdx: 79,
         accent: "border-rose-400 text-rose-300"
+    },
+    {
+        id: 8,
+        chapterId: 2,
+        badge: "ROZDZIAŁ 3 • SEKCJA 1 (POZIOMY 81 - 90)",
+        title: "1. Rozżarzone Wydmy Sahary",
+        desc: "Palące słońce, efekt fali gorąca (Heatwave), kolczaste kaktusy i szybkie skaczące Dino-Raptory!",
+        minIdx: 80,
+        maxIdx: 89,
+        accent: "border-amber-400 text-amber-300"
+    },
+    {
+        id: 9,
+        chapterId: 2,
+        badge: "ROZDZIAŁ 3 • SEKCJA 2 (POZIOMY 91 - 100)",
+        title: "2. Kanion Wielkich Dinozaurów",
+        desc: "Ruchome piaski, kaniony piaskowca i potężne pancerne Dino-Rexy o ogromnym HP goniące Dave'a!",
+        minIdx: 90,
+        maxIdx: 99,
+        accent: "border-orange-500 text-orange-300"
+    }
+    ,
+    {
+        id: 10,
+        chapterId: 2,
+        badge: "ROZDZIAŁ 3 • SEKCJA 3 (POZIOMY 101 - 112)",
+        title: "3. Ośnieżone Granie i Lawiny",
+        desc: "Strome górskie przepaści, spadające głazy i nowe Cyber-Dashery Johna unikające Twoich pocisków!",
+        minIdx: 100,
+        maxIdx: 111,
+        accent: "border-sky-400 text-sky-300"
+    },
+    {
+        id: 11,
+        chapterId: 2,
+        badge: "ROZDZIAŁ 3 • SEKCJA 4 (POZIOMY 113 - 125)",
+        title: "4. Górskie Twierdze Johna (Finał)",
+        desc: "Elitarne Laser-Snajpery, Krio-Drony, Pancerne Gwardie i Egzoszkielety Johna na szlaku do zamku!",
+        minIdx: 112,
+        maxIdx: 124,
+        accent: "border-indigo-400 text-indigo-300"
     }
 ];
 
@@ -2470,7 +4041,7 @@ function renderLevelsModalStep() {
 
 function openLevelsModal() {
     levelSelectStep = 1;
-    selectedChapterIdx = savedPlayerLevelIdx >= 50 ? 1 : 0;
+    selectedChapterIdx = savedPlayerLevelIdx >= 80 ? 2 : (savedPlayerLevelIdx >= 50 ? 1 : 0);
     renderLevelsModalStep();
     levelsModal.classList.remove('hidden');
     updateTouchControlsVisibility();

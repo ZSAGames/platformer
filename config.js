@@ -19,7 +19,9 @@ const THEME_PALETTES = {
     underwater_shallows: { left: '#0d9488', right: '#a16207', top: '#14b8a6' },
     jungle:              { left: '#15803d', right: '#65a30d', top: '#0d9488' },
     jungle_outpost:      { left: '#0d9488', right: '#0284c7', top: '#16a34a' },
-    john_base:           { left: '#0284c7', right: '#7c3aed', top: '#f43f5e' }
+    john_base:           { left: '#0284c7', right: '#7c3aed', top: '#f43f5e' },
+    sahara:              { left: '#ea580c', right: '#d97706', top: '#f59e0b' },
+    mountain:            { left: '#0284c7', right: '#38bdf8', top: '#6366f1' }
 };
 
 let cachedCanvasRect = { left: 0, top: 0, width: 800, height: 600 };

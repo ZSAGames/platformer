@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="PDicon.ico">
-    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 
@@ -131,7 +131,7 @@
                     </div>
                     <div class="flex items-center gap-1 min-w-0">
                         <span id="hud-level-badge" class="hud-pill-skew bg-gradient-to-r from-pink-600 to-purple-700 border border-yellow-300/70 text-[9px] font-extrabold px-1.5 py-0.2 rounded text-yellow-200 mono-font shrink-0">
-                            1/80
+                            1/125
                         </span>
                         <h1 id="hud-level-name" class="text-[11px] sm:text-xs font-bold text-white truncate drop-shadow-[1px_1px_0_#090d16]">
                             1. Ogrodowy Szlak
@@ -276,7 +276,7 @@
                         </div>
 
                         <p class="menu-desc-compact text-[11px] sm:text-xs text-slate-200 font-medium leading-relaxed">
-                            Rozdział 1 & 2: Pokonaj Fortecę Evada, wypłyń z rzeki, zdobądź Ostrze Rdzeniowe 360° od Jerry'ego i zinfiltruj Tajną Bazę Johna w 80 poziomach!
+                            Rozdział 1, 2 & 3: Pokonaj Fortecę Evada, zdobądź Ostrze Rdzeniowe w Dżungli, zinfiltruj Bazę Johna i przebij się z Raygunem przez Saharę oraz Góry Johna w 125 poziomach!
                         </p>
                     </div>
 
@@ -504,7 +504,7 @@
                     <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-800">
                         <div>
                             <h2 id="levels-modal-title" class="retro-font text-[10px] sm:text-xs text-yellow-300 drop-shadow-[2px_2px_0_#9333ea]">🗺️ WYBIERZ ROZDZIAŁ</h2>
-                            <p id="levels-modal-breadcrumb" class="text-[10px] text-cyan-300 font-bold mono-font mt-0.5">Wybierz Rozdział 1 lub Rozdział 2 (Poziomy 1 - 80)</p>
+                            <p id="levels-modal-breadcrumb" class="text-[10px] text-cyan-300 font-bold mono-font mt-0.5">Wybierz Rozdział 1 lub Rozdział 2 (Poziomy 1 - 125)</p>
                         </div>
                         <button id="btn-levels-close" type="button" class="text-slate-400 hover:text-yellow-300 font-bold text-sm px-2 py-0.5 rounded">✕</button>
                     </div>
@@ -516,7 +516,7 @@
                             ◀ WRÓĆ
                         </button>
                         <button id="btn-levels-unlock-all" type="button" class="hidden btn-retro-secondary flex-1 py-2 rounded-xl font-bold text-amber-300 text-xs border-amber-400">
-                            🔓 ODBLOKUJ WSZYSTKIE (1-80)
+                            🔓 ODBLOKUJ WSZYSTKIE (1-125)
                         </button>
                         <button id="btn-levels-back" type="button" class="btn-retro-secondary flex-1 py-2 rounded-xl font-bold text-slate-200 text-xs">
                             ZAMKNIJ MENU
@@ -552,13 +552,13 @@
                 <div class="retro-panel rounded-2xl p-3.5 sm:p-5 max-w-md w-full my-auto flex flex-col gap-2">
                     <div class="text-2xl sm:text-3xl">👑🟪🌀</div>
                     <h2 class="retro-font text-xs sm:text-sm text-amber-300 leading-relaxed">
-                        UKOŃCZONO ROZDZIAŁ 1 & 2!
+                        UKOŃCZONO ROZDZIAŁ 1, 2 & 3!
                     </h2>
                     <p class="text-slate-300 text-[11px] sm:text-xs leading-relaxed">
-                        Dave przebił się z Ostrzem Rdzeniowym przez dżunglę i Tajną Bazę Johna, ale John nacisnął czerwony przycisk i zepchnął Dave'a w międzywymiarowy portal!
+                        Dave uciekł z prehistorycznej Sahary przez portal otwarty Czerwonym Przyciskiem Johna i wylądował na szczycie stromych gór, skąd widać w oddali Zamek Dave'a i Angeli!
                     </p>
                     <div class="bg-purple-950/70 border border-purple-400/40 rounded-xl p-2 text-[10px] sm:text-[11px] text-purple-200">
-                        🌀 <strong>W kolejnej części:</strong> dokąd prowadzi portal Johna i jak Dave wróci po swoje Ostrze Rdzeniowe oraz Angelę?
+                        🏔️ <strong>W kolejnym rozdziale (Góry):</strong> zejdź ze szczytu ośnieżonych gór i przedostań się z powrotem do Zamku, by uratować Angelę!
                     </div>
                     <div id="victory-stats-grid" class="grid grid-cols-2 gap-2 bg-slate-900/90 p-2 rounded-xl border border-purple-500/30">
                         <div>
@@ -695,7 +695,7 @@
                                 </button>
                                 <button id="btn-select-mode-ohko" type="button" class="btn-retro-secondary py-2 px-2.5 rounded-xl font-extrabold text-rose-300 text-xs flex flex-col items-center gap-0.5">
                                     <span>☠️ TRYB OHKO</span>
-                                    <span id="submit-preview-ohko" class="text-[10px] text-white mono-font">POZ. 1/80</span>
+                                    <span id="submit-preview-ohko" class="text-[10px] text-white mono-font">POZ. 1/125</span>
                                 </button>
                             </div>
                         </div>
@@ -724,14 +724,14 @@
 
 
     <!-- Moduły JavaScript Gry "Przygoda Dave'a" -->
-    <script src="config.js?v=5"></script>
-    <script src="audio.js?v=5"></script>
-    <script src="levels.js?v=5"></script>
-    <script src="cutscenes.js?v=5"></script>
-    <script src="state.js?v=5"></script>
-    <script src="leaderboard.js?v=5"></script>
-    <script src="mechanics.js?v=5"></script>
-    <script src="renderer.js?v=5"></script>
-    <script src="ui_input.js?v=5"></script>
+    <script src="config.js?v=9"></script>
+    <script src="audio.js?v=9"></script>
+    <script src="levels.js?v=9"></script>
+    <script src="cutscenes.js?v=9"></script>
+    <script src="state.js?v=9"></script>
+    <script src="leaderboard.js?v=9"></script>
+    <script src="mechanics.js?v=9"></script>
+    <script src="renderer.js?v=9"></script>
+    <script src="ui_input.js?v=9"></script>
 </body>
 </html>
